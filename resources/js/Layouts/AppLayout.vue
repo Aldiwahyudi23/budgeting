@@ -40,15 +40,14 @@ const toggleProfileDropdown = () => {
 
         <div class="min-h-screen bg-gray-100">
             <!-- Header -->
-            <nav class="bg-white border-b border-gray-100 fixed w-full top-0 z-50">
+            <nav class="bg-sky-500 border-b border-gray-100 fixed w-full top-0 z-50">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between h-12">
                         <!-- Logo -->
-                        <div class="shrink-0 flex items-center">
-                            <Link :href="route('dashboard')">
-                                <ApplicationMark class="block h-7 w-auto" />
-                            </Link>
-                        </div>
+                          <!-- Logo -->
+                            <div class="shrink-0 flex items-center text-2xl font-bold">
+                                <span class="text-white">Budgeting</span>
+                            </div>
 
                         <!-- Menu Desktop (Tampil di atas pada laptop) -->
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -68,10 +67,10 @@ const toggleProfileDropdown = () => {
                             </div>
 
                             <!-- Profil dan Logout (Desktop) -->
-                            <div class="ms-3 relative">
+                            <div class="ms-3 relative ">
                                 <Dropdown align="right" width="48">
                                     <template #trigger>
-                                        <button v-if="$page.props.jetstream.managesProfilePhotos" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
+                                        <button v-if="$page.props.jetstream.managesProfilePhotos" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition ">
                                             <img class="size-8 rounded-full object-cover" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
                                         </button>
 
@@ -94,6 +93,10 @@ const toggleProfileDropdown = () => {
 
                                         <DropdownLink :href="route('profile.show')">
                                             Profile
+                                        </DropdownLink>
+
+                                         <DropdownLink :href="route('settings.index')">
+                                            Setting
                                         </DropdownLink>
 
                                         <DropdownLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')">
@@ -143,6 +146,10 @@ const toggleProfileDropdown = () => {
                                             Profile
                                         </DropdownLink>
 
+                                        <DropdownLink :href="route('settings.index')">
+                                            Setting
+                                        </DropdownLink>
+
                                         <DropdownLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')">
                                             API Tokens
                                         </DropdownLink>
@@ -163,34 +170,81 @@ const toggleProfileDropdown = () => {
                 </div>
             </nav>
 
-            <!-- Menu Mobile (Tampil di bawah pada Android) -->
-            <nav class="md:hidden fixed bottom-0 w-full bg-white shadow-lg z-50">
+            <nav class="md:hidden fixed bottom-0 w-full bg-sky-500 shadow-lg z-50 rounded-t-2xl">
                 <div class="flex justify-around items-center py-2">
-                    <ResponsiveNavLink :href="route('dashboard')" class="flex flex-col items-center text-gray-700 hover:text-blue-600 rounded-lg">
+                    <!-- Home -->
+                    <Link :href="route('dashboard')" class="flex flex-col items-center text-white hover:text-blue-200"
+                        :class="{'border-b-2 border-white': $page.url === '/dashboard'}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                            </path>
                         </svg>
-                        <span class="text-xxs">Home</span>
-                    </ResponsiveNavLink>
-                    <ResponsiveNavLink :href="route('expense.index')" class="flex flex-col items-center text-gray-700 hover:text-blue-600 rounded-lg">
+                        <span class="text-xs">Home</span>
+                    </Link>
+
+                    <!-- Transaksi (Modal) -->
+                    <button @click="toggleModal"
+                        class="flex flex-col items-center text-white hover:text-blue-200 focus:outline-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
                         </svg>
-                        <span class="text-xxs">Transaksi</span>
-                    </ResponsiveNavLink>
-                    <ResponsiveNavLink :href="route('account-bank.index')" class="flex flex-col items-center text-gray-700 hover:text-blue-600 rounded-lg">
+                        <span class="text-xs">Transaksi</span>
+                    </button>
+
+                    <!-- Modal untuk Expense dan Income -->
+                    <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                        <div class="flex gap-4">
+                            <!-- Modal Expense -->
+                            <div class="bg-white p-6 rounded-lg shadow-lg w-40 text-center">
+                                <!-- <h4 class="font-semibold text-lg mb-3">Pengeluaran</h4> -->
+                                <Link :href="route('expense.index')" class="bg-red-500 text-white px-4 py-2 rounded-md">
+                                    Expense
+                                </Link>
+                            </div>
+
+                            <!-- Modal Income -->
+                            <div class="bg-white p-6 rounded-lg shadow-lg w-40 text-center">
+                                <!-- <h2 class="font-semibold text-lg mb-3">Income</h2> -->
+                                <Link :href="route('income.index')" class="bg-green-500 text-white px-4 py-2 rounded-md">
+                                    Income
+                                </Link>
+                            </div>
+                        </div>
+                        <!-- Tombol Batal di bawah -->
+                        <!-- <div class="flex">
+                            <button @click="closeModal" class="text-gray-500 mt-5 w-full py-2 bg-gray-200 rounded-md">
+                                Batal
+                            </button>
+                        </div> -->
+                    </div>
+
+                    <!-- Keuangan -->
+                    <Link :href="route('account-bank.index')" class="flex flex-col items-center text-white hover:text-blue-200"
+                        :class="{'border-b-2 border-white': $page.url === '/account-bank'}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
                         </svg>
-                        <span class="text-xxs">Asset</span>
-                    </ResponsiveNavLink>
-                    <ResponsiveNavLink :href="route('settings.index')" class="flex flex-col items-center text-gray-700 hover:text-blue-600 rounded-lg">
+                        <span class="text-xs">Keuangan</span>
+                    </Link>
+
+                    <!-- Laporan -->
+                    <Link :href="route('settings.index')" class="flex flex-col items-center text-white hover:text-blue-200"
+                        :class="{'border-b-2 border-white': $page.url === '/settings'}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+                            </path>
                         </svg>
-                        <span class="text-xxs">Setting</span>
-                    </ResponsiveNavLink>
+                        <span class="text-xs">Laporan</span>
+                    </Link>
                 </div>
             </nav>
 
@@ -202,6 +256,44 @@ const toggleProfileDropdown = () => {
     </div>
 </template>
 
-<style>
 
+<script>
+export default {
+    data() {
+        return {
+            isModalOpen: false
+        };
+    },
+    methods: {
+        toggleModal() {
+            this.isModalOpen = !this.isModalOpen;
+        },
+        closeModal() {
+            this.isModalOpen = false;
+        }
+    }
+};
+</script>
+
+<style scoped>
+/* Animasi Fade In */
+.modal-enter-active,
+.modal-leave-active {
+    transition: opacity 0.3s;
+}
+.modal-enter,
+.modal-leave-to {
+    opacity: 0;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
 </style>

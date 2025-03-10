@@ -19,8 +19,12 @@ class SubCategoryController extends Controller
     public function index()
     {
         $settings = Setting::where('user_id', Auth::id())->first();
-        $subCategory = SubCategory::with('category')->latest()->get();
-        $category = Category::all();
+        // $subCategory = SubCategory::with('category')->latest()->get();
+        $userId = Auth::id(); // Ambil user_id yang sedang aktif
+        $subCategory = SubCategory::whereHas('category', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })->with('category')->latest()->get();
+        $category = Category::where('user_id', Auth::id())->get();
 
         return Inertia::render('MasterData/Category/Sub', [
             'subCategory' => $subCategory,

@@ -31,7 +31,7 @@ class AllocationExController extends Controller
             ->get();
 
         // Ambil semua kategori
-        $categories = Category::all();
+        $categories = Category::where('user_id', Auth::id())->get();
 
         return Inertia::render('MasterData/Category/Allocation', [
             'transactions' => $transactions,

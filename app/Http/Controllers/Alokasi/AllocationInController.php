@@ -31,7 +31,7 @@ class AllocationInController extends Controller
             ->get();
 
         // Ambil semua sumber (sources)
-        $sources = Source::all();
+        $sources = Source::where('user_id', Auth::id())->get();
 
         return Inertia::render('MasterData/Source/Allocation', [
             'transactions' => $transactions,

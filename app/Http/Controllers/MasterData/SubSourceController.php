@@ -19,8 +19,12 @@ class SubSourceController extends Controller
     public function index()
     {
         $settings = Setting::where('user_id', Auth::id())->first();
-        $subSources = SubSource::with('source')->latest()->get();
-        $sources = Source::all();
+        // $subSources = SubSource::with('source')->latest()->get();
+        $userId = Auth::id(); // Ambil user_id yang sedang aktif
+        $subSources = SubSource::whereHas('source', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })->with('source')->latest()->get();
+        $sources = Source::where('user_id', Auth::id())->get();
 
         return Inertia::render('MasterData/Source/Sub', [
             'subSources' => $subSources,

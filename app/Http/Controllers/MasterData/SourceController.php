@@ -8,6 +8,7 @@ use App\Models\MasterData\SubSource;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class SourceController extends Controller
@@ -18,7 +19,7 @@ class SourceController extends Controller
     public function index()
     {
         $settings = Setting::where('user_id', Auth::id())->first();
-        $sources = Source::latest()->get();
+        $sources = Source::where('user_id', Auth::id())->latest()->get();
 
         return Inertia::render('MasterData/Source/Index', [
             'sources' => $sources,
@@ -40,8 +41,15 @@ class SourceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:50|unique:sources,name',
             'description' => 'nullable|string',
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('sources')->where(function ($query) {
+                    return $query->where('user_id', Auth::id());
+                }),
+            ],
             'is_active' => 'boolean',
         ], [
             'name.required' => "Source Wajib diisi !",
@@ -80,7 +88,14 @@ class SourceController extends Controller
     public function update(Request $request, Source $source)
     {
         $request->validate([
-            'name' => 'required|string|max:50|unique:sources,name,' . $source->id,
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('sources')->where(function ($query) {
+                    return $query->where('user_id', Auth::id());
+                })->ignore($source->id), // Abaikan record dengan ID yang sedang diperbarui
+            ],
             'description' => 'nullable|string',
             'is_active' => 'boolean',
         ], [

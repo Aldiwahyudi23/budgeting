@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
@@ -16,7 +17,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::latest()->get();
+        $categories = Category::where('user_id', Auth::id())->latest()->get();
         $settings = Setting::where('user_id', Auth::id())->first();
         return Inertia::render('MasterData/Category/Index', compact('categories', 'settings'));
     }
@@ -35,7 +36,14 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:50|unique:categories,name',
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('categories')->where(function ($query) {
+                    return $query->where('user_id', Auth::id());
+                }),
+            ],
             'description' => 'nullable|string',
             'is_active' => 'boolean',
         ], [
@@ -75,7 +83,14 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $request->validate([
-            'name' => 'required|string|max:50|unique:categories,name,' . $category->id,
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('categories')->where(function ($query) {
+                    return $query->where('user_id', Auth::id());
+                })->ignore($category->id), // Abaikan record dengan ID yang sedang diperbarui
+            ],
             'description' => 'nullable|string',
             'is_active' => 'boolean',
         ], [
