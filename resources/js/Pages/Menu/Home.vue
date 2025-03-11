@@ -171,7 +171,7 @@
           </Link>
 
           <Link
-            :href="route('savings.index')"
+            :href="route('account-bank.index')"
             class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
           >
             <div class="flex items-center">

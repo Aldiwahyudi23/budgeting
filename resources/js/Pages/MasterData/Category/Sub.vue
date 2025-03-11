@@ -33,7 +33,7 @@
                             <th class="px-4 py-2 text-left">No</th>
                             <th class="px-4 py-2 text-left">Kategori</th>
                             <th class="px-4 py-2 text-left">Nama</th>
-                            <th class="px-4 py-2 text-left">Deskripsi</th>
+                            <!-- <th class="px-4 py-2 text-left">Deskripsi</th> -->
                             <th class="px-4 py-2 text-center">Status</th>
                             <th v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">Aksi</th>
                         </tr>
@@ -43,7 +43,7 @@
                             <td class="px-4 py-2">{{ index + 1 }}</td>
                             <td class="px-4 py-2">{{ subCategory.category.name }}</td>
                             <td class="px-4 py-2">{{ subCategory.name }}</td>
-                            <td class="px-4 py-2">{{ subCategory.description || '-' }}</td>
+                            <!-- <td class="px-4 py-2">{{ subCategory.description || '-' }}</td> -->
                             <td class="px-4 py-2 text-center">
                                 <span v-if="subCategory.is_active" class="px-2 py-1 text-green-700 bg-green-200 rounded-full text-sm">Aktif</span>
                                 <span v-else class="px-2 py-1 text-red-700 bg-red-200 rounded-full text-sm">Tidak Aktif</span>

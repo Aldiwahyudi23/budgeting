@@ -120,7 +120,7 @@ class SettingController extends Controller
         $newAccountBank = AccountBank::find($newAccountId);
 
         // Jika AccountBank lama atau baru tidak ditemukan
-        if (!$oldAccountBank || !$newAccountBank) {
+        if (!$newAccountBank) {
             return redirect()->back()->with('error', 'Data bank tidak valid.');
         }
 
@@ -149,13 +149,15 @@ class SettingController extends Controller
         $totalSavingAmount = $latestTransactions->sum('balance');
         // Update saldo di AccountBank lama dan baru
         DB::transaction(function () use ($oldAccountBank, $newAccountBank, $totalSavingAmount, $setting, $newAccountId) {
-            // Kurangi saldo di AccountBank lama
-            $oldAccountBank->amount -= $totalSavingAmount;
-            $oldAccountBank->save();
+            if ($oldAccountBank) {
+                // Kurangi saldo di AccountBank lama
+                $oldAccountBank->amount -= $totalSavingAmount;
+                $oldAccountBank->save();
 
-            // Tambahkan saldo di AccountBank baru
-            $newAccountBank->amount += $totalSavingAmount;
-            $newAccountBank->save();
+                // Tambahkan saldo di AccountBank baru
+                $newAccountBank->amount += $totalSavingAmount;
+                $newAccountBank->save();
+            }
 
             // Update account_id di Setting
             $setting->account_id = $newAccountId;
