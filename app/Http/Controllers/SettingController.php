@@ -72,7 +72,7 @@ class SettingController extends Controller
         // Jika key yang diupdate adalah expense_saving, saving_expense, atau income_saving
         if (in_array($key, ['expense_saving', 'saving_expense', 'income_saving'])) {
             // Cek apakah kategori dengan nama "Saving" sudah ada
-            $category = Category::where('name', 'Saving')
+            $category = Category::where('name', 'Saving (Tabungan)')
                 ->where('user_id', Auth::id())
                 ->first();
 
@@ -80,8 +80,8 @@ class SettingController extends Controller
             if (!$category) {
                 Category::create([
                     'user_id' => Auth::id(),
-                    'name' => 'Saving',
-                    'description' => 'Kategori untuk menyimpan uang.',
+                    'name' => 'Saving (Tabungan)',
+                    'description' => 'Kategori Untuk Tabungan.',
                     'is_active' => true,
                 ]);
             } elseif ($category) {
@@ -126,7 +126,7 @@ class SettingController extends Controller
 
         // Ambil kategori tabungan berdasarkan user_id yang login
         $savingCategory = Category::where('user_id', Auth::id())
-            ->where('name', 'Saving')
+            ->where('name', 'Saving (Tabungan)')
             ->first();
 
         if (!$savingCategory) {

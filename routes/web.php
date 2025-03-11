@@ -68,6 +68,8 @@ Route::middleware([
 
     Route::resource('/master-data/account-bank', AccountBankController::class);
     Route::get('/account-bank/{accountBank}/mutation', [AccountBankController::class, 'mutation'])->name('account-bank.mutation'); // Route untuk mutasi
+    Route::post('/account-bank/withdraw', [AccountBankController::class, 'withdraw'])->name('account-bank.withdraw');
+    Route::post('/account-bank/deposit', [AccountBankController::class, 'deposit'])->name('account-bank.deposit');
     Route::resource('/master-data/debits', DebitController::class);
 
     Route::resource('/expense', ExpensesController::class);

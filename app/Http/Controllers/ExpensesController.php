@@ -38,7 +38,7 @@ class ExpensesController extends Controller
         // Ambil data SubCategory berdasarkan kategori Saving (jika saving_expense aktif)
         $savingSubCategories = [];
         if ($settings && $settings->saving_expense) {
-            $savingCategory = Category::where('name', 'Saving')
+            $savingCategory = Category::where('name', 'Saving (Tabungan)')
                 ->where('user_id', Auth::id())
                 ->first();
 
@@ -91,7 +91,7 @@ class ExpensesController extends Controller
     //     // Jika memilih SubCategory (nilai account_id diawali dengan "subcategory_")
     //     $category = Category::where('id', $request->category_id)->where('user_id', Auth::id())->first();
 
-    //     if (str_starts_with($request->account_id, 'subcategory_') && $category->name = "Saving") {
+    //     if (str_starts_with($request->account_id, 'subcategory_') && $category->name "Saving (Tabungan)") {
     //         // Ambil ID SubCategory
     //         $subCategoryId = (int) str_replace('subcategory_', '', $request->account_id);
 
@@ -99,7 +99,7 @@ class ExpensesController extends Controller
 
     //         // Simpan data ke tabel savings
     //         $lastSaving = Saving::where('user_id', Auth::id())->latest()->first();
-    //         if ($category->name = "Saving") {
+    //         if ($category->name "Saving (Tabungan)") {
     //             $balance = $lastSaving ? $lastSaving->balance + $request->amount : $request->amount;
     //         }
     //         if (str_starts_with($request->account_id, 'subcategory_')) {
@@ -141,7 +141,7 @@ class ExpensesController extends Controller
     //         $amountBank->amount -= $request->amount;
     //         $amountBank->update();
 
-    //         if ($category->name = "Saving") {
+    //         if ($category->name "Saving (Tabungan)") {
     //             $amountSaving = AccountBank::find($accountId);
     //             $amountSaving->amount += $request->amount;
     //             $amountSaving->update();
@@ -225,7 +225,7 @@ class ExpensesController extends Controller
             $accountId = (int) str_replace('account_', '', $request->account_id);
         }
 
-        if ($category->name == "Saving") {
+        if ($category->name == "Saving (Tabungan)") {
             // Cek apakah account_id di settings sudah dipilih
             if (!$settings || !$settings->account_id) {
                 return redirect()->back()->with('error', 'Bank untuk tabungan belum dipilih. Silakan pilih bank terlebih dahulu di pengaturan.');
@@ -258,7 +258,7 @@ class ExpensesController extends Controller
         if ($accountId) {
             // Ambil ID kategori "Saving"
             $savingCategory = Category::where('user_id', Auth::id())
-                ->where('name', 'Saving')->first();
+                ->where('name', 'Saving (Tabungan)')->first();
 
             // Ambil semua sub_category berdasarkan category_id yang telah ditemukan
             $subCategories = SubCategory::where('category_id', $savingCategory->id)
@@ -333,7 +333,7 @@ class ExpensesController extends Controller
             $amountBank->update();
 
             // Jika kategori adalah "Saving", tambahkan amount ke account_id di settings
-            if ($category->name == "Saving" && $settings && $settings->account_id) {
+            if ($category->name == "Saving (Tabungan)" && $settings && $settings->account_id) {
                 $savingAccount = AccountBank::find($settings->account_id);
                 $savingAccount->amount += $request->amount;
                 $savingAccount->update();

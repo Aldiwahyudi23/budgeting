@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('debits', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Relasi ke users
-            $table->enum('type', ['income', 'expense']); // Jenis transaksi
+            $table->enum('type', ['income', 'expense', 'withdraw', 'deposit']); // Jenis transaksi
             $table->string('note')->nullable(); // Catatan transaksi
             $table->decimal('amount', 15, 0); // Jumlah transaksi
             $table->decimal('balance', 15, 0); // Saldo setelah transaksi

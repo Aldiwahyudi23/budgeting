@@ -41,7 +41,7 @@
                 <div class="relative w-full md:w-64">
                     <TextInput 
                         v-model="searchQuery" 
-                        placeholder="Cari Pemasukan..." 
+                        placeholder="Cari..." 
                         class="pl-10 pr-4 py-2 border rounded-md w-full"
                     />
                     <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,10 +60,10 @@
                         <th class="px-4 py-2 text-left">Tanggal</th>
                         <th class="px-4 py-2 text-left">Jumlah</th>
                         <th class="px-4 py-2 text-left">Kategori</th>
-                        <th class="px-4 py-2 text-left">Sub Kategori</th>
+                        <th class="px-4 py-2 text-left">Keterangan</th>
                         <th class="px-4 py-2 text-left">Pembayaran</th>
                         <th class="px-4 py-2 text-left">Rekening</th>
-                        <th class="px-4 py-2 text-center">Aksi</th>
+                        <th v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -75,7 +75,7 @@
                         <td class="px-4 py-2">{{ item.sub_category?.name || '-' }}</td>
                         <td class="px-4 py-2">{{ item.payment }}</td>
                         <td class="px-4 py-2">{{ item.account_bank?.name || '-' }}</td>
-                        <td class="px-4 py-2 text-center">
+                        <td v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">
                             <SecondaryButton v-if="settings.btn_edit" @click="openModal('edit', item)">Edit</SecondaryButton>
                             <PrimaryButton v-if="settings.btn_delete" class="ml-2 bg-red-600 hover:bg-red-700" @click="confirmDelete(item.id)">Hapus</PrimaryButton>
                         </td>
@@ -110,9 +110,9 @@
                     </div>
 
                     <div class="mb-4">
-                        <InputLabel for="sub_kategori_id" value="Sub Kategori" />
+                        <InputLabel for="sub_kategori_id" value="Keterangan" />
                         <select id="sub_kategori_id" v-model="form.sub_kategori_id" class="block w-full border rounded-md p-2" :disabled="!form.category_id">
-                            <option disabled value="">Pilih Sub Kategori</option>
+                            <option disabled value="">Pilih Keterangan</option>
                             <option v-for="subCategory in filteredSubCategories" :key="subCategory.id" :value="subCategory.id" :disabled="!subCategory.is_active">{{ subCategory.name }} <span v-if="!subCategory.is_active" >(Tidak Aktif)</span></option>
                         </select>
                         <InputError :message="form.errors.sub_kategori_id" />
@@ -152,7 +152,7 @@
                         </optgroup>
 
                         <!-- Opsi untuk SubCategory (Muncul jika saving_expense aktif) -->
-                        <optgroup v-if="settings.saving_expense" label="Sub Kategori (Saving)">
+                        <optgroup v-if="settings.saving_expense" label="Saving (Tabungan)">
                         <option v-for="subCategory in savingSubCategories" 
                         :key="subCategory.id" 
                         :value="`subcategory_${subCategory.id}`"

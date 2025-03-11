@@ -59,12 +59,24 @@
               <td class="px-4 py-2">{{ (debits.current_page - 1) * debits.per_page + index + 1 }}</td>
               <td class="px-4 py-2">{{ formatDate(debit.created_at) }}</td>
               <td class="px-4 py-2">
-                <span :class="debit.type === 'income' ? 'text-green-600' : 'text-red-600'">
-                  {{ debit.type === 'income' ? 'Pendapatan' : 'Pengeluaran' }}
-                </span>
+                
+                <span :class="{
+                  'text-green-600': debit.type === 'income',
+                  'text-red-600': debit.type === 'expense',
+                  'text-yellow-500': debit.type === 'withdraw',
+                  'text-blue-500': debit.type === 'deposit'
+                }">
+                 {{ debit.type === 'income' ? 'Pendapatan' : debit.type === 'withdraw' ? 'Tarik Tunai' : debit.type === 'deposit' ? 'Setor Tunai' : 'Pengeluaran' }}
+</span>
+
               </td>
               <td class="px-4 py-2">{{ debit.note || '-' }}</td>
-              <td class="px-4 py-2" :class="debit.type === 'income' ? 'text-green-600' : 'text-red-600'">
+              <td class="px-4 py-2" :class="{
+                  'text-green-600': debit.type === 'income',
+                  'text-red-600': debit.type === 'expense',
+                  'text-yellow-500': debit.type === 'withdraw',
+                  'text-blue-500': debit.type === 'deposit'
+                }">
                 {{ formatCurrency(debit.amount) }}
               </td>
               <td class="px-4 py-2">{{ formatCurrency(debit.balance) }}</td>

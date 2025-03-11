@@ -1,5 +1,5 @@
 <template>
-    <AppLayout title="Saving">
+    <AppLayout title= "Saving (Tabungan)">
         <div class="p-4">
                      <!-- Tampilkan flash message jika ada -->
         <div v-if="$page.props.flash.success" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
@@ -9,9 +9,21 @@
         <div v-if="$page.props.flash.error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           {{ $page.props.flash.error }}
         </div>
+        <!-- Tampilkan Saldo per Sub Kategori -->
+     <div class="mb-2">
+         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+             <div v-for="subCategory in subCategoryBalances" :key="subCategory.id" class="bg-white p-4 rounded-lg shadow-md">
+                 <h3 class="text-gray-700 font-medium">{{ subCategory.name }}</h3>
+                 <p class="text-2xl font-bold" :class="subCategory.balance < 0 ? 'text-red-600' : 'text-green-600'">
+                     {{ formatCurrency(subCategory.balance) }}
+                 </p>
+             </div>
+         </div>
+     </div>
             <!-- Bagian Header: Tombol Tambah & Pencarian -->
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-4 md:space-y-0">
-                <PrimaryButton @click="openModal('create')">Tambah Tabungan</PrimaryButton>
+               
+                <!-- <PrimaryButton @click="openModal('create')">Tambah Tabungan</PrimaryButton> -->
                 <div class="relative">
                     <TextInput 
                         v-model="searchQuery" 
@@ -24,18 +36,6 @@
                 </div>
             </div>
     
-            <!-- Tampilkan Saldo per Sub Kategori -->
-            <div class="mb-2">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    <div v-for="subCategory in subCategoryBalances" :key="subCategory.id" class="bg-white p-4 rounded-lg shadow-md">
-                        <h3 class="text-gray-700 font-medium">{{ subCategory.name }}</h3>
-                        <p class="text-2xl font-bold" :class="subCategory.balance < 0 ? 'text-red-600' : 'text-green-600'">
-                            {{ formatCurrency(subCategory.balance) }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-    
             <!-- Tabel Data -->
             <div class="mt-4 overflow-x-auto">
                 <table class="min-w-full border bg-white rounded-lg shadow-md">
@@ -43,7 +43,7 @@
                         <tr>
                             <th class="px-4 py-2 text-left">No</th>
                             <th class="px-4 py-2 text-left">Tanggal</th>
-                            <th class="px-4 py-2 text-left">Sub Kategori</th>
+                            <th class="px-4 py-2 text-left">Kategori</th>
                             <th class="px-4 py-2 text-left">Catatan</th>
                             <th class="px-4 py-2 text-left">Masuk</th>
                             <th class="px-4 py-2 text-left">Keluar</th>
@@ -132,7 +132,7 @@
                        <div class="mb-4">
                             <InputLabel for="category_id" value="Tabungan" />
                             <select id="category_id" v-model="form.category_id" class="block w-full border rounded-md p-2" @change="form.sub_category_id = null">
-                                <option value="">Pilih Tabungan</option>
+                                <option disabled value="">Pilih Tabungan</option>
                                 <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
                             </select>
                             <InputError :message="form.errors.category_id" />
@@ -141,7 +141,7 @@
                         <div class="mb-4">
                             <InputLabel for="sub_category_id" value="Data Tabungan" />
                             <select id="sub_category_id" v-model="form.sub_category_id" class="block w-full border rounded-md p-2" :disabled="!form.category_id">
-                                <option value="">Pilih Data Tabungan</option>
+                                <option disabled value="">Pilih Data Tabungan</option>
                                 <option v-for="subCategory in filteredSubCategories" :key="subCategory.id" :value="subCategory.id">{{ subCategory.name }}</option>
                             </select>
                             <InputError :message="form.errors.sub_category_id" />
