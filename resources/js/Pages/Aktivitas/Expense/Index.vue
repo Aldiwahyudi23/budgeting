@@ -9,6 +9,7 @@
     <div v-if="$page.props.flash.error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
       {{ $page.props.flash.error }}
     </div>
+
         <!-- Bagian Header: Tombol Tambah & Pencarian -->
   <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-4 md:space-y-0">
             <!-- Tombol Tambah Pemasukan -->
@@ -178,7 +179,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted  } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3'; // Ganti Inertia dengan router
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -187,12 +188,8 @@ import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import CustomModal from '@/Components/CustomModal.vue';
 
-import { handleFlashMessages } from '@/Plugins/sweetalert';
+import Swal from 'sweetalert2';
 
-// Tangkap flash message dari Laravel
-const page = usePage();
-console.log(page.props.flash); // Periksa isi flash message
-handleFlashMessages(page);
 
 const props = defineProps({
     expenses: Array,
@@ -200,6 +197,8 @@ const props = defineProps({
     subCategories: Array,
     accountBanks: Array,
 });
+// Tangkap flash message dari Laravel
+const page = usePage();
 
 const searchQuery = ref('');
 const modalOpen = ref(false);
@@ -316,4 +315,49 @@ onMounted(() => {
     console.log(savingSubCategories.value);
   }
 });
+
 </script>
+
+<style scoped>
+/* Style untuk alert */
+.alert {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  max-width: 90%;
+  width: 400px;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Style untuk tombol close */
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  color: inherit;
+  padding: 0;
+  margin-left: 1rem;
+}
+
+/* Style untuk alert success */
+.alert-success {
+  background-color: #f0fdf4;
+  border-color: #4ade80;
+  color: #166534;
+}
+
+/* Style untuk alert error */
+.alert-error {
+  background-color: #fef2f2;
+  border-color: #f87171;
+  color: #991b1b;
+}
+</style>

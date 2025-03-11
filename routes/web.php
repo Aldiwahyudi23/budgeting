@@ -7,6 +7,7 @@ use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\MasterData\AccountBankController;
 use App\Http\Controllers\MasterData\CategoryController;
+use App\Http\Controllers\MasterData\DebitController;
 use App\Http\Controllers\MasterData\SourceController;
 use App\Http\Controllers\MasterData\SubCategoryController;
 use App\Http\Controllers\MasterData\SubSourceController;
@@ -48,6 +49,7 @@ Route::middleware([
 
     Route::resource('/master-data/account-bank', AccountBankController::class);
     Route::get('/account-bank/{accountBank}/mutation', [AccountBankController::class, 'mutation'])->name('account-bank.mutation'); // Route untuk mutasi
+    Route::resource('/master-data/debits', DebitController::class);
 
     Route::resource('/expense', ExpensesController::class);
     Route::resource('/income', IncomeController::class);

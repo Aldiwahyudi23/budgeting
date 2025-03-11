@@ -56,13 +56,16 @@ const toggleProfileDropdown = () => {
                                     Dashboard
                                 </NavLink>
                                 <NavLink :href="route('expense.index')" :active="route().current('expense.index')">
-                                    Transaksi
+                                    Expenses
+                                </NavLink>
+                                <NavLink :href="route('income.index')" :active="route().current('income.index')">
+                                    Income
                                 </NavLink>
                                 <NavLink :href="route('aset')" :active="route().current('aset')">
                                     Aset
                                 </NavLink>
                                 <NavLink :href="route('laporan')" :active="route().current('laporan')">
-                                    Setting
+                                    Laporan
                                 </NavLink>
                             </div>
 

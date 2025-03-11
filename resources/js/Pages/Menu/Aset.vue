@@ -1,7 +1,7 @@
 <template>
   <AppLayout title="Aset">
     <div class="p-4">
-      <h1 class="text-2xl font-bold mb-6">Manajemen Aset</h1>
+      <h3 class="text-xl font-bold mb-6">Manajemen Aset</h3>
 
       <!-- Section Tabungan -->
       <div class="bg-white p-6 rounded-lg shadow-md mb-6">
@@ -11,7 +11,7 @@
             <p class="text-sm text-gray-600">Saldo tabungan Anda</p>
           </div>
           <div class="text-right">
-            <p class="text-2xl font-bold text-green-600">
+            <p class="text-xl font-bold text-green-600">
               Rp{{ formatCurrency(totalSavingAmount) }}
             </p>
             <p class="text-sm text-gray-500">Saldo saat ini</p>

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Aktivitas\Income;
 use App\Http\Controllers\Controller;
 use App\Models\MasterData\AccountBank;
+use App\Models\MasterData\Debit;
 use App\Models\MasterData\Source;
+use App\Models\MasterData\SubCategory;
 use App\Models\MasterData\SubSource;
 use App\Models\Setting;
 use Illuminate\Http\Request;
@@ -28,8 +30,8 @@ class IncomeController extends Controller
             ->with(['source', 'subSource', 'accountBank'])
             ->get();
 
-        $sources = Source::where('is_active', true)->get();
-        $subSources = SubSource::where('is_active', true)->get();
+        $sources = Source::where('user_id', Auth::id())->get();
+        $subSources = SubSource::all();
         $accountBanks = AccountBank::where('user_id', Auth::id())->get();
 
         return inertia('Aktivitas/Income/Index', [
@@ -79,6 +81,24 @@ class IncomeController extends Controller
             'payment' => $request->payment,
             'account_id' => $accountId,
         ]);
+
+        if ($request->payment == "Tunai") {
+            $latestDebit = Debit::where('user_id', Auth::id())->latest()->first();
+            $balance = $latestDebit ? $latestDebit->balance : 0;
+            $amount = $request->amount;
+
+            $subSource = SubSource::find($request->sub_source_id);
+            $source = Source::find($request->source_id);
+            $note = $source->name . " dari " . $subSource->name;
+
+            $debit = new Debit();
+            $debit->user_id = Auth::id();
+            $debit->amount = $amount;
+            $debit->type = 'Income';
+            $debit->note = $note;
+            $debit->balance = $balance + $amount; // Mengurangi saldo
+            $debit->save();
+        }
 
         if ($accountId) {
             $amount_bank = AccountBank::find($accountId);
