@@ -30,8 +30,8 @@ class ExpensesController extends Controller
             ->with(['category', 'subCategory', 'accountBank'])
             ->get();
 
-        $categories = Category::where('is_active', true)->where('user_id', Auth::id())->get();
-        $subCategories = SubCategory::where('is_active', true)->get();
+        $categories = Category::where('user_id', Auth::id())->get();
+        $subCategories = SubCategory::all();
         $accountBanks = AccountBank::where('user_id', Auth::id())->get();
 
         // Ambil data SubCategory berdasarkan kategori Saving (jika saving_expense aktif)
@@ -88,7 +88,7 @@ class ExpensesController extends Controller
     //     $accountId = $request->payment === 'Tunai' ? null : $request->account_id;
 
     //     // Jika memilih SubCategory (nilai account_id diawali dengan "subcategory_")
-    //     $category = Category::where('id', $request->category_id)->where('is_active', true)->where('user_id', Auth::id())->first();
+    //     $category = Category::where('id', $request->category_id)->where('user_id', Auth::id())->first();
 
     //     if (str_starts_with($request->account_id, 'subcategory_') && $category->name = "Saving") {
     //         // Ambil ID SubCategory
@@ -257,29 +257,35 @@ class ExpensesController extends Controller
         // Ambil ID kategori "Saving"
         $savingCategory = Category::where('user_id', Auth::id())
             ->where('name', 'Saving')->first();
-        // $saldosubsaving = Saving::where('category_id', $savingCategory->id)
-        //     ->where('user_id', Auth::id())
 
-        //     ;
-        // Ambil data terbaru untuk setiap sub kategori
-        $latestSavings = Saving::where('category_id', $savingCategory->id)
+        // Ambil semua sub_category berdasarkan category_id yang telah ditemukan
+        $subCategories = SubCategory::where('category_id', $savingCategory->id)
+            ->pluck('id'); // Mengambil hanya ID dalam bentuk array
+
+        // Ambil transaksi terbaru untuk setiap sub_category_id
+        $latestTransactions = Saving::whereIn('sub_category_id', $subCategories)
             ->where('user_id', Auth::id())
-            ->with(['category', 'subCategory'])
-            ->latest() // Urutkan berdasarkan tanggal terbaru
+            ->orderBy('sub_category_id') // Urutkan berdasarkan sub_category_id
+            ->orderByDesc('created_at') // Urutkan terbaru berdasarkan waktu
             ->get()
-            ->groupBy('sub_category_id') // Kelompokkan berdasarkan sub_category_id
-            ->map(function ($items) {
-                return $items->first(); // Ambil data terbaru (pertama setelah diurutkan)
-            });
+            ->unique('sub_category_id'); // Ambil hanya satu transaksi terbaru dari setiap sub_category_id
 
-        // Hitung total balance
-        $totalBalance = $latestSavings->sum('balance');
-
+        // Hitung total amount dari transaksi terbaru masing-masing sub_category
+        $totalBalance = $latestTransactions->sum('balance');
 
         $saldo = AccountBank::find($accountId);
         // Jika amount lebih besar dari savingLast->balance, tampilkan alert bahwa saldo tidak cukup
         if ($request->amount > $saldo->amount) {
-            return back()->with('error', "Saldo $saldo->name ($totalBalance) Tidak cukup.");
+            $Rpalert = number_format($saldo->amount);
+            return back()->with('error', "Saldo $saldo->name (Rp. $Rpalert) Tidak cukup.");
+        }
+        // Cek apakah id account sama dengan account_id di setting jika sama maka saldo yang bisa di pakai adalah sisa dari pengurangan saldo saving
+        if ($accountId == $settings->account_id) {
+            $saldoBank = $saldo->amount - $totalBalance;
+            if ($request->amount > $saldoBank) {
+                $Rp = number_format($saldoBank);
+                return back()->with('error', "Saldo $saldo->name yang Free (Rp. $Rp) Tidak cukup, karena Saldo yang ada adalah saldo Saving (Tabungan).");
+            }
         }
         // Simpan data ke tabel expenses
         Expenses::create([

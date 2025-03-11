@@ -64,8 +64,14 @@
                         <div class="mb-4">
                             <InputLabel for="category_id" value="Kategori" />
                             <select id="category_id" v-model="form.category_id" class="block w-full border rounded-md p-2">
-                                <option v-for="category in props.category" :key="category.id" :value="category.id">{{ category.name }}</option>
+                                <option v-for="category in props.category" 
+                                    :key="category.id" 
+                                    :value="category.id" 
+                                    :disabled="!category.is_active">
+                                    {{ category.name }} <span v-if="!category.is_active">(Tidak Aktif)</span>
+                                </option>
                             </select>
+
                             <InputError :message="form.errors.category_id" />
                         </div>
     

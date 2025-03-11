@@ -45,7 +45,7 @@
                                 <TextInput 
                                     v-model="amountInputs[source.id]" 
                                     type="text" 
-                                    class="block w-full" 
+                                    class="block w-full min-w-[150px]" 
                                     :disabled="isSaved(source.id)"
                                     @input="handleAmountInput(source.id, $event)"
                                 />

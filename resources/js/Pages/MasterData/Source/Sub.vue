@@ -10,7 +10,9 @@
                     <!-- Filter Kategori -->
                     <select v-model="selectedSource" class="border rounded px-4 py-2 w-full md:w-48">
                         <option value="">Semua Source</option>
-                        <option v-for="source in props.sources" :key="source.id" :value="source.id">
+                        <option v-for="source in props.sources" 
+                        :key="source.id" 
+                        :value="source.id">
                             {{ source.name }}
                         </option>
                     </select>
@@ -64,7 +66,12 @@
                         <div class="mb-4">
                             <InputLabel for="source_id" value="Source" />
                             <select id="source_id" v-model="form.source_id" class="block w-full border rounded-md p-2">
-                                <option v-for="source in sources" :key="source.id" :value="source.id">{{ source.name }}</option>
+                                <option v-for="source in sources" 
+                                :key="source.id" 
+                                :value="source.id"
+                                :disabled="!source.is_active"
+                                >{{ source.name }} <span v-if="!source.is_active">(Tidak Aktif)</span>
+                            </option>
                             </select>
                             <InputError :message="form.errors.source_id" />
                         </div>

@@ -23,7 +23,7 @@
                             <tr>
                                 <th class="px-4 py-2 text-left">No</th>
                                 <th class="px-4 py-2 text-left">Nama</th>
-                                <th class="px-4 py-2 text-left">Deskripsi</th>
+                                <!-- <th class="px-4 py-2 text-left">Deskripsi</th> -->
                                 <th class="px-4 py-2 text-left">Jumlah</th>
                                 <th class="px-4 py-2 text-center">Status</th>
                                 <th class="px-4 py-2 text-center">Aksi</th>
@@ -33,7 +33,7 @@
                             <tr v-for="(item, index) in filteredAccountBanks" :key="item.id" class="border-b hover:bg-gray-100">
                                 <td class="px-4 py-2">{{ index + 1 }}</td>
                                 <td class="px-4 py-2">{{ item.name }}</td>
-                                <td class="px-4 py-2">{{ item.description || '-' }}</td>
+                                <!-- <td class="px-4 py-2">{{ item.description || '-' }}</td> -->
                                 <td class="px-4 py-2">{{ formatCurrency(item.amount) }}</td>
                                 <td class="px-4 py-2 text-center">
                                     <span v-if="item.is_active" class="px-2 py-1 text-green-700 bg-green-200 rounded-full text-sm">Aktif</span>

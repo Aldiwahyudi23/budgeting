@@ -52,16 +52,16 @@ const toggleProfileDropdown = () => {
                         <!-- Menu Desktop (Tampil di atas pada laptop) -->
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
                             <div class="hidden space-x-8 sm:-my-px sm:flex">
-                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                                <NavLink :href="route('home')" :active="route().current('home')">
                                     Dashboard
                                 </NavLink>
                                 <NavLink :href="route('expense.index')" :active="route().current('expense.index')">
                                     Transaksi
                                 </NavLink>
-                                <NavLink :href="route('account-bank.index')" :active="route().current('account-bank.index')">
-                                    Asset
+                                <NavLink :href="route('aset')" :active="route().current('aset')">
+                                    Aset
                                 </NavLink>
-                                <NavLink :href="route('settings.index')" :active="route().current('settings.index')">
+                                <NavLink :href="route('laporan')" :active="route().current('laporan')">
                                     Setting
                                 </NavLink>
                             </div>
@@ -93,6 +93,10 @@ const toggleProfileDropdown = () => {
 
                                         <DropdownLink :href="route('profile.show')">
                                             Profile
+                                        </DropdownLink>
+
+                                         <DropdownLink :href="route('setupData')">
+                                            Setup Data
                                         </DropdownLink>
 
                                          <DropdownLink :href="route('settings.index')">
@@ -146,6 +150,10 @@ const toggleProfileDropdown = () => {
                                             Profile
                                         </DropdownLink>
 
+                                        <DropdownLink :href="route('setupData')">
+                                            Setup Data
+                                        </DropdownLink>
+
                                         <DropdownLink :href="route('settings.index')">
                                             Setting
                                         </DropdownLink>
@@ -173,8 +181,8 @@ const toggleProfileDropdown = () => {
             <nav class="md:hidden fixed bottom-0 w-full bg-sky-500 shadow-lg z-50 rounded-t-2xl">
                 <div class="flex justify-around items-center py-2">
                     <!-- Home -->
-                    <Link :href="route('dashboard')" class="flex flex-col items-center text-white hover:text-blue-200"
-                        :class="{'border-b-2 border-white': $page.url === '/dashboard'}">
+                    <Link :href="route('home')" class="flex flex-col items-center text-white hover:text-blue-200"
+                        :class="{'border-b-2 border-white': $page.url === '/home'}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
@@ -222,19 +230,19 @@ const toggleProfileDropdown = () => {
                     </div>
 
                     <!-- Keuangan -->
-                    <Link :href="route('account-bank.index')" class="flex flex-col items-center text-white hover:text-blue-200"
-                        :class="{'border-b-2 border-white': $page.url === '/account-bank'}">
+                    <Link :href="route('aset')" class="flex flex-col items-center text-white hover:text-blue-200"
+                        :class="{'border-b-2 border-white': $page.url === '/aset'}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
                             </path>
                         </svg>
-                        <span class="text-xs">Keuangan</span>
+                        <span class="text-xs">Aset</span>
                     </Link>
 
                     <!-- Laporan -->
-                    <Link :href="route('settings.index')" class="flex flex-col items-center text-white hover:text-blue-200"
-                        :class="{'border-b-2 border-white': $page.url === '/settings'}">
+                    <Link :href="route('laporan')" class="flex flex-col items-center text-white hover:text-blue-200"
+                        :class="{'border-b-2 border-white': $page.url === '/laporan'}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                 d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">

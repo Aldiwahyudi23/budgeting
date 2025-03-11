@@ -10,6 +10,7 @@ use App\Http\Controllers\MasterData\CategoryController;
 use App\Http\Controllers\MasterData\SourceController;
 use App\Http\Controllers\MasterData\SubCategoryController;
 use App\Http\Controllers\MasterData\SubSourceController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\SettingController;
 use App\Models\MasterData\Category;
 use Illuminate\Foundation\Application;
@@ -55,4 +56,10 @@ Route::middleware([
 
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings/{key}', [SettingController::class, 'update'])->name('settings.update');
+    Route::post('/setting/account-bank/saving/{key}', [SettingController::class, 'update_accountBank'])->name('setting_Account.update');
+
+    Route::get('/home', [MenuController::class, 'home'])->name('home');
+    Route::get('/aset', [MenuController::class, 'aset'])->name('aset');
+    Route::get('/laporan', [MenuController::class, 'laporan'])->name('laporan');
+    Route::get('/master-data', [MenuController::class, 'setupData'])->name('setupData');
 });

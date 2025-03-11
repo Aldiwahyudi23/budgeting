@@ -96,8 +96,8 @@
                         <div class="mb-4">
                             <InputLabel for="source_id" value="Sumber" />
                             <select id="source_id" v-model="form.source_id" class="block w-full border rounded-md p-2" @change="form.sub_source_id = null">
-                                <option value="">Pilih Sumber</option>
-                                <option v-for="source in sources" :key="source.id" :value="source.id">{{ source.name }}</option>
+                                <option disabled value="">Pilih Sumber</option>
+                                <option v-for="source in sources" :key="source.id" :value="source.id" :disabled="!source.is_active">{{ source.name }} <span v-if="!source.is_active">(Tidak Aktif)</span> </option>
                             </select>
                             <InputError :message="form.errors.source_id" />
                         </div>
@@ -105,8 +105,8 @@
                         <div class="mb-4">
                             <InputLabel for="sub_source_id" value="Sub Sumber" />
                             <select id="sub_source_id" v-model="form.sub_source_id" class="block w-full border rounded-md p-2" :disabled="!form.source_id">
-                                <option value="">Pilih Sub Sumber</option>
-                                <option v-for="subSource in filteredSubSources" :key="subSource.id" :value="subSource.id">{{ subSource.name }}</option>
+                                <option disabled value="">Pilih Sub Sumber</option>
+                                <option v-for="subSource in filteredSubSources" :key="subSource.id" :value="subSource.id" :disabled="!subSource.is_active">{{ subSource.name }} <span v-if="!subSource.is_active"  >(Tidak Aktif)</span> </option>
                             </select>
                             <InputError :message="form.errors.sub_source_id" />
                         </div>
@@ -129,8 +129,8 @@
                         <div class="mb-4" v-if="form.payment === 'Transfer'">
                             <InputLabel for="account_id" value="Rekening Tujuan" />
                             <select id="account_id" v-model="form.account_id" class="block w-full border rounded-md p-2">
-                                <option value="">Pilih Rekening</option>
-                                <option v-for="account in accountBanks" :key="account.id" :value="account.id">{{ account.name }}</option>
+                                <option disabled value="">Pilih Rekening</option>
+                                <option v-for="account in accountBanks" :key="account.id" :value="account.id" :disabled="!account.is_active">{{ account.name }} <span v-if="!account.is_active">(Tidak Aktif)</span></option>
                             </select>
                             <InputError :message="form.errors.account_id" />
                         </div>

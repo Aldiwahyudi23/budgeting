@@ -102,8 +102,8 @@
                     <div class="mb-4">
                         <InputLabel for="category_id" value="Kategori" />
                         <select id="category_id" v-model="form.category_id" class="block w-full border rounded-md p-2" @change="form.sub_kategori_id = null">
-                            <option value="">Pilih Kategori</option>
-                            <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
+                            <option disabled value="">Pilih Kategori</option>
+                            <option v-for="category in categories" :key="category.id" :value="category.id" :disabled="!category.is_active">{{ category.name }} <span v-if="!category.is_active">(Tidak Aktif)</span></option>
                         </select>
                         <InputError :message="form.errors.category_id" />
                     </div>
@@ -111,8 +111,8 @@
                     <div class="mb-4">
                         <InputLabel for="sub_kategori_id" value="Sub Kategori" />
                         <select id="sub_kategori_id" v-model="form.sub_kategori_id" class="block w-full border rounded-md p-2" :disabled="!form.category_id">
-                            <option value="">Pilih Sub Kategori</option>
-                            <option v-for="subCategory in filteredSubCategories" :key="subCategory.id" :value="subCategory.id">{{ subCategory.name }}</option>
+                            <option disabled value="">Pilih Sub Kategori</option>
+                            <option v-for="subCategory in filteredSubCategories" :key="subCategory.id" :value="subCategory.id" :disabled="!subCategory.is_active">{{ subCategory.name }} <span v-if="!subCategory.is_active" >(Tidak Aktif)</span></option>
                         </select>
                         <InputError :message="form.errors.sub_kategori_id" />
                     </div>
@@ -132,37 +132,31 @@
                         <InputError :message="form.errors.payment" />
                     </div>
 
-                    <!-- <div class="mb-4" v-if="form.payment === 'Transfer'">
-                        <InputLabel for="account_id" value="Rekening" />
-                        <select id="account_id" v-model="form.account_id" class="block w-full border rounded-md p-2">
-                            <option value="">Pilih Rekening</option>
-                            <option v-for="account in accountBanks" :key="account.id" :value="account.id">{{ account.name }}</option>
-                        </select>
-                        <InputError :message="form.errors.account_id" />
-                    </div> -->
-
                         <!-- Dropdown Gabungan (AccountBank dan SubCategory) -->
                     <div class="mb-4" v-if="form.payment === 'Transfer'">
                     <InputLabel for="account_id" value="Sumber Rekening " />
                     <select id="account_id" v-model="form.account_id" class="block w-full border rounded-md p-2">
                         
                         <!-- Opsi Default -->
-                        <option value="">
+                        <option disabled value="">
                         Pilih Rekening
-                        <span v-if="settings.saving_expense"> atau Data Saving</span>
+                        <span v-if="settings.saving_expense"> / Dari Saving (Tabungan)</span>
                         </option>
                         
                         <!-- Opsi untuk AccountBank -->
                         <optgroup label="Rekening">
-                        <option v-for="account in accountBanks" :key="account.id" :value="`account_${account.id}`">
-                            {{ account.name }}
+                        <option v-for="account in accountBanks" :key="account.id" :value="`account_${account.id}`" :disabled="!account.is_active">
+                            {{ account.name }} <span v-if="!account.is_active">(Tidak Aktif)</span>
                         </option>
                         </optgroup>
 
                         <!-- Opsi untuk SubCategory (Muncul jika saving_expense aktif) -->
                         <optgroup v-if="settings.saving_expense" label="Sub Kategori (Saving)">
-                        <option v-for="subCategory in savingSubCategories" :key="subCategory.id" :value="`subcategory_${subCategory.id}`">
-                            {{ subCategory.name }}
+                        <option v-for="subCategory in savingSubCategories" 
+                        :key="subCategory.id" 
+                        :value="`subcategory_${subCategory.id}`"
+                        :disabled="!subCategory.is_active">
+                            {{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span>
                         </option>
                         </optgroup>
                     </select>

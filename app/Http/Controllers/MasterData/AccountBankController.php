@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Spatie\Activitylog\Models\Activity;
 
 class AccountBankController extends Controller
@@ -40,7 +41,14 @@ class AccountBankController extends Controller
     {
         // Validasi input
         $request->validate([
-            'name' => 'required|string|max:255|unique:account_banks,name',
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('account_banks')->where(function ($query) {
+                    return $query->where('user_id', Auth::id());
+                })
+            ],
             'description' => 'nullable|string',
             'amount' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
@@ -86,7 +94,14 @@ class AccountBankController extends Controller
         }
         // Validasi input
         $request->validate([
-            'name' => 'required|string|max:255|unique:account_banks,name,' . $accountBank->id,
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('account_banks')->where(function ($query) {
+                    return $query->where('user_id', Auth::id());
+                })->ignore($accountBank->id), // Abaikan record dengan ID yang sedang diperbarui
+            ],
             'description' => 'nullable|string',
             'amount' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',

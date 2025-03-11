@@ -16,6 +16,7 @@ class Setting extends Model
         'expense_saving',
         'saving_expense',
         'income_saving',
+        'account_id',
     ];
 
     public function user()

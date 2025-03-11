@@ -80,14 +80,14 @@
             <!-- Pagination -->
             <div class="flex justify-between items-center mt-4">
                 <div class="flex items-center space-x-2">
-                    <span class="text-sm text-gray-700">Menampilkan</span>
+                    <!-- <span class="text-sm text-gray-700">Menampilkan</span> -->
                     <select v-model="perPage" class="border rounded-md p-1 text-sm">
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                         <option value="100">100</option>
                     </select>
-                    <span class="text-sm text-gray-700">data per halaman</span>
+                    <!-- <span class="text-sm text-gray-700">data per halaman</span> -->
                 </div>
                 <div class="flex space-x-2">
                     <button 
@@ -95,14 +95,14 @@
                         :disabled="currentPage === 1" 
                         class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
                     >
-                        Sebelumnya
+                        back
                     </button>
                     <button 
                         @click="nextPage" 
                         :disabled="currentPage === totalPages" 
                         class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50"
                     >
-                        Selanjutnya
+                        next
                     </button>
                 </div>
             </div>
