@@ -2,11 +2,11 @@
   <AppLayout title="Dashboard Keuangan">
     <div class="p-4">
 
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <!-- Card Saldo Bersih -->
     <Link
       :href="route('account-bank.index')"
-      class="flex flex-col items-center justify-center bg-blue-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
+      class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow"
     >
       <div class="flex items-center">
         <div class="bg-purple-100 p-2 rounded-full">
@@ -26,7 +26,7 @@
     </Link>
 
     <!-- Card Saldo Tabungan -->
-    <div class="flex flex-col items-center justify-center bg-red-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
+    <div class="bg-white p-4 rounded-lg shadow-md">
       <div class="flex items-center">
         <div class="bg-blue-100 p-2 rounded-full">
           <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +42,7 @@
     </div>
 
     <!-- Card Total Pendapatan -->
-    <div class="flex flex-col items-center justify-center bg-green-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
+    <div class="bg-white p-4 rounded-lg shadow-md">
       <div class="flex items-center">
         <div class="bg-green-100 p-2 rounded-full">
           <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@
     </div>
 
     <!-- Card Total Pengeluaran -->
-    <div class="flex flex-col items-center justify-center bg-yellow-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
+    <div class="bg-white p-4 rounded-lg shadow-md">
       <div class="flex items-center">
         <div class="bg-red-100 p-2 rounded-full">
           <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,57 +74,57 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-4 sm:grid-cols-6 xl:grid-cols-8 gap-4 mt-6">
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
     <!-- Menu Tagihan -->
     <Link
       :href="route('bills.index')"
-      class="menu-item bg-blue-500"
+      class="flex flex-col items-center justify-center bg-blue-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
     >
-      <div class="bg-blue-600 p-3 rounded-full text-white">
-        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h11m-1-6h4m-4 0v4m0-4L3 10m1 4h9m-9 0v6m0-6L3 14m11-4h4m-4 0v6m0-6L14 14m5-4h2m-2 0v6m0-6L19 14"></path>
+      <div class="bg-blue-500 p-3 rounded-full text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M3 3v18m18-18v18M3 9h18m-9 9V9"></path>
         </svg>
       </div>
-      <span>Tagihan</span>
+      <p class="mt-2 text-sm font-semibold text-gray-700">Tagihan</p>
     </Link>
 
     <!-- Menu Hutang -->
     <Link
       :href="route('debts.index')"
-      class="menu-item bg-red-500"
+      class="flex flex-col items-center justify-center bg-red-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
     >
-      <div class="bg-red-600 p-3 rounded-full text-white">
-        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3 3v-6m-8 3a9 9 0 1118 0 9 9 0 01-18 0z"></path>
+      <div class="bg-red-500 p-3 rounded-full text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-2 0v10m-6 4h12a1 1 0 001-1v-2H4v2a1 1 0 001 1z"></path>
         </svg>
       </div>
-      <span>Hutang</span>
+      <p class="mt-2 text-sm font-semibold text-gray-700">Hutang</p>
     </Link>
 
     <!-- Menu Pinjaman -->
     <Link
       :href="route('loans.index')"
-      class="menu-item bg-green-500"
+      class="flex flex-col items-center justify-center bg-green-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
     >
-      <div class="bg-green-600 p-3 rounded-full text-white">
-        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      <div class="bg-green-500 p-3 rounded-full text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m0 0L9 8m6 0v8"></path>
         </svg>
       </div>
-      <span>Pinjaman</span>
+      <p class="mt-2 text-sm font-semibold text-gray-700">Pinjaman</p>
     </Link>
 
     <!-- Menu Tabungan -->
     <Link
       :href="route('savings.index')"
-      class="menu-item bg-purple-500"
+      class="flex flex-col items-center justify-center bg-yellow-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
     >
-      <div class="bg-purple-600 p-3 rounded-full text-white">
-        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      <div class="bg-yellow-500 p-3 rounded-full text-white">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a4 4 0 00-8 0v2m0 0a4 4 0 018 0zm-4 5v2m-6 4h12a1 1 0 001-1v-2H4v2a1 1 0 001 1z"></path>
         </svg>
       </div>
-      <span>Tabungan</span>
+      <p class="mt-2 text-sm font-semibold text-gray-700">Tabungan</p>
     </Link>
   </div>
 
@@ -273,11 +273,3 @@ const formatCurrency = (value) => {
   return new Intl.NumberFormat('id-ID').format(value);
 };
 </script>
-<style scoped>
-.menu-item {
-  @apply flex flex-col items-center justify-center p-4 rounded-lg shadow-md text-white font-semibold transition-transform transform hover:scale-105;
-}
-.icon {
-  @apply w-10 h-10 mb-2;
-}
-</style>

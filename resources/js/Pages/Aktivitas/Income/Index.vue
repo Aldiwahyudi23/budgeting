@@ -149,7 +149,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -196,26 +196,31 @@ const filteredIncomes = computed(() => {
     });
 });
 
-// Filter sub sumber berdasarkan source_id yang dipilih
-const filteredSubSources = computed(() => {
-    return props.subSources.filter(sub => sub.source_id === form.source_id);
-});
-
-const formatCurrency = (value) => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-    }).format(value);
-};
-
+// **Deklarasikan form SEBELUM watchEffect**
 const form = useForm({
     id: '',
     date: '',
     amount: '',
     source_id: '',
     sub_source_id: null,
-    payment: '', // Default payment
-    account_id: null, // Default account_id
+    payment: '',
+    account_id: null,
+});
+
+// Filter sub sumber berdasarkan source_id yang dipilih
+const filteredSubSources = computed(() => {
+    return props.subSources.filter(sub => sub.source_id === form.source_id);
+});
+
+// Format mata uang
+const formatCurrency = (value) => {
+  if (!value) return '';
+  return new Intl.NumberFormat('id-ID').format(value.replace(/\D/g, ''));
+};
+
+// **Pastikan watchEffect berada setelah form dideklarasikan**
+watchEffect(() => {
+    form.amount = formatCurrency(String(form.amount));
 });
 
 const openModal = (mode, item = null) => {
@@ -269,6 +274,4 @@ const confirmDelete = (id) => {
         });
     }
 };
-
-
 </script>

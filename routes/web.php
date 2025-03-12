@@ -4,6 +4,9 @@ use App\Http\Controllers\Alokasi\AllocationExController;
 use App\Http\Controllers\Alokasi\AllocationInController;
 use App\Http\Controllers\Assets\SavingController;
 use App\Http\Controllers\ExpensesController;
+use App\Http\Controllers\Financial\BillController;
+use App\Http\Controllers\Financial\DebtController;
+use App\Http\Controllers\Financial\LoanController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\MasterData\AccountBankController;
 use App\Http\Controllers\MasterData\CategoryController;
@@ -76,6 +79,9 @@ Route::middleware([
     Route::resource('/income', IncomeController::class);
 
     Route::resource('/savings', SavingController::class);
+    Route::resource('/bills', BillController::class);
+    Route::resource('/debts', DebtController::class);
+    Route::resource('/loans', LoanController::class);
 
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings/{key}', [SettingController::class, 'update'])->name('settings.update');

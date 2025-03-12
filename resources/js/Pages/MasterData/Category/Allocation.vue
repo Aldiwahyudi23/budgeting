@@ -41,7 +41,7 @@
                                     {{ category.name }}
                                 </span>
                             </td>
-                            <td class="px-4 py-2">
+                            <td class="px-4 py-2" >
                                 <TextInput 
                                     v-model="amountInputs[category.id]" 
                                     type="text" 
@@ -50,6 +50,7 @@
                                     @input="handleAmountInput(category.id, $event)"
                                 />
                             </td>
+
                             <td class="px-4 py-2">
                                 <PrimaryButton 
                                     @click="isSaved(category.id) ? resetInput(category.id) : saveInput(category.id)"
@@ -207,25 +208,49 @@ const updateCategoryStatus = (category) => {
     }).put(route('category_active', category.id));
 };
 
-// Format mata uang
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-    }).format(amount);
-};
+// // Format mata uang
+// const formatCurrency = (amount) => {
+//     return new Intl.NumberFormat('id-ID', {
+//         style: 'currency',
+//         currency: 'IDR',
+//     }).format(amount);
+// };
 
-// Handle input amount
-const handleAmountInput = (categoryId, event) => {
-    const value = event.target.value;
-    const numericValue = value.replace(/[^0-9.]/g, ''); // Hapus karakter non-numerik
-    amountInputs.value[categoryId] = numericValue; // Simpan nilai numerik
-    event.target.value = formatCurrency(numericValue); // Tampilkan nilai yang diformat
-};
+// // Handle input amount
+// const handleAmountInput = (categoryId, event) => {
+//     const value = event.target.value;
+//     const numericValue = value.replace(/[^0-9.]/g, ''); // Hapus karakter non-numerik
+//     amountInputs.value[categoryId] = numericValue; // Simpan nilai numerik
+//     event.target.value = formatCurrency(numericValue); // Tampilkan nilai yang diformat
+// };
 
 // Watch perubahan tahun dan bulan
 watch([selectedYear, selectedMonth], ([year, month]) => {
     // Me-refresh halaman saat filter berubah
     router.get(route('allocation-ex.index'), { year, month }, { preserveState: false });
 });
+
+
+// Fungsi untuk format angka dengan pemisah ribuan (menggunakan titik untuk format Indonesia)
+const formatCurrency = (value) => {
+    if (!value) return ""; // Jika tidak ada nilai, kosongkan input
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Tambahkan titik setiap 3 angka
+};
+
+// Fungsi untuk menangani input amount agar tetap dalam format angka ribuan
+const handleAmountInput = (categoryId, event) => {
+    let value = event.target.value.replace(/[^0-9]/g, ""); // Hanya ambil angka
+    amountInputs.value[categoryId] = value; // Simpan angka tanpa format
+    event.target.value = formatCurrency(value); // Format tampilan dengan titik
+};
+
+// Watch untuk memastikan data tetap terformat setelah perubahan
+watch(amountInputs, (newValues) => {
+    Object.keys(newValues).forEach(categoryId => {
+        if (newValues[categoryId]) {
+            amountInputs.value[categoryId] = newValues[categoryId]; // Pastikan tetap angka
+        }
+    });
+}, { deep: true });
+
 </script>

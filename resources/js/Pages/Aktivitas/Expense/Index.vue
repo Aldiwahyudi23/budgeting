@@ -179,7 +179,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, computed, onMounted  } from 'vue';
+import { ref, computed, onMounted , watchEffect } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3'; // Ganti Inertia dengan router
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -234,18 +234,6 @@ const filteredExpenses = computed(() => {
     });
 });
 
-// Filter sub kategori berdasarkan category_id yang dipilih
-const filteredSubCategories = computed(() => {
-    return props.subCategories.filter(sub => sub.category_id === form.category_id);
-});
-
-const formatCurrency = (value) => {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-    }).format(value);
-};
-
 const form = useForm({
     id: '',
     date: '',
@@ -255,6 +243,26 @@ const form = useForm({
     payment: '', // Default payment
     account_id: null, // Default account_id
 });
+
+// Filter sub kategori berdasarkan category_id yang dipilih
+const filteredSubCategories = computed(() => {
+    return props.subCategories.filter(sub => sub.category_id === form.category_id);
+});
+
+// Format mata uang
+const formatCurrency = (value) => {
+  if (!value) return '';
+  return new Intl.NumberFormat('id-ID').format(value.replace(/\D/g, ''));
+};
+
+// **Gunakan watchEffect untuk memastikan form sudah ada sebelum mengamati perubahan**
+watchEffect(() => {
+  if (form) {
+    form.amount = formatCurrency(String(form.amount));
+    form.balance = formatCurrency(String(form.balance));
+  }
+});
+
 
 const openModal = (mode, item = null) => {
     isEditMode.value = mode === 'edit';

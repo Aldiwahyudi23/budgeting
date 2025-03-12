@@ -77,8 +77,8 @@
 
       <!-- Switch untuk Expenses to Savings -->
       <div class="mb-6 p-4 bg-white rounded-lg shadow-md">
-        <label class="block text-gray-700 font-bold mb-2">Expenses to Savings</label>
-        <p class="text-gray-600 mb-2 text-sm">Agar di transaksi Expense, ada category Saving muncul</p>
+        <label class="block text-gray-700 font-bold mb-2">Nabung  ditransaksi Pengeluaran</label>
+        <p class="text-gray-600 mb-2 text-sm">Memindahkan Saldo Utama ke data Tabungan, Kategori tabungan akan muncul ditransaksi pengeluaran</p>
         <div class="flex items-center">
           <input
             type="checkbox"
@@ -92,8 +92,8 @@
 
       <!-- Switch untuk Savings to Expenses -->
       <div class="mb-6 p-4 bg-white rounded-lg shadow-md">
-        <label class="block text-gray-700 font-bold mb-2">Savings to Expenses</label>
-        <p class="text-gray-600 mb-2 text-sm">Agar di transaksi Expense, Saving muncul di Account Bank</p>
+        <label class="block text-gray-700 font-bold mb-2">Tabungan Sumber Pengeluaran </label>
+        <p class="text-gray-600 mb-2 text-sm">Anda dapat mengambil Uang dari Tabungan untuk pengeluaran</p>
         <div class="flex items-center">
           <input
             type="checkbox"
