@@ -6,6 +6,7 @@ use App\Models\Aktivitas\Expenses;
 use App\Http\Controllers\Controller;
 use App\Models\Assets\Saving;
 use App\Models\Financial\Bill;
+use App\Models\Financial\Debt;
 use App\Models\MasterData\AccountBank;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\Debit;
@@ -344,6 +345,21 @@ class ExpensesController extends Controller
                 $savingAccount->update();
             }
         }
+
+        if ($category->name === "Debt (Hutang)") {
+            $debt = Debt::where('sub_category_id', $request->sub_kategori_id)
+                ->where('user_id', Auth::id())
+                ->first();
+
+            if ($debt && $debt->type === "personal") {
+                $debt->update([
+                    'amount' => max(0, $debt->amount - $request->amount),
+                    'paid_amount' => $debt->paid_amount + $request->amount,
+                    'status' => $debt->amount - $request->amount <= 0 ? 'paid' : $debt->status,
+                ]);
+            }
+        }
+
 
         return redirect()->route('expense.index')->with('success', 'Pengeluaran berhasil ditambahkan.');
     }

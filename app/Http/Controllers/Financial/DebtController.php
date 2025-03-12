@@ -105,10 +105,49 @@ class DebtController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Debt $debt)
+
+    // Method untuk mengupdate data debt
+    public function update(Request $request, $id)
     {
-        //
+        // Validasi data yang diterima dari frontend
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'kategori' => 'required|string|max:255',
+            'amount' => 'required|numeric',
+            'note' => 'nullable|string',
+            'type' => 'required|in:personal,installment,business',
+            'due_date' => 'nullable|integer|between:1,31',
+            'tenor_months' => 'nullable|integer',
+            'is_active' => 'boolean',
+            'reminder' => 'boolean',
+            'auto' => 'boolean',
+        ]);
+
+        $debt = Debt::findOrFail($id);
+
+        // Update sub kategori
+        $debt->subCategory->update([
+            'name' => $request->kategori,
+            'description' => $request->note,
+            'is_active' => $request->is_active,
+        ]);
+
+        // Update data Debt
+        $debt->update([
+            'name' => $request->name,
+            'amount' => $request->amount,
+            'note' => $request->note,
+            'type' => $request->type,
+            'due_date' => $request->due_date,
+            'tenor_months' => $request->tenor_months,
+            'reminder' => $request->reminder,
+            'auto' => $request->auto,
+        ]);
+
+        // Redirect ke halaman daftar debt dengan pesan sukses
+        return redirect()->route('debts.index')->with('success', 'Hutang berhasil diperbarui.');
     }
+
 
     /**
      * Remove the specified resource from storage.

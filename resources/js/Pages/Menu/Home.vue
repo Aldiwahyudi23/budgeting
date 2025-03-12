@@ -16,7 +16,7 @@
         </div>
         <div class="ml-3">
           <h2 class="text-base font-semibold">Saldo Bersih</h2>
-          <p class="text-xl font-bold text-purple-600">Rp {{ formatCurrency(totalBalance) }}</p>
+          <p class="text-xl font-bold text-purple-600">{{ formatCurrency(totalBalance) }}</p>
           <p class="text-xs text-gray-500">
             <span class="block">Bank: {{ formatCurrency(totalBankBalance) }}</span>
             <span class="block">Tunai: {{ formatCurrency(totalCashBalance) }}</span>
