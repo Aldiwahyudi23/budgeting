@@ -132,10 +132,10 @@
       <!-- Grafik dan Data Lainnya -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <!-- Grafik Pengeluaran -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
-          <h2 class="text-lg font-semibold mb-4">Grafik Pengeluaran</h2>
-          <div class="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-            <p class="text-gray-500">Grafik akan ditampilkan di sini</p>
+       <div class="bg-white p-6 rounded-lg shadow-md">
+          <h2 class="text-lg font-semibold mb-4">Grafik Pengeluaran vs Pendapatan</h2>
+          <div class="h-64">
+            <canvas ref="chartCanvas"></canvas>
           </div>
         </div>
 
@@ -254,14 +254,19 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'; // Tambahkan import ref & onMounted
 import { Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import Chart from 'chart.js/auto';
+
+const chartCanvas = ref(null);
+let chartInstance = null;
 
 // Terima props dari controller
 const props = defineProps({
   totalSavingAmount: Number,
-  totalIncome:Number,
-  totalExpenses:Number,
+  totalIncome: Number,
+  totalExpenses: Number,
   totalBalance: Number,
   totalBankBalance: Number,
   totalCashBalance: Number,
@@ -270,9 +275,56 @@ const props = defineProps({
 
 // Fungsi untuk memformat mata uang
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat('id-ID').format(value);
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
 };
+
+onMounted(() => {
+  if (chartCanvas.value) {
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(chartCanvas.value, {
+      type: 'bar',
+      data: {
+        labels: ['Pengeluaran', 'Pendapatan'],
+        datasets: [
+          {
+            label: 'Jumlah (Rp)',
+            data: [props.totalExpenses, props.totalIncome],
+            backgroundColor: ['#f87171', '#4ade80'],
+            borderColor: ['#dc2626', '#16a34a'],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: {
+              callback: function (value) {
+                return new Intl.NumberFormat('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                }).format(value);
+              },
+            },
+          },
+        },
+        plugins: {
+          legend: { display: false },
+        },
+      },
+    });
+  }
+});
 </script>
+
+
 <style scoped>
 .menu-item {
   @apply flex flex-col items-center justify-center p-4 rounded-lg shadow-md text-white font-semibold transition-transform transform hover:scale-105;
@@ -281,3 +333,4 @@ const formatCurrency = (value) => {
   @apply w-10 h-10 mb-2;
 }
 </style>
+

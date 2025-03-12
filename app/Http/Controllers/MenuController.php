@@ -147,4 +147,17 @@ class MenuController extends Controller
 
         return Inertia::render('Menu/SetupData');
     }
+
+    public function getFinanceSummary()
+    {
+        $currentMonth = now()->format('Y-m');
+
+        $expenses = Expenses::where('date', 'like', "$currentMonth%")->sum('amount');
+        $income = Income::where('date', 'like', "$currentMonth%")->sum('amount');
+
+        return response()->json([
+            'expenses' => $expenses,
+            'income' => $income
+        ]);
+    }
 }

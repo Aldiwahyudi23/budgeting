@@ -88,6 +88,8 @@ Route::middleware([
     Route::post('/setting/account-bank/saving/{key}', [SettingController::class, 'update_accountBank'])->name('setting_Account.update');
 
     Route::get('/home', [MenuController::class, 'home'])->name('home');
+    Route::get('/finance-summary', [MenuController::class, 'getFinanceSummary']);
+
     Route::get('/aset', [MenuController::class, 'aset'])->name('aset');
     Route::get('/laporan', [MenuController::class, 'laporan'])->name('laporan');
     Route::get('/master-data', [MenuController::class, 'setupData'])->name('setupData');

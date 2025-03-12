@@ -147,7 +147,7 @@
             <optgroup label="Rekening">
               <option v-for="account in accountBanks" :key="account.id" :value="`account_${account.id}`" :disabled="!account.is_active">{{ account.name }} <span v-if="!account.is_active">(Tidak Aktif)</span></option>
             </optgroup>
-            <optgroup v-if="settings.saving_expense" label="Saving (Tabungan)">
+            <optgroup v-if="!isSavingCategory && settings.saving_expense" label="Saving (Tabungan)" >
               <option v-for="subCategory in savingSubCategories" :key="subCategory.id" :value="`subcategory_${subCategory.id}`" :disabled="!subCategory.is_active">{{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span></option>
             </optgroup>
           </select>

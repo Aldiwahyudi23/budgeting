@@ -1,90 +1,127 @@
 <template>
-  <AppLayout title="Kelola Bill">
+  <AppLayout title="Kelola Hutang">
     <div class="p-4">
-  <div class="container mx-auto p-2">
-    <!-- Header & Tombol Tambah -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg shadow-md mb-2">
-      <div>
-        <h1 class="text-xl font-semibold text-gray-800">Kelola Tagihan Bulanan</h1>
-        <p class="text-sm text-gray-600 mt-1">
-          Halaman ini digunakan untuk mengelola dan menambahkan data tagihan bulanan seperti 
-          listrik, internet, dan tagihan rutin lainnya.
-        </p>
-      </div>
-      <PrimaryButton @click="openModal('create')" class="mt-4 sm:mt-0">Tambah Bill (Tagihan)</PrimaryButton>
-    </div>
+      <div class="container mx-auto p-2">
+        <!-- Header & Tombol Tambah -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg shadow-md mb-2">
+          <div>
+            <h1 class="text-xl font-semibold text-gray-800">Kelola Hutang</h1>
+            <p class="text-sm text-gray-600 mt-1">
+              Halaman ini digunakan untuk mengelola dan menambahkan data hutang seperti hutang pribadi, cicilan, atau hutang bisnis.
+            </p>
+          </div>
+          <PrimaryButton @click="openModal('create')" class="mt-4 sm:mt-0">Tambah Hutang</PrimaryButton>
+        </div>
 
-    <!-- Daftar Bill -->
-    <div v-if="bills.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div v-for="bill in bills" :key="bill.id" class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-semibold">{{ bill.sub_category?.name || 'Tanpa Kategori' }}</h2>
-        <p class="text-sm text-gray-500">{{ bill.note }}</p>
-        <p class="text-xl font-bold text-purple-600">{{ formatCurrency(bill.amount) }}</p>
-        <p class="text-sm text-gray-500">Tanggal Batas Akhir : {{ formatDate(bill.date) }}</p>
+        <!-- Daftar Hutang -->
+        <div v-if="debts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div v-for="debt in debts" :key="debt.id" class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-semibold">{{ debt.sub_category?.name || 'Tanpa Kategori' }}</h2>
+              <span 
+                class="px-2 py-1 text-xs font-semibold rounded-lg"
+                :class="debt.sub_category?.is_active ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
+              >
+                {{ debt.sub_category?.is_active ? 'Aktif' : 'Tidak Aktif' }}
+              </span>
+            </div>
+            <p class="text-sm text-gray-500">{{ debt.note }}</p>
+            <p class="text-xl font-bold text-purple-600">{{ formatCurrency(debt.amount) }}</p>
+            <p class="text-sm text-gray-500">Tanggal Jatuh Tempo: {{ formatDate(debt.due_date) }}</p>
 
-        <!-- Pesan Reminder -->
-        <p v-if="bill.reminder" class="text-sm text-green-500">
-          Tagihan ini di set Pengingat dan akan diingatkan selalu.
-        </p>
-        <p v-if="bill.auto" class="text-sm text-blue-500">
-          Setiap tanggal jatuh tempo, tagihan akan otomatis tersimpan ke data.
-        </p>
+            <!-- Pesan Reminder -->
+            <p v-if="debt.reminder" class="text-sm text-green-500">
+              Hutang ini di set Pengingat dan akan diingatkan selalu.
+            </p>
+            <p v-if="debt.auto" class="text-sm text-blue-500">
+              Setiap tanggal jatuh tempo, hutang akan otomatis tersimpan ke data.
+            </p>
 
-        <!-- Tombol Edit & Hapus -->
-        <div class="mt-4 flex space-x-2">
-          <PrimaryButton @click="openModal('edit', bill)">Edit</PrimaryButton>
-          <PrimaryButton class="bg-red-600 hover:bg-red-700" @click="confirmDelete(bill.id)">Hapus</PrimaryButton>
+            <!-- Tombol Edit & Hapus -->
+            <div class="mt-4 flex space-x-2">
+              <PrimaryButton @click="openModal('edit', debt)">Edit</PrimaryButton>
+              <PrimaryButton class="bg-red-600 hover:bg-red-700" @click="confirmDelete(debt.id)">Hapus</PrimaryButton>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pesan Jika Tidak Ada Data -->
+        <div v-else class="text-center bg-white p-2 rounded-lg shadow-md">
+          <p class="text-gray-500 text-sm">Belum ada hutang yang tercatat. Silakan tambahkan hutang baru.</p>
+        </div>
+
+        <!-- Informasi Tambahan -->
+        <div class="mt-4 bg-gray-100 p-2 rounded-lg shadow-md">
+          <h2 class="text-lg font-semibold text-gray-800">Informasi Mengenai Hutang</h2>
+          <p class="text-sm text-gray-600 mt-2">
+            Halaman ini digunakan untuk mencatat hutang yang harus dibayar, baik itu hutang pribadi, cicilan, atau hutang bisnis.
+          </p>
+          <p class="text-sm text-gray-600 mt-2">
+            Untuk pembayaran atau transaksi, silakan lakukan melalui halaman 
+            <strong>Transaksi Pengeluaran (Expenses)</strong>. 
+            Pilih kategori <strong>Hutang</strong> dan tambahkan keterangan sesuai jenis hutang yang dibayarkan.
+          </p>
         </div>
       </div>
-    </div>
 
-    <!-- Pesan Jika Tidak Ada Data -->
-    <div v-else class="text-center bg-white p-2 rounded-lg shadow-md">
-      <p class="text-gray-500 text-sm">Belum ada tagihan yang tercatat. Silakan tambahkan tagihan baru.</p>
-    </div>
-
-    <!-- Informasi Tambahan -->
-    <div class="mt-4 bg-gray-100 p-2 rounded-lg shadow-md">
-      <h2 class="text-lg font-semibold text-gray-800">Informasi Mengenai Tagihan</h2>
-      <p class="text-sm text-gray-600 mt-2">
-        Halaman ini hanya digunakan untuk mencatat kategori tagihan yang harus dibayar setiap bulan, 
-        seperti listrik, internet, atau tagihan lainnya. 
-      </p>
-      <p class="text-sm text-gray-600 mt-2">
-        Untuk pembayaran atau transaksi, silakan lakukan melalui halaman 
-        <strong>Transaksi Pengeluaran (Expenses)</strong>. 
-        Pilih kategori <strong>Bill (Tagihan)</strong> dan tambahkan keterangan sesuai jenis tagihan yang dibayarkan.
-      </p>
-    </div>
-  </div>
-
-
-      <!-- Modal Tambah/Edit Bill -->
-      <CustomModal :show="modalOpen" :title="isEditMode ? 'Edit Bill (Tagihan)' : 'Tambah Bill (Tagihan)'" @close="closeModal">
+      <!-- Modal Tambah/Edit Hutang -->
+      <CustomModal :show="modalOpen" :title="isEditMode ? 'Edit Hutang' : 'Tambah Hutang'" @close="closeModal">
         <template #content>
           <form @submit.prevent="submitForm">
             <div class="mb-4">
-            <InputLabel for="name" value="Nama Bill (Tagihan)" />
-            <TextInput id="name" v-model="form.name" class="block w-full" :disabled="isEditMode" :readonly="isEditMode"/>
-            <InputError :message="form.errors.name" />
-          </div>
-
-            <div class="mb-4">
-              <InputLabel for="note" value="Keterangan" />
-              <TextInput id="note" v-model="form.note" class="block w-full" />
-              <InputError :message="form.errors.note" />
+              <InputLabel for="name" value="Nama Hutang" />
+              <TextInput id="name" v-model="form.name" class="block w-full" :disabled="isEditMode" :readonly="isEditMode"/>
+              <InputError :message="form.errors.name" />
             </div>
 
             <div class="mb-4">
-              <InputLabel for="amount" value="Jumlah Tagihan" />
+              <InputLabel for="kategori" value="Kategori" />
+              <TextInput id="kategori" v-model="form.kategori" class="block w-full" />
+              <InputError :message="form.errors.kategori" />
+            </div>
+
+            <div class="mb-4">
+              <InputLabel for="amount" value="Jumlah Hutang" />
               <TextInput id="amount" type="number" v-model="form.amount" class="block w-full" required />
               <InputError :message="form.errors.amount" />
             </div>
 
             <div class="mb-4">
-              <InputLabel for="date" value="Tanggal Tagihan" />
-              <TextInput id="date" type="date" v-model="form.date" class="block w-full" required />
-              <InputError :message="form.errors.date" />
+              <InputLabel for="note" value="Catatan" />
+              <TextInput id="note" v-model="form.note" class="block w-full" />
+              <InputError :message="form.errors.note" />
+            </div>
+
+            <div class="mb-4">
+              <InputLabel for="type" value="Tipe Hutang" />
+              <select id="type" v-model="form.type" class="block w-full">
+                <option value="personal">Personal</option>
+                <option value="installment">Cicilan</option>
+                <option value="business">Bisnis</option>
+              </select>
+              <InputError :message="form.errors.type" />
+            </div>
+
+            <div v-if="form.type === 'installment'" class="mb-4">
+              <InputLabel for="due_date" value="Tanggal Jatuh Tempo" />
+              <select id="due_date" v-model="form.due_date" class="block w-full">
+                <option v-for="day in 31" :key="day" :value="day">{{ day }}</option>
+              </select>
+              <InputError :message="form.errors.due_date" />
+            </div>
+
+            <div v-if="form.type === 'installment'" class="mb-4">
+              <InputLabel for="tenor_months" value="Tenor (Bulan)" />
+              <TextInput id="tenor_months" type="number" v-model="form.tenor_months" class="block w-full" />
+              <InputError :message="form.errors.tenor_months" />
+            </div>
+
+            <div class="mb-4">
+              <label class="flex items-center">
+                <input type="checkbox" v-model="form.is_active" class="mr-2" />
+                <span>Status</span>  
+              </label>
+              <p class="text-sm text-gray-500">Jika Aktif akan bisa Transaksi</p>
             </div>
 
             <div class="mb-4">
@@ -116,7 +153,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import { useForm, usePage, router } from '@inertiajs/vue3';
 import CustomModal from '@/Components/CustomModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -127,35 +164,56 @@ import InputError from '@/Components/InputError.vue';
 
 // Ambil props dari controller
 const props = defineProps({
-  bills: Array,
+  debts: Array,
 });
 
 // State untuk modal
 const modalOpen = ref(false);
 const isEditMode = ref(false);
 
-// Form untuk tambah/edit Bill
+// Form untuk tambah/edit Debt
 const form = useForm({
   id: null,
   name: '',
+  kategori: '',
+  amount: '',
   note: '',
-  amount: 0,
-  date: '',
+  type: 'personal',
+  due_date: null,
+  tenor_months: null,
+  is_active: false,
   reminder: false,
   auto: false,
 });
 
+// Format mata uang
+const formatCurrency = (value) => {
+  if (!value) return '';
+  return new Intl.NumberFormat('id-ID').format(value.replace(/\D/g, ''));
+};
+
+// Watch perubahan amount
+watch(() => {
+  if (form) {
+    form.amount = formatCurrency(String(form.amount));
+  }
+});
+
 // Buka modal
-const openModal = (mode, bill = null) => {
+const openModal = (mode, debt = null) => {
   isEditMode.value = mode === 'edit';
-  if (isEditMode.value && bill) {
-    form.id = bill.id;
-    form.name = bill.sub_category?.name || '';
-    form.note = bill.note;
-    form.amount = bill.amount;
-    form.date = bill.date;
-    form.reminder = Boolean(bill.reminder);
-    form.auto = Boolean(bill.auto);
+  if (isEditMode.value && debt) {
+    form.id = debt.id;
+    form.name = debt.sub_category?.name || '';
+    form.kategori = debt.sub_category?.name || '';
+    form.note = debt.note;
+    form.amount = formatCurrency(String(debt.amount)); // Format sebelum ditampilkan
+    form.type = debt.type;
+    form.due_date = debt.due_date;
+    form.tenor_months = debt.tenor_months;
+    form.reminder = Boolean(debt.reminder);
+    form.auto = Boolean(debt.auto);
+    form.is_active = Boolean(debt.sub_category?.is_active || false);
   } else {
     form.reset();
   }
@@ -170,12 +228,15 @@ const closeModal = () => {
 
 // Submit form
 const submitForm = () => {
+  // Hapus format sebelum dikirim ke backend
+  form.amount = form.amount.replace(/\D/g, '');
+
   if (isEditMode.value) {
-    form.put(route('bills.update', form.id), {
+    form.put(route('debts.update', form.id), {
       onSuccess: () => closeModal(),
     });
   } else {
-    form.post(route('bills.store'), {
+    form.post(route('debts.store'), {
       onSuccess: () => closeModal(),
     });
   }
@@ -183,31 +244,15 @@ const submitForm = () => {
 
 // Konfirmasi hapus
 const confirmDelete = (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus bill ini?')) {
-    router.delete(route('bills.destroy', id));
+  if (confirm('Apakah Anda yakin ingin menghapus hutang ini?')) {
+    router.delete(route('debts.destroy', id));
   }
 };
 
-// Format mata uang
-const formatCurrency = (value) => {
-  if (!value) return '';
-  return new Intl.NumberFormat('id-ID').format(value.replace(/\D/g, ''));
-};
-
-// Watch perubahan amount & balance, lalu format otomatis
-// **Gunakan watchEffect untuk memastikan form sudah ada sebelum mengamati perubahan**
-watch(() => {
-  if (form) {
-    form.amount = formatCurrency(String(form.amount));
-    form.balance = formatCurrency(String(form.balance));
-  }
-});
 // Format tanggal
 const formatDate = (date) => {
-  // return new Date(date).toLocaleDateString('id-ID');
   if (!date) return "";
-    const parsedDate = new Date(date);
-    return parsedDate.getDate(); // Mengambil hanya tanggal (1-31)
+  const parsedDate = new Date(date);
+  return parsedDate.getDate();
 };
-
 </script>
