@@ -18,8 +18,8 @@
           <h2 class="text-base font-semibold">Saldo Bersih</h2>
           <p class="text-xl font-bold text-purple-600">Rp {{ formatCurrency(totalBalance) }}</p>
           <p class="text-xs text-gray-500">
-            <span class="block">Bank: Rp {{ formatCurrency(totalBankBalance) }}</span>
-            <span class="block">Tunai: Rp {{ formatCurrency(totalCashBalance) }}</span>
+            <span class="block">Bank: {{ formatCurrency(totalBankBalance) }}</span>
+            <span class="block">Tunai: {{ formatCurrency(totalCashBalance) }}</span>
           </p>
         </div>
       </div>
@@ -35,7 +35,7 @@
         </div>
         <div class="ml-3">
           <h2 class="text-base font-semibold">Saldo Tabungan</h2>
-          <p class="text-xl font-bold text-blue-600">Rp{{ formatCurrency(totalSavingAmount) }}</p>
+          <p class="text-xl font-bold text-blue-600">{{ formatCurrency(totalSavingAmount) }}</p>
           <p class="text-xs text-gray-500">Saldo saat ini</p>
         </div>
       </div>
@@ -51,7 +51,7 @@
         </div>
         <div class="ml-3">
           <h2 class="text-base font-semibold">Total Pendapatan</h2>
-          <p class="text-xl font-bold text-green-600">Rp{{ formatCurrency(totalIncome) }}</p>
+          <p class="text-xl font-bold text-green-600">{{ formatCurrency(totalIncome) }}</p>
           <p class="text-xs text-gray-500">Bulan ini</p>
         </div>
       </div>
@@ -67,7 +67,7 @@
         </div>
         <div class="ml-3">
           <h2 class="text-base font-semibold">Total Pengeluaran</h2>
-          <p class="text-xl font-bold text-red-600">Rp{{ formatCurrency(totalExpenses) }}</p>
+          <p class="text-xl font-bold text-red-600">{{ formatCurrency(totalExpenses) }}</p>
           <p class="text-xs text-gray-500">Bulan ini</p>
         </div>
       </div>
@@ -273,10 +273,19 @@ const props = defineProps({
   transactions: Array, // Tambahkan transaksi
 });
 
-// Fungsi untuk memformat mata uang
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+  return new Intl.NumberFormat('id-ID', { 
+    style: 'currency', 
+    currency: 'IDR', 
+    minimumFractionDigits: 0, 
+    maximumFractionDigits: 0 
+  }).format(value);
 };
+
+// Contoh penggunaan
+console.log(formatCurrency(1000000)); // Output: "Rp1.000.000"
+console.log(formatCurrency(50000));   // Output: "Rp50.000"
+
 
 onMounted(() => {
   if (chartCanvas.value) {
