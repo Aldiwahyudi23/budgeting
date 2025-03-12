@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Aktivitas\Expenses;
 use App\Http\Controllers\Controller;
 use App\Models\Assets\Saving;
+use App\Models\Financial\Bill;
 use App\Models\MasterData\AccountBank;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\Debit;
@@ -48,6 +49,9 @@ class ExpensesController extends Controller
             }
         }
 
+        // Ambil data Bills untuk dijadikan referensi amount
+        $bills = Bill::where('user_id', Auth::id())->get();
+
         return inertia('Aktivitas/Expense/Index', [
             'expenses' => $expenses,
             'categories' => $categories,
@@ -55,6 +59,7 @@ class ExpensesController extends Controller
             'accountBanks' => $accountBanks,
             'savingSubCategories' => $savingSubCategories,
             'settings' => $settings,
+            'bills' => $bills, // Kirim data bills ke frontend
             'filters' => [
                 'year' => $year,
                 'month' => $month,

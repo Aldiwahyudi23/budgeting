@@ -87,9 +87,15 @@
                             <InputError :message="form.errors.date" />
                         </div>
     
-                        <div class="mb-4">
+                          <div class="mb-4">
                             <InputLabel for="amount" value="Jumlah" />
-                            <TextInput id="amount" type="number" v-model="form.amount" class="block w-full" />
+                            <TextInput
+                            id="amount"
+                            type="text"
+                            v-model="formattedAmount"
+                            @input="handleAmountInput"
+                            class="block w-full"
+                            />
                             <InputError :message="form.errors.amount" />
                         </div>
     
@@ -212,15 +218,37 @@ const filteredSubSources = computed(() => {
     return props.subSources.filter(sub => sub.source_id === form.source_id);
 });
 
-// Format mata uang
+// Format mata uang untuk tampilan di frontend
 const formatCurrency = (value) => {
   if (!value) return '';
-  return new Intl.NumberFormat('id-ID').format(value.replace(/\D/g, ''));
+  return new Intl.NumberFormat('id-ID').format(value);
 };
 
-// **Pastikan watchEffect berada setelah form dideklarasikan**
+// Hapus tanda pemisah ribuan (titik) untuk mengirim nilai numerik murni ke backend
+const parseCurrency = (value) => {
+  if (!value) return '';
+  return value.replace(/\./g, ''); // Hapus semua titik
+};
+
+// Gunakan computed property untuk mengelola tampilan amount
+const formattedAmount = computed({
+  get: () => {
+    return formatCurrency(form.amount); // Format tampilan
+  },
+  set: (value) => {
+    form.amount = parseCurrency(value); // Simpan nilai numerik murni
+  },
+});
+
+// Handle input dari pengguna
+const handleAmountInput = (event) => {
+  const rawValue = event.target.value.replace(/\./g, ''); // Hapus titik
+  form.amount = rawValue; // Simpan nilai numerik murni
+};
+
+// Jika form.amount diubah dari luar (misalnya, saat edit), pastikan formattedAmount diperbarui
 watchEffect(() => {
-    form.amount = formatCurrency(String(form.amount));
+  formattedAmount.value = formatCurrency(form.amount);
 });
 
 const openModal = (mode, item = null) => {

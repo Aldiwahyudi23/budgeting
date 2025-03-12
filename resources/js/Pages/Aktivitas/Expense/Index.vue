@@ -85,118 +85,106 @@
         </div>
 
         <!-- Modal Create / Edit -->
-        <CustomModal :show="modalOpen" :title="isEditMode ? 'Edit Pengeluaran' : 'Tambah Pengeluaran'" @close="closeModal">
-            <template #content>
-                <form @submit.prevent="submitForm">
-                    <div class="mb-4">
-                        <InputLabel for="date" value="Tanggal" />
-                        <TextInput id="date" type="date" v-model="form.date" class="block w-full" />
-                        <InputError :message="form.errors.date" />
-                    </div>
+<CustomModal :show="modalOpen" :title="isEditMode ? 'Edit Pengeluaran' : 'Tambah Pengeluaran'" @close="closeModal">
+    <template #content>
+      <form @submit.prevent="submitForm">
+        <div class="mb-4">
+          <InputLabel for="date" value="Tanggal" />
+          <TextInput id="date" type="date" v-model="form.date" class="block w-full" />
+          <InputError :message="form.errors.date" />
+        </div>
 
-                    <div class="mb-4">
-                        <InputLabel for="amount" value="Jumlah" />
-                        <TextInput id="amount" type="number" v-model="form.amount" class="block w-full" />
-                        <InputError :message="form.errors.amount" />
-                    </div>
+        <div class="mb-4">
+          <InputLabel for="category_id" value="Kategori" />
+          <select id="category_id" v-model="form.category_id" class="block w-full border rounded-md p-2" @change="onCategoryChange">
+            <option disabled value="">Pilih Kategori</option>
+            <option v-for="category in categories" :key="category.id" :value="category.id" :disabled="!category.is_active">{{ category.name }} <span v-if="!category.is_active">(Tidak Aktif)</span></option>
+          </select>
+          <InputError :message="form.errors.category_id" />
+        </div>
 
-                    <div class="mb-4">
-                        <InputLabel for="category_id" value="Kategori" />
-                        <select id="category_id" v-model="form.category_id" class="block w-full border rounded-md p-2" @change="form.sub_kategori_id = null">
-                            <option disabled value="">Pilih Kategori</option>
-                            <option v-for="category in categories" :key="category.id" :value="category.id" :disabled="!category.is_active">{{ category.name }} <span v-if="!category.is_active">(Tidak Aktif)</span></option>
-                        </select>
-                        <InputError :message="form.errors.category_id" />
-                    </div>
+        <div class="mb-4">
+          <InputLabel for="sub_kategori_id" value="Keterangan" />
+          <select id="sub_kategori_id" v-model="form.sub_kategori_id" class="block w-full border rounded-md p-2" :disabled="!form.category_id" @change="onSubCategoryChange">
+            <option disabled value="">Pilih Keterangan</option>
+            <option v-for="subCategory in filteredSubCategories" :key="subCategory.id" :value="subCategory.id" :disabled="!subCategory.is_active">{{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span></option>
+          </select>
+          <InputError :message="form.errors.sub_kategori_id" />
+        </div>
 
-                    <div class="mb-4">
-                        <InputLabel for="sub_kategori_id" value="Keterangan" />
-                        <select id="sub_kategori_id" v-model="form.sub_kategori_id" class="block w-full border rounded-md p-2" :disabled="!form.category_id">
-                            <option disabled value="">Pilih Keterangan</option>
-                            <option v-for="subCategory in filteredSubCategories" :key="subCategory.id" :value="subCategory.id" :disabled="!subCategory.is_active">{{ subCategory.name }} <span v-if="!subCategory.is_active" >(Tidak Aktif)</span></option>
-                        </select>
-                        <InputError :message="form.errors.sub_kategori_id" />
-                    </div>
-
-                    <div class="mb-4">
-                        <InputLabel for="payment" value="Pembayaran" />
-                        <div class="flex space-x-4 mt-2">
-                            <label class="flex items-center">
-                                <input type="radio" v-model="form.payment" value="Transfer" class="mr-2" @change="form.account_id = ''" />
-                                <span>Transfer</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="radio" v-model="form.payment" value="Tunai" class="mr-2" @change="form.account_id = null" />
-                                <span>Tunai</span>
-                            </label>
-                        </div>
-                        <InputError :message="form.errors.payment" />
-                    </div>
-
-                        <!-- Dropdown Gabungan (AccountBank dan SubCategory) -->
-                    <div class="mb-4" v-if="form.payment === 'Transfer'">
-                    <InputLabel for="account_id" value="Sumber Rekening " />
-                    <select id="account_id" v-model="form.account_id" class="block w-full border rounded-md p-2">
-                        
-                        <!-- Opsi Default -->
-                        <option disabled value="">
-                        Pilih Rekening
-                        <span v-if="settings.saving_expense"> / Dari Saving (Tabungan)</span>
-                        </option>
-                        
-                        <!-- Opsi untuk AccountBank -->
-                        <optgroup label="Rekening">
-                        <option v-for="account in accountBanks" :key="account.id" :value="`account_${account.id}`" :disabled="!account.is_active">
-                            {{ account.name }} <span v-if="!account.is_active">(Tidak Aktif)</span>
-                        </option>
-                        </optgroup>
-
-                        <!-- Opsi untuk SubCategory (Muncul jika saving_expense aktif) -->
-                        <optgroup v-if="settings.saving_expense" label="Saving (Tabungan)">
-                        <option v-for="subCategory in savingSubCategories" 
-                        :key="subCategory.id" 
-                        :value="`subcategory_${subCategory.id}`"
-                        :disabled="!subCategory.is_active">
-                            {{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span>
-                        </option>
-                        </optgroup>
-                    </select>
-                    <InputError :message="form.errors.account_id" />
-                    </div>
+  <div class="mb-4">
+    <InputLabel for="amount" value="Jumlah" />
+    <TextInput
+      id="amount"
+      type="text"
+      v-model="formattedAmount"
+      @input="handleAmountInput"
+      class="block w-full"
+    />
+    <InputError :message="form.errors.amount" />
+  </div>
 
 
-                    <div class="flex justify-end mt-4">
-                        <SecondaryButton type="button" @click="closeModal">Batal</SecondaryButton>
-                        <PrimaryButton class="ml-3" type="submit">{{ isEditMode ? 'Update' : 'Simpan' }}</PrimaryButton>
-                    </div>
-                </form>
-            </template>
-        </CustomModal>
+        <div class="mb-4">
+          <InputLabel for="payment" value="Pembayaran" />
+          <div class="flex space-x-4 mt-2">
+            <label class="flex items-center">
+              <input type="radio" v-model="form.payment" value="Transfer" class="mr-2" @change="form.account_id = ''" />
+              <span>Transfer</span>
+            </label>
+            <label class="flex items-center" v-if="!isSavingCategory">
+              <input type="radio" v-model="form.payment" value="Tunai" class="mr-2" @change="form.account_id = null" />
+              <span>Tunai</span>
+            </label>
+          </div>
+          <InputError :message="form.errors.payment" />
+        </div>
+
+        <div class="mb-4" v-if="form.payment === 'Transfer'">
+          <InputLabel for="account_id" value="Sumber Rekening " />
+          <select id="account_id" v-model="form.account_id" class="block w-full border rounded-md p-2">
+            <option disabled value="">Pilih Rekening</option>
+            <optgroup label="Rekening">
+              <option v-for="account in accountBanks" :key="account.id" :value="`account_${account.id}`" :disabled="!account.is_active">{{ account.name }} <span v-if="!account.is_active">(Tidak Aktif)</span></option>
+            </optgroup>
+            <optgroup v-if="settings.saving_expense" label="Saving (Tabungan)">
+              <option v-for="subCategory in savingSubCategories" :key="subCategory.id" :value="`subcategory_${subCategory.id}`" :disabled="!subCategory.is_active">{{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span></option>
+            </optgroup>
+          </select>
+          <InputError :message="form.errors.account_id" />
+        </div>
+
+        <div class="flex justify-end mt-4">
+          <SecondaryButton type="button" @click="closeModal">Batal</SecondaryButton>
+          <PrimaryButton class="ml-3" type="submit">{{ isEditMode ? 'Update' : 'Simpan' }}</PrimaryButton>
+        </div>
+      </form>
+    </template>
+  </CustomModal>
     </div>
             
      </AppLayout>
 </template>
-
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, computed, onMounted , watchEffect } from 'vue';
-import { useForm, router, usePage } from '@inertiajs/vue3'; // Ganti Inertia dengan router
+import { ref, computed, onMounted, watch, watchEffect } from 'vue'; // Tambahkan watch di sini
+import { useForm, router, usePage } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import CustomModal from '@/Components/CustomModal.vue';
-
 import Swal from 'sweetalert2';
-
 
 const props = defineProps({
     expenses: Array,
     categories: Array,
     subCategories: Array,
     accountBanks: Array,
+    bills: Array, // Data bills dari controller
 });
+
 // Tangkap flash message dari Laravel
 const page = usePage();
 
@@ -250,19 +238,81 @@ const filteredSubCategories = computed(() => {
 });
 
 // Format mata uang
+// const formatCurrency = (value) => {
+//   if (!value) return '';
+//   return new Intl.NumberFormat('id-ID').format(value.replace(/\D/g, ''));
+// };
+
+// // **Gunakan watchEffect untuk memastikan form sudah ada sebelum mengamati perubahan**
+// watchEffect(() => {
+//   if (form) {
+//     form.amount = formatCurrency(String(form.amount));
+//   }
+// });
+// Format mata uang untuk tampilan di frontend
 const formatCurrency = (value) => {
   if (!value) return '';
-  return new Intl.NumberFormat('id-ID').format(value.replace(/\D/g, ''));
+  return new Intl.NumberFormat('id-ID').format(value);
 };
 
-// **Gunakan watchEffect untuk memastikan form sudah ada sebelum mengamati perubahan**
-watchEffect(() => {
-  if (form) {
-    form.amount = formatCurrency(String(form.amount));
-    form.balance = formatCurrency(String(form.balance));
-  }
+// Hapus tanda pemisah ribuan (titik) untuk mengirim nilai numerik murni ke backend
+const parseCurrency = (value) => {
+  if (!value) return '';
+  return value.replace(/\./g, ''); // Hapus semua titik
+};
+
+// Gunakan computed property untuk mengelola tampilan amount
+const formattedAmount = computed({
+  get: () => {
+    return formatCurrency(form.amount); // Format tampilan
+  },
+  set: (value) => {
+    form.amount = parseCurrency(value); // Simpan nilai numerik murni
+  },
 });
 
+// Handle input dari pengguna
+const handleAmountInput = (event) => {
+  const rawValue = event.target.value.replace(/\./g, ''); // Hapus titik
+  form.amount = rawValue; // Simpan nilai numerik murni
+};
+
+// Jika form.amount diubah dari luar (misalnya, saat edit), pastikan formattedAmount diperbarui
+watchEffect(() => {
+  formattedAmount.value = formatCurrency(form.amount);
+});
+
+// Cek apakah kategori yang dipilih adalah "Saving (Tabungan)"
+const isSavingCategory = computed(() => {
+    const selectedCategory = props.categories.find(cat => cat.id === form.category_id);
+    return selectedCategory && selectedCategory.name === 'Saving (Tabungan)';
+});
+
+// Cek apakah kategori yang dipilih adalah "Bills (Tagihan)"
+const isBillsCategory = computed(() => {
+    const selectedCategory = props.categories.find(cat => cat.id === form.category_id);
+    return selectedCategory && selectedCategory.name === 'Bills (Tagihan)';
+});
+
+// Handle perubahan sub kategori
+const onSubCategoryChange = () => {
+    if (isBillsCategory.value && form.sub_kategori_id) {
+        // Ambil data amount dari bills berdasarkan sub_category_id yang dipilih
+        const selectedBill = props.bills.find(bill => bill.sub_category_id === form.sub_kategori_id);
+        if (selectedBill) {
+            form.amount = selectedBill.amount; // Isi amount secara otomatis
+        } else {
+            form.amount = ''; // Jika tidak ditemukan, kosongkan amount
+        }
+    }
+};
+
+// Watch perubahan pada sub_kategori_id
+watch(() => form.sub_kategori_id, (newVal) => {
+    if (newVal && isBillsCategory.value) {
+        onSubCategoryChange();
+    }
+});
 
 const openModal = (mode, item = null) => {
     isEditMode.value = mode === 'edit';
@@ -323,7 +373,6 @@ onMounted(() => {
     console.log(savingSubCategories.value);
   }
 });
-
 </script>
 
 <style scoped>
