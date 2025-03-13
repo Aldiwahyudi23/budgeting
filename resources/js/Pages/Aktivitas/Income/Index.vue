@@ -198,7 +198,7 @@ const isEditMode = ref(false);
 const page = usePage();
 
 // Filter Tahun dan Bulan
-const years = Array.from({ length: 6 }, (_, i) => 2025 + i); // Tahun 2025-2030
+const years = ref(Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i));
 const months = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'

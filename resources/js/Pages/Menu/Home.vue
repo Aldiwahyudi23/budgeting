@@ -2,7 +2,7 @@
   <AppLayout title="Dashboard Keuangan">
     <div class="p-4">
 
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
     <!-- Card Saldo Bersih -->
     <Link
       :href="route('account-bank.index')"

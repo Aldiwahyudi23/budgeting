@@ -300,9 +300,6 @@ const closeModal = () => {
 
 // Submit form
 const submitForm = () => {
-  // Hapus format sebelum dikirim ke backend
-  form.amount = form.amount.replace(/\D/g, '');
-
   if (isEditMode.value) {
     form.put(route('debts.update', form.id), {
       onSuccess: () => closeModal(),

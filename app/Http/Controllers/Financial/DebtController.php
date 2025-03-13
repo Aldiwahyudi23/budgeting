@@ -205,6 +205,11 @@ class DebtController extends Controller
             // Temukan debt berdasarkan ID
             $debt = Debt::findOrFail($id);
 
+            // Pastikan subCategory ada
+            if (!$debt->subCategory) {
+                throw new \Exception('Sub kategori tidak ditemukan.');
+            }
+
             // Update sub kategori
             $debt->subCategory->update([
                 'name' => $request->name,

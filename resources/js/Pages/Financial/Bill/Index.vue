@@ -222,9 +222,6 @@ const closeModal = () => {
 
 // Submit form
 const submitForm = () => {
-  // Hapus format sebelum dikirim ke backend
-  form.amount = form.amount.replace(/\D/g, '');
-  form.balance = form.balance.replace(/\D/g, '');
 
   if (isEditMode.value) {
     form.put(route('bills.update', form.id), {

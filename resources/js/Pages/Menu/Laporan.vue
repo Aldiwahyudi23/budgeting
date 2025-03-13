@@ -1,10 +1,10 @@
 <template>
   <AppLayout title="Laporan Keuangan">
     <div class="p-4">
-      <h1 class="text-2xl font-bold mb-6">Laporan Keuangan</h1>
+      <!-- <h1 class="text-2xl font-bold mb-6">Laporan Keuangan</h1> -->
 
       <!-- Filter Laporan -->
-      <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+      <div class="bg-white p-6 rounded-lg shadow-md mb-6 mt-2">
         <h2 class="text-lg font-semibold mb-4">Filter Laporan</h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Pilih Tahun -->

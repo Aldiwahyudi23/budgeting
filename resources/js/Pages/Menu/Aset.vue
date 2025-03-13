@@ -1,10 +1,10 @@
 <template>
   <AppLayout title="Aset">
     <div class="p-4">
-      <h3 class="text-xl font-bold mb-6">Manajemen Aset</h3>
+      <!-- <h3 class="text-xl font-bold mb-6">Manajemen Aset</h3> -->
 
       <!-- Section Tabungan -->
-      <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+      <div class="bg-white p-6 rounded-lg shadow-md mb-6 mt-2">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-lg font-semibold">Tabungan</h2>
