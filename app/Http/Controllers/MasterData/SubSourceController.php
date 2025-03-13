@@ -61,11 +61,12 @@ class SubSourceController extends Controller
             'description' => 'nullable|string',
             'is_active' => 'boolean',
         ], [
-            'name.required' => "Sub Source Wajib diisi !",
-            'name.max' => "Sub Source Tidak Boleh Lebih Dari 50 !",
+            'name.required' => "Sub Sumber (Source) Wajib diisi !",
+            'name.max' => "Sub Sumber (Source) Tidak Boleh Lebih Dari 50 !",
+            'name.unique' => "Sub Sumber (Source) dengan nama ini sudah ada untuk Sumber (Source) yang dipilih.",
 
-            'source_id.required' => "Nama Source Wajib siisi",
-            'source_id.exists' => "Nama Source sudah ada, silakan gunakan nama yang lain.",
+            'source_id.required' => "Nama Sumber (Source) Wajib diisi !",
+            'source_id.exists' => "Nama Sumber (Source) sudah ada, silakan gunakan nama yang lain.",
         ]);
 
         SubSource::create($request->all());
@@ -110,12 +111,12 @@ class SubSourceController extends Controller
             'description' => 'nullable|string',
             'is_active' => 'boolean',
         ], [
-            'name.required' => "Sub Source Wajib diisi !",
-            'name.max' => "Sub Source Tidak Boleh Lebih Dari 50 Karakter !",
-            'name.unique' => "Sub Source dengan nama ini sudah ada untuk Source yang dipilih.",
+            'name.required' => "Sub Sumber (Source) Wajib diisi !",
+            'name.max' => "Sub Sumber (Source) Tidak Boleh Lebih Dari 50 Karakter !",
+            'name.unique' => "Sub Sumber (Source) dengan nama ini sudah ada untuk Sumber (Source) yang dipilih.",
 
-            'source_id.required' => "Nama Source Wajib diisi !",
-            'source_id.exists' => "Source yang dipilih tidak valid.",
+            'source_id.required' => "Nama Sumber (Source) Wajib diisi !",
+            'source_id.exists' => "Sumber (Source) yang dipilih tidak valid.",
         ]);
 
         // Update data

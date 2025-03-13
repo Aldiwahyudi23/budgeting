@@ -62,7 +62,10 @@
                 <template #content>
                     <form @submit.prevent="submitForm">
                         <div class="mb-4">
-                            <InputLabel for="category_id" value="Kategori" />
+                            <InputLabel for="category_id">
+                            Kategori
+                                <span class="text-red-500 text-sm" >*</span>
+                            </InputLabel>
                             <select id="category_id" v-model="form.category_id" class="block w-full border rounded-md p-2">
                                 <option v-for="category in props.category" 
                                     :key="category.id" 
@@ -76,7 +79,10 @@
                         </div>
     
                         <div class="mb-4">
-                            <InputLabel for="name" value="Nama Sub Kategori" />
+                            <InputLabel for="name">
+                                Nama Sub Kategori
+                                <span class="text-red-500 text-sm" >*</span>
+                            </InputLabel>
                             <TextInput id="name" v-model="form.name" class="block w-full" />
                             <InputError :message="form.errors.name" />
                         </div>

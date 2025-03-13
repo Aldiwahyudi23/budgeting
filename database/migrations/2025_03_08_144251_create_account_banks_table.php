@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Relasi ke tabel users
             $table->string('name'); // Nama kategori
-            $table->longText('description'); //Keterangan 
+            $table->longText('description')->nullable(); //Keterangan 
             $table->boolean('is_active')->default(true); // Kategori aktif atau tidak
             $table->decimal('amount', 10, 0)->nullable(); // Jumlah pengeluaran
             $table->timestamps();

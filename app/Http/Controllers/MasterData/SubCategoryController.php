@@ -63,6 +63,7 @@ class SubCategoryController extends Controller
         ], [
             'name.required' => "Sub Kategori Wajib diisi !",
             'name.max' => "Sub Kategori Tidak Boleh Lebih Dari 50 !",
+            'name.unique' => "Nama Kategori sudah ada, silakan gunakan nama yang lain.",
 
             'category_id.required' => "Nama Kategori Wajib siisi",
             'category_id.exists' => "Nama Kategori sudah ada, silakan gunakan nama yang lain.",
@@ -111,6 +112,7 @@ class SubCategoryController extends Controller
         ], [
             'name.required' => "Sub Kategori Wajib diisi !",
             'name.max' => "Sub Kategori Tidak Boleh Lebih Dari 50 !",
+            'name.unique' => "Nama Sub Kategori sudah ada, silakan gunakan nama yang lain.",
 
             'category_id.required' => "Nama Kategori Wajib siisi",
             'category_id.exists' => "Nama Kategori sudah ada, silakan gunakan nama yang lain.",

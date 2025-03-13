@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('source_id')->constrained('sources')->onDelete('cascade');
             $table->string('name');
-            $table->longText('description'); //Keterangan 
+            $table->longText('description')->nullable(); //Keterangan 
             $table->boolean('is_active')->default(true); // Kategori aktif atau tidak
             $table->timestamps();
         });

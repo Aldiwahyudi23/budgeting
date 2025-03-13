@@ -55,7 +55,10 @@
                 <template #content>
                     <form @submit.prevent="submitForm">
                         <div class="mb-4">
-                            <InputLabel for="name" value="Nama Kategori" />
+                            <InputLabel for="name">
+                            Nama Kategori
+                            <span class="text-red-500 text-sm" >*</span>
+                            </InputLabel>
                             <TextInput id="name" v-model="form.name" class="block w-full" required />
                             <InputError :message="form.errors.name" />
                         </div>

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Relasi ke tabel users
             $table->foreignId('source_id')->constrained('sources')->onDelete('cascade'); // Relasi ke tabel categories
-            $table->decimal('amount', 10, 2); // Jumlah transaksi
+            $table->decimal('amount', 10, 0); // Jumlah transaksi
             $table->string('date', 7); // Kolom untuk menyimpan bulan dan tahun (format YYYY-MM)
             $table->timestamps();
         });

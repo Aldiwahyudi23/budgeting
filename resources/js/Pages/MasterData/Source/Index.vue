@@ -3,7 +3,7 @@
         <div class="p-4">
             <!-- Bagian Header: Tombol Tambah & Pencarian -->
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-4 md:space-y-0">
-                <PrimaryButton @click="openModal('create')">Tambah Source</PrimaryButton>
+                <PrimaryButton @click="openModal('create')">Tambah Sumber (Source)</PrimaryButton>
                 <div class="relative">
                     <TextInput 
                         v-model="searchQuery" 
@@ -47,11 +47,14 @@
             </div>
     
             <!-- Modal Create / Edit -->
-            <CustomModal :show="modalOpen" :title="isEditMode ? 'Edit Source' : 'Tambah Source'" @close="closeModal">
+            <CustomModal :show="modalOpen" :title="isEditMode ? 'Edit Sumber (Source)' : 'Tambah Sumber (Source)'" @close="closeModal">
                 <template #content>
                     <form @submit.prevent="submitForm">
                         <div class="mb-4">
-                            <InputLabel for="name" value="Nama Source" />
+                            <InputLabel for="name">
+                                Nama Sumber (Source)
+                                <span class="text-red-500 text-sm" >*</span>
+                            </InputLabel>
                             <TextInput id="name" v-model="form.name" class="block w-full" />
                             <InputError :message="form.errors.name" />
                         </div>

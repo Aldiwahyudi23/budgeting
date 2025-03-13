@@ -107,7 +107,7 @@ class CategoryController extends Controller
         ]);
 
         // Jika kategori yang diupdate adalah "Saving"
-        if ($category->name === 'Saving') {
+        if ($category->name === 'Saving (Tabungan)') {
             // Cek apakah ada data Setting untuk user yang sedang login
             $settings = Setting::where('user_id', Auth::id())->first();
 

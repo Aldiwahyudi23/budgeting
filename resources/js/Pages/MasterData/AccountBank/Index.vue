@@ -31,8 +31,8 @@
           <thead class="bg-gray-200">
             <tr>
               <th class="px-4 py-2 text-left">No</th>
-              <th class="px-4 py-2 text-left">Nama</th>
-              <th class="px-4 py-2 text-left">Jumlah</th>
+              <th class="px-4 py-2 text-left">Bank</th>
+              <th class="px-4 py-2 text-left">Nominal</th>
               <th class="px-4 py-2 text-center">Status</th>
               <th class="px-4 py-2 text-center">Aksi</th>
             </tr>
@@ -81,8 +81,11 @@
         <template #content>
           <form @submit.prevent="submitForm">
             <div class="mb-4">
-              <InputLabel for="name" value="Nama Rekening Bank" />
-              <TextInput id="name" v-model="form.name" class="block w-full" required />
+              <InputLabel for="name">
+                Nama Rekening Bank
+                <span class="text-red-500 text-sm">*</span> <!-- Bintang merah kecil -->
+              </InputLabel>
+              <TextInput id="name" v-model="form.name" class="block w-full" />
               <InputError :message="form.errors.name" />
             </div>
 
@@ -93,8 +96,14 @@
             </div>
 
             <div class="mb-4">
-              <InputLabel for="amount" value="Jumlah" />
-              <TextInput id="amount" type="number" v-model="form.amount" class="block w-full" />
+              <InputLabel for="amount" value="Nominal" />
+              <TextInput
+            id="amount"
+            type="text"
+            v-model="formattedAmount"
+            @input="handleAmountInput"
+            class="block w-full"
+          />
               <InputError :message="form.errors.amount" />
             </div>
 
@@ -120,8 +129,17 @@
         </div>
 
         <div class="mb-4">
-            <InputLabel for="amount" value="Jumlah Yang Ditarik" />
-            <TextInput id="amount" type="number" v-model="withdrawForm.amount" class="block w-full" required />
+            <InputLabel for="withdrawAmount">
+              Nominal Yang Ditarik
+              <span class="text-red-500 text-sm">*</span>
+            </InputLabel>
+            <TextInput
+            id="withdrawAmount"
+            type="text"
+            v-model="formattedWithdrawAmount"
+            @input="handleWithdrawAmountInput"
+            class="block w-full"
+          />
             <InputError :message="withdrawForm.errors.amount" />
         </div>
 
@@ -144,7 +162,10 @@
   <template #content>
     <form @submit.prevent="submitDepositForm">
       <div class="mb-4">
-        <InputLabel for="bank_id" value="Pilih Bank" />
+        <InputLabel for="bank_id">
+           Pilih Bank Tujuan
+          <span class="text-red-500 text-sm" >*</span>
+          </InputLabel>
         <select id="bank_id" v-model="depositForm.bank_id" class="block w-full border rounded-md p-2">
           <option disabled value="">Pilih Bank</option>
           <option v-for="bank in accountBanks" :key="bank.id" :value="bank.id" :disabled="!bank.is_active" >{{ bank.name }} <span v-if="!bank.is_active">(Tidak Aktif)</span> </option>
@@ -153,8 +174,17 @@
       </div>
 
       <div class="mb-4">
-        <InputLabel for="amount" value="Jumlah" />
-        <TextInput id="amount" type="number" v-model="depositForm.amount" class="block w-full" required />
+        <InputLabel for="depositAmount">
+          Nominal Setor Tunai
+          <span class="text-red-500 text-sm" >*</span>
+          </InputLabel>
+<TextInput
+            id="depositAmount"
+            type="text"
+            v-model="formattedDepositAmount"
+            @input="handleDepositAmountInput"
+            class="block w-full"
+          />
         <InputError :message="depositForm.errors.amount" />
       </div>
 
@@ -175,7 +205,6 @@
     </div>
   </AppLayout>
 </template>
-
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { ref, reactive, computed } from 'vue';
@@ -212,27 +241,43 @@ const filteredAccountBanks = computed(() => {
   );
 });
 
-// Format jumlah uang ke dalam format mata uang
-const formatCurrency = (value) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-  }).format(value || 0);
-};
-
 // Form default (di-reset setiap kali modal dibuka)
 const defaultForm = {
   id: '',
   name: '',
   description: '',
-  amount: 0,
+  amount: '', // Pastikan string kosong
   is_active: false,
-  user_id: usePage().props.auth.user.id, // Ambil user_id dari pengguna yang login
+  user_id: usePage().props.auth.user.id,
 };
 
 // Menggunakan form reaktif
 const form = useForm({ ...defaultForm });
 
+// Fungsi untuk memformat mata uang
+const formatCurrency = (value) => {
+  if (!value && value !== 0) return ''; // Handle null, undefined, atau empty string
+  return new Intl.NumberFormat('id-ID').format(value);
+};
+
+// Fungsi untuk menghapus format mata uang
+const parseCurrency = (value) => {
+  if (!value) return '';
+  return String(value).replace(/\./g, ''); // Pastikan string
+};
+
+// Computed property untuk form utama
+const formattedAmount = computed({
+  get: () => formatCurrency(form.amount),
+  set: (value) => (form.amount = parseCurrency(value)),
+});
+
+const handleAmountInput = (event) => {
+  const rawValue = String(event.target.value).replace(/\./g, ''); // Pastikan string
+  form.amount = rawValue;
+};
+
+// Buka modal Create/Edit
 const openModal = (mode, item = null) => {
   isEditMode.value = mode === 'edit';
   
@@ -240,7 +285,7 @@ const openModal = (mode, item = null) => {
     form.id = item.id;
     form.name = item.name;
     form.description = item.description;
-    form.amount = item.amount || 0;
+    form.amount = item.amount || '';
     form.is_active = Boolean(item.is_active);
   } else {
     form.reset(); // Reset data form ketika membuka modal Create
@@ -249,11 +294,13 @@ const openModal = (mode, item = null) => {
   modalOpen.value = true;
 };
 
+// Tutup modal Create/Edit
 const closeModal = () => {
   form.reset(); // Reset form saat modal ditutup
   modalOpen.value = false;
 };
 
+// Submit form Create/Edit
 const submitForm = () => {
   if (isEditMode.value) {
     form.put(route('account-bank.update', form.id), {
@@ -277,6 +324,7 @@ const submitForm = () => {
   }
 };
 
+// Konfirmasi hapus rekening bank
 const confirmDelete = (id) => {
   if (confirm('Apakah Anda yakin ingin menghapus rekening bank ini?')) {
     form.delete(route('account-bank.destroy', id), {
@@ -293,10 +341,20 @@ const confirmDelete = (id) => {
 
 // Form untuk tarik tunai
 const withdrawForm = useForm({
-  amount: 0,
+  amount: '', // Pastikan string kosong
   note: '',
   bank_id: null,
 });
+
+const formattedWithdrawAmount = computed({
+  get: () => formatCurrency(withdrawForm.amount),
+  set: (value) => (withdrawForm.amount = parseCurrency(value)),
+});
+
+const handleWithdrawAmountInput = (event) => {
+  const rawValue = String(event.target.value).replace(/\./g, ''); // Pastikan string
+  withdrawForm.amount = rawValue;
+};
 
 // Buka modal tarik tunai
 const openWithdrawModal = (bank) => {
@@ -319,18 +377,28 @@ const submitWithdrawForm = () => {
       // Perbarui saldo cash dan rekening bank
       const index = accountBanks.findIndex((b) => b.id === selectedBank.value.id);
       if (index !== -1) {
-        accountBanks[index].amount -= withdrawForm.amount;
+        accountBanks[index].amount -= parseFloat(withdrawForm.amount);
       }
-         },
+    },
   });
 };
 
 // Form untuk setor tunai
 const depositForm = useForm({
-  amount: 0,
+  amount: '', // Pastikan string kosong
   note: '',
   bank_id: null,
 });
+
+const formattedDepositAmount = computed({
+  get: () => formatCurrency(depositForm.amount),
+  set: (value) => (depositForm.amount = parseCurrency(value)),
+});
+
+const handleDepositAmountInput = (event) => {
+  const rawValue = String(event.target.value).replace(/\./g, ''); // Pastikan string
+  depositForm.amount = rawValue;
+};
 
 // Buka modal setor tunai
 const openDepositModal = () => {
@@ -348,15 +416,14 @@ const submitDepositForm = () => {
   depositForm.post(route('account-bank.deposit'), {
     onSuccess: () => {
       closeDepositModal();
-// Perbarui saldo cash dan rekening bank
+      // Perbarui saldo cash dan rekening bank
       const index = accountBanks.findIndex((b) => b.id === depositForm.bank_id);
       if (index !== -1) {
-        accountBanks[index].amount += depositForm.amount;
+        accountBanks[index].amount += parseFloat(depositForm.amount);
       }
     },
   });
 };
-
 
 // Fungsi untuk mengarahkan ke halaman mutasi
 const goToMutation = (id) => {

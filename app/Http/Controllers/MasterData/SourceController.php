@@ -52,9 +52,9 @@ class SourceController extends Controller
             ],
             'is_active' => 'boolean',
         ], [
-            'name.required' => "Source Wajib diisi !",
-            'name.max' => "Source Tidak Boleh Lebih Dari 50 !",
-            'name.unique' => "Nama Source sudah ada, silakan gunakan nama yang lain.",
+            'name.required' => "Nama Sumber (Source) Wajib diisi !",
+            'name.max' => "Nama Sumber (Source) Tidak Boleh Lebih Dari 50 !",
+            'name.unique' => "Nama Sumber (Source) sudah ada, silakan gunakan nama yang lain.",
         ]);
 
         Source::create([
@@ -99,9 +99,9 @@ class SourceController extends Controller
             'description' => 'nullable|string',
             'is_active' => 'boolean',
         ], [
-            'name.required' => "Source Wajib diisi !",
-            'name.max' => "Source Tidak Boleh Lebih Dari 50 !",
-            'name.unique' => "Nama Source sudah ada, silakan gunakan nama yang lain.",
+            'name.required' => "Nama Sumber (Source) Wajib diisi !",
+            'name.max' => "Nama Sumber (Source) Tidak Boleh Lebih Dari 50 !",
+            'name.unique' => "Nama Sumber (Source) sudah ada, silakan gunakan nama yang lain.",
         ]);
 
         $source->update([

@@ -3,13 +3,13 @@
         <div class="p-4">
              <!-- Tombol Tambah Data -->
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-4 md:space-y-0">
-                <PrimaryButton @click="openModal('create')">Tambah Model</PrimaryButton>
+                <PrimaryButton @click="openModal('create')">Tambah Sumber (Source)</PrimaryButton>
     
                 <!-- Filter & Search -->
                 <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 w-full md:w-auto">
                     <!-- Filter Kategori -->
                     <select v-model="selectedSource" class="border rounded px-4 py-2 w-full md:w-48">
-                        <option value="">Semua Source</option>
+                        <option value="">Semua Sumber (Source)</option>
                         <option v-for="source in props.sources" 
                         :key="source.id" 
                         :value="source.id">
@@ -19,7 +19,7 @@
     
                     <!-- Kolom Pencarian -->
                      <div class="relative">
-                         <TextInput v-model="searchQuery" placeholder="Cari Model..." class="w-full md:w-48 pl-10 pr-4 py-2 border" />
+                         <TextInput v-model="searchQuery" placeholder="Cari Sumber (Source)..." class="w-full md:w-48 pl-10 pr-4 py-2 border" />
                           <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A8.5 8.5 0 1010.5 19a8.5 8.5 0 006.15-2.85z" />
                          </svg>
@@ -33,7 +33,7 @@
                     <thead class="bg-gray-200">
                         <tr>
                             <th class="px-4 py-2 text-left">No</th>
-                            <th class="px-4 py-2 text-left">Source</th>
+                            <th class="px-4 py-2 text-left">Sumber</th>
                             <th class="px-4 py-2 text-left">Nama</th>
                             <!-- <th class="px-4 py-2 text-left">Deskripsi</th> -->
                             <th class="px-4 py-2 text-center">Status</th>
@@ -64,7 +64,10 @@
                 <template #content>
                     <form @submit.prevent="submitForm">
                         <div class="mb-4">
-                            <InputLabel for="source_id" value="Source" />
+                            <InputLabel for="source_id" >
+                                Sumber (Source)
+                                <span class="text-red-500 tsxt-m">*</span>
+                            </InputLabel>
                             <select id="source_id" v-model="form.source_id" class="block w-full border rounded-md p-2">
                                 <option v-for="source in sources" 
                                 :key="source.id" 
@@ -77,7 +80,10 @@
                         </div>
     
                         <div class="mb-4">
-                            <InputLabel for="name" value="Nama Sub Source" />
+                            <InputLabel for="name" >
+                            Nama Sub Sumber (Source)
+                            <span class="text-red-500 tsxt-m">*</span>
+                            </InputLabel>
                             <TextInput id="name" v-model="form.name" class="block w-full" />
                             <InputError :message="form.errors.name" />
                         </div>

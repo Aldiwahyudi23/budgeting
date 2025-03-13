@@ -58,7 +58,7 @@
                     <tr>
                         <th class="px-4 py-2 text-left">No</th>
                         <th class="px-4 py-2 text-left">Tanggal</th>
-                        <th class="px-4 py-2 text-left">Jumlah</th>
+                        <th class="px-4 py-2 text-left">Nominal</th>
                         <th class="px-4 py-2 text-left">Kategori</th>
                         <th class="px-4 py-2 text-left">Keterangan</th>
                         <th class="px-4 py-2 text-left">Pembayaran</th>
@@ -89,13 +89,19 @@
     <template #content>
       <form @submit.prevent="submitForm">
         <div class="mb-4">
-          <InputLabel for="date" value="Tanggal" />
+          <InputLabel for="date">
+          Tanggal
+          <span class="text-red-500 text-sm ">*</span>
+          </InputLabel>
           <TextInput id="date" type="date" v-model="form.date" class="block w-full" />
           <InputError :message="form.errors.date" />
         </div>
 
         <div class="mb-4">
-          <InputLabel for="category_id" value="Kategori" />
+          <InputLabel for="category_id" >
+          Kategori
+          <span class="text-red-500 text-sm ">*</span>
+          </InputLabel>
           <select id="category_id" v-model="form.category_id" class="block w-full border rounded-md p-2" @change="onCategoryChange">
             <option disabled value="">Pilih Kategori</option>
             <option v-for="category in categories" :key="category.id" :value="category.id" :disabled="!category.is_active">{{ category.name }} <span v-if="!category.is_active">(Tidak Aktif)</span></option>
@@ -104,7 +110,10 @@
         </div>
 
         <div class="mb-4">
-          <InputLabel for="sub_kategori_id" value="Keterangan" />
+          <InputLabel for="sub_kategori_id" >
+          Keterangan
+          <span class="text-red-500 text-sm ">*</span>
+          </InputLabel>
           <select id="sub_kategori_id" v-model="form.sub_kategori_id" class="block w-full border rounded-md p-2" :disabled="!form.category_id" @change="onSubCategoryChange">
             <option disabled value="">Pilih Keterangan</option>
             <option v-for="subCategory in filteredSubCategories" :key="subCategory.id" :value="subCategory.id" :disabled="!subCategory.is_active">{{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span></option>
@@ -112,21 +121,27 @@
           <InputError :message="form.errors.sub_kategori_id" />
         </div>
 
-  <div class="mb-4">
-    <InputLabel for="amount" value="Jumlah" />
-    <TextInput
-      id="amount"
-      type="text"
-      v-model="formattedAmount"
-      @input="handleAmountInput"
-      class="block w-full"
-    />
-    <InputError :message="form.errors.amount" />
-  </div>
+        <div class="mb-4">
+          <InputLabel for="amount" >
+                Nominal
+                <span class="text-red-500 text-sm ">*</span>
+                </InputLabel>
+          <TextInput
+            id="amount"
+            type="text"
+            v-model="formattedAmount"
+            @input="handleAmountInput"
+            class="block w-full"
+          />
+          <InputError :message="form.errors.amount" />
+        </div>
 
 
         <div class="mb-4">
-          <InputLabel for="payment" value="Pembayaran" />
+          <InputLabel for="payment" >
+          Pembayaran
+          <span class="text-red-500 text-sm ">*</span>
+          </InputLabel>
           <div class="flex space-x-4 mt-2">
             <label class="flex items-center">
               <input type="radio" v-model="form.payment" value="Transfer" class="mr-2" @change="form.account_id = ''" />
@@ -141,8 +156,11 @@
         </div>
 
         <div class="mb-4" v-if="form.payment === 'Transfer'">
-          <InputLabel for="account_id" value="Sumber Rekening " />
-          <select id="account_id" v-model="form.account_id" class="block w-full border rounded-md p-2">
+          <InputLabel for="account_id" >
+          Sumber Rekening
+          <span class="text-red-500 text-sm ">*</span>
+          </InputLabel>
+          <select id="account_id" v-model="form.account_id" class="block w-full border rounded-md p-2" required>
             <option disabled value="">Pilih Rekening</option>
             <optgroup label="Rekening">
               <option v-for="account in accountBanks" :key="account.id" :value="`account_${account.id}`" :disabled="!account.is_active">{{ account.name }} <span v-if="!account.is_active">(Tidak Aktif)</span></option>
@@ -167,7 +185,7 @@
 </template>
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, computed, onMounted, watch, watchEffect } from 'vue'; // Tambahkan watch di sini
+import { ref, computed, onMounted, watch, watchEffect } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -182,41 +200,38 @@ const props = defineProps({
     categories: Array,
     subCategories: Array,
     accountBanks: Array,
-    bills: Array, // Data bills dari controller
+    bills: Array, // Data tagihan
+    debts: Array, // Data hutang (baru ditambahkan)
 });
 
-// Tangkap flash message dari Laravel
 const page = usePage();
-
 const searchQuery = ref('');
 const modalOpen = ref(false);
 const isEditMode = ref(false);
-
-// Ambil data settings dari props
 const settings = ref(usePage().props.settings);
-
-// Ambil data savingSubCategories dari props
 const savingSubCategories = ref(usePage().props.savingSubCategories);
 
 // Filter Tahun dan Bulan
-const years = Array.from({ length: 6 }, (_, i) => 2025 + i); // Tahun 2025-2030
+const years = Array.from({ length: 6 }, (_, i) => 2025 + i);
 const months = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ];
 
-const selectedYear = ref(new Date().getFullYear()); // Default: Tahun saat ini
-const selectedMonth = ref(new Date().getMonth() + 1); // Default: Bulan saat ini
+const selectedYear = ref(new Date().getFullYear());
+const selectedMonth = ref(new Date().getMonth() + 1);
 
-// Filter data berdasarkan tahun, bulan, dan pencarian
+// **Perbaikan filter bulan agar data muncul**
 const filteredExpenses = computed(() => {
     return props.expenses.filter(item => {
         const date = new Date(item.date);
         const matchesYear = date.getFullYear() === selectedYear.value;
         const matchesMonth = date.getMonth() + 1 === selectedMonth.value;
-        const matchesSearch = item.category.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                              item.sub_category?.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                              item.payment.toLowerCase().includes(searchQuery.value.toLowerCase());
+        const matchesSearch = searchQuery.value
+            ? item.category.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+              item.sub_category?.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+              item.payment.toLowerCase().includes(searchQuery.value.toLowerCase())
+            : true; 
 
         return matchesYear && matchesMonth && matchesSearch;
     });
@@ -228,58 +243,31 @@ const form = useForm({
     amount: '',
     category_id: '',
     sub_kategori_id: null,
-    payment: '', // Default payment
-    account_id: null, // Default account_id
+    payment: '',
+    account_id: null,
 });
 
-// Filter sub kategori berdasarkan category_id yang dipilih
 const filteredSubCategories = computed(() => {
     return props.subCategories.filter(sub => sub.category_id === form.category_id);
 });
 
-// Format mata uang
-// const formatCurrency = (value) => {
-//   if (!value) return '';
-//   return new Intl.NumberFormat('id-ID').format(value.replace(/\D/g, ''));
-// };
-
-// // **Gunakan watchEffect untuk memastikan form sudah ada sebelum mengamati perubahan**
-// watchEffect(() => {
-//   if (form) {
-//     form.amount = formatCurrency(String(form.amount));
-//   }
-// });
-// Format mata uang untuk tampilan di frontend
 const formatCurrency = (value) => {
-  if (!value) return '';
-  return new Intl.NumberFormat('id-ID').format(value);
+    if (!value) return '';
+    return new Intl.NumberFormat('id-ID').format(value);
 };
 
-// Hapus tanda pemisah ribuan (titik) untuk mengirim nilai numerik murni ke backend
 const parseCurrency = (value) => {
-  if (!value) return '';
-  return value.replace(/\./g, ''); // Hapus semua titik
+    if (!value) return '';
+    return value.replace(/\./g, '');
 };
 
-// Gunakan computed property untuk mengelola tampilan amount
 const formattedAmount = computed({
-  get: () => {
-    return formatCurrency(form.amount); // Format tampilan
-  },
-  set: (value) => {
-    form.amount = parseCurrency(value); // Simpan nilai numerik murni
-  },
+    get: () => formatCurrency(form.amount),
+    set: (value) => { form.amount = parseCurrency(value); }
 });
 
-// Handle input dari pengguna
-const handleAmountInput = (event) => {
-  const rawValue = event.target.value.replace(/\./g, ''); // Hapus titik
-  form.amount = rawValue; // Simpan nilai numerik murni
-};
-
-// Jika form.amount diubah dari luar (misalnya, saat edit), pastikan formattedAmount diperbarui
 watchEffect(() => {
-  formattedAmount.value = formatCurrency(form.amount);
+    formattedAmount.value = formatCurrency(form.amount);
 });
 
 // Cek apakah kategori yang dipilih adalah "Saving (Tabungan)"
@@ -288,28 +276,34 @@ const isSavingCategory = computed(() => {
     return selectedCategory && selectedCategory.name === 'Saving (Tabungan)';
 });
 
-// Cek apakah kategori yang dipilih adalah "Bills (Tagihan)"
+// **Cek apakah kategori adalah "Bills (Tagihan)"**
 const isBillsCategory = computed(() => {
     const selectedCategory = props.categories.find(cat => cat.id === form.category_id);
     return selectedCategory && selectedCategory.name === 'Bills (Tagihan)';
 });
 
-// Handle perubahan sub kategori
+// **Cek apakah kategori adalah "Debt (Hutang)"**
+const isDebtCategory = computed(() => {
+    const selectedCategory = props.categories.find(cat => cat.id === form.category_id);
+    return selectedCategory && selectedCategory.name === 'Debt (Hutang)';
+});
+
+// **Handle perubahan sub kategori untuk Bills dan Debt**
 const onSubCategoryChange = () => {
     if (isBillsCategory.value && form.sub_kategori_id) {
-        // Ambil data amount dari bills berdasarkan sub_category_id yang dipilih
         const selectedBill = props.bills.find(bill => bill.sub_category_id === form.sub_kategori_id);
-        if (selectedBill) {
-            form.amount = selectedBill.amount; // Isi amount secara otomatis
-        } else {
-            form.amount = ''; // Jika tidak ditemukan, kosongkan amount
-        }
+        form.amount = selectedBill ? selectedBill.amount : '';
+    }
+
+    if (isDebtCategory.value && form.sub_kategori_id) {
+        const selectedDebt = props.debts.find(debt => debt.sub_category_id === form.sub_kategori_id);
+        form.amount = selectedDebt ? selectedDebt.amount : '';
     }
 };
 
-// Watch perubahan pada sub_kategori_id
+// **Perubahan dipantau dengan watch**
 watch(() => form.sub_kategori_id, (newVal) => {
-    if (newVal && isBillsCategory.value) {
+    if (newVal) {
         onSubCategoryChange();
     }
 });
@@ -339,13 +333,9 @@ const closeModal = () => {
 
 const submitForm = () => {
     if (isEditMode.value) {
-        form.put(route('expense.update', form.id), {
-            onSuccess: () => closeModal(),
-        });
+        form.put(route('expense.update', form.id), { onSuccess: () => closeModal() });
     } else {
-        form.post(route('expense.store'), {
-            onSuccess: () => closeModal(),
-        });
+        form.post(route('expense.store'), { onSuccess: () => closeModal() });
     }
 };
 
@@ -353,27 +343,23 @@ const confirmDelete = (id) => {
     if (confirm('Apakah Anda yakin ingin menghapus pengeluaran ini?')) {
         router.delete(route('expense.destroy', id), {
             onSuccess: () => {
-                // Hapus dari daftar tanpa reload
                 const index = props.expenses.findIndex((e) => e.id === id);
                 if (index !== -1) {
                     props.expenses.splice(index, 1);
                 }
             },
-            onError: (errors) => {
-                alert('Gagal menghapus pengeluaran. Silakan coba lagi.');
-            },
+            onError: () => { alert('Gagal menghapus pengeluaran. Silakan coba lagi.'); },
         });
     }
 };
 
-// Jika saving_expense aktif, ambil data SubCategory berdasarkan kategori Saving
 onMounted(() => {
-  if (settings.value.saving_expense) {
-    // Pastikan data savingSubCategories sudah diambil dari controller
-    console.log(savingSubCategories.value);
-  }
+    if (settings.value.saving_expense) {
+        console.log(savingSubCategories.value);
+    }
 });
 </script>
+
 
 <style scoped>
 /* Style untuk alert */

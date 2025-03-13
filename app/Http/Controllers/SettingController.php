@@ -100,7 +100,7 @@ class SettingController extends Controller
             'account_id' => 'required|exists:account_banks,id',
         ], [
             'account_id.required' => "Pilihan bank harus diisi",
-            'account_id.exists' => "Bank yang dipilih tidak valid",
+            'account_id.exists' => "Bank yang dipilih tidak valid, Tabungan Belum Aktif",
         ]);
 
         // Ambil data setting berdasarkan ID
