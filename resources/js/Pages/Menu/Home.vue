@@ -149,7 +149,7 @@
         class="flex items-center justify-between py-1 border-b"
       >
         <div>
-          <p class="text-xs font-semibold">{{ transaction.type }}</p>
+          <p class="text-xs font-semibold">{{ transaction.category }} {{ transaction.description }}</p>
           <p class="text-[10px] text-gray-500">
             {{ new Date(transaction.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}
           </p>
@@ -160,7 +160,7 @@
       </li>
     </ul>
     <Link
-      :href="route('expense.index')"
+      :href="route('laporan')"
       class="text-blue-500 hover:text-blue-700 text-[12px] mt-3 block"
     >
       Lihat Semua Transaksi →

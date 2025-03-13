@@ -169,119 +169,112 @@ class AccountBankController extends Controller
         return redirect()->back()->with('success', 'Data Berhasil Dihapus');
     }
 
-    public function mutation($id)
+    public function mutationn($id)
     {
 
 
-        // Ambil data dari tabel Income
-        $income = Income::where('user_id', Auth::id())
-            ->select(
-                'id',
-                'amount',
-                'date',
-                'source_id AS category_id',
-                'sub_source_id AS sub_kategori_id',
-                DB::raw("'income' AS type")
-            );
+        // // Ambil data dari tabel Income
+        // $income = Income::where('user_id', Auth::id())
+        //     ->select(
+        //         'id',
+        //         'amount',
+        //         'date',
+        //         'source_id AS category_id',
+        //         'sub_source_id AS sub_kategori_id',
+        //         DB::raw("'income' AS type")
+        //     );
 
         // Ambil data dari tabel Expenses dan gabungkan dengan Income
-        $transactions = Expenses::where('user_id', Auth::id())
-            ->select(
-                'id',
-                'amount',
-                'date',
-                'category_id',
-                'sub_kategori_id',
-                DB::raw("'expense' AS type")
-            )
-            ->union($income) // Gabungkan data Income & Expenses
-            ->orderBy('date', 'desc') // Urutkan berdasarkan tanggal terbaru
+        // $transactions = Expenses::where('user_id', Auth::id())
+        //     ->select(
+        //         'id',
+        //         'amount',
+        //         'date',
+        //         'category_id',
+        //         'sub_kategori_id',
+        //         DB::raw("'expense' AS type")
+        //     )
+        //     ->union($income) // Gabungkan data Income & Expenses
+        //     ->orderBy('date', 'desc') // Urutkan berdasarkan tanggal terbaru
+        //     ->where('account_id', $id)
+        //     ->get();
+
+        $expenses = Expenses::where('user_id', Auth::id())
+            // ->whereMonth('date', $currentMonth)
+            // ->whereYear('date', $currentYear)
             ->where('account_id', $id)
             ->get();
+        // Ambil data pendapatan
+        $incomes = Income::where('user_id', Auth::id())
+            // ->whereMonth('date', $currentMonth)
+            // ->whereYear('date', $currentYear)
+            ->where('account_id', $id)
+            ->get();
+        // Gabungkan transaksi
+        $transactions = collect()
+            ->merge($expenses->map(fn($expense) => [
+                'id' => $expense->id,
+                'date' => $expense->date,
+                'category' => $expense->category->name,
+                'description' => $expense->subCategory->name,
+                'amount' => $expense->amount,
+                'type' => 'expense',
+            ]))
+            ->merge($incomes->map(fn($income) => [
+                'id' => $income->id,
+                'date' => $income->date,
+                'category' => $income->source->name,
+                'description' => $income->subSource->name,
+                'amount' => $income->amount,
+                'type' => 'income',
+            ]))
+            ->sortByDesc('date')
+            ->values(); // Reset keys
 
         return inertia('MasterData/AccountBank/Mutation', [
             'transactions' => $transactions,
         ]);
     }
 
-    // public function withdraw(Request $request)
-    // {
-    //     $request->validate([
-    //         'amount' => ['required', 'numeric', 'gt:0'],
-    //         'note' => ['nullable', 'string'],
-    //         'bank_id' => ['required', 'exists:account_banks,id'],
-    //     ], [
-    //         'amount.required' => 'Nominal harus diisi.',
-    //         'amount.numeric' => 'Nominal harus berupa angka.',
-    //         'amount.gt' => 'Nominal tidak boleh kurang dari 0.',
+    public function mutation($id)
+    {
+        $user = Auth::user();
 
-    //         'note.string' => 'Catatan harus berupa teks.',
+        // Ambil data pengeluaran
+        $expenses = Expenses::where('user_id', $user->id)
+            ->where('account_id', $id)
+            ->get();
 
-    //         'bank_id.required' => 'Bank harus dipilih.',
-    //         'bank_id.exists' => 'Bank yang dipilih tidak valid.',
-    //     ]);
+        // Ambil data pendapatan
+        $incomes = Income::where('user_id', $user->id)
+            ->where('account_id', $id)
+            ->get();
 
-    //     if ($request->bank_id) {
-    //         // Ambil data settings untuk user yang sedang login
-    //         $settings = Setting::where('user_id', Auth::id())->first();
-    //         if ($request->bank_id == $settings->account_id) {
-    //             // Ambil ID kategori "Saving"
-    //             $savingCategory = Category::where('user_id', Auth::id())
-    //                 ->where('name', 'Saving (Tabungan)')->first();
+        // Gabungkan transaksi
+        $transactions = collect()
+            ->merge($expenses->map(fn($expense) => [
+                'id' => $expense->id,
+                'date' => $expense->date,
+                'category' => $expense->category->name,
+                'description' => $expense->subCategory->name,
+                'amount' => $expense->amount,
+                'type' => 'expense',
+            ]))
+            ->merge($incomes->map(fn($income) => [
+                'id' => $income->id,
+                'date' => $income->date,
+                'category' => $income->source->name,
+                'description' => $income->subSource->name,
+                'amount' => $income->amount,
+                'type' => 'income',
+            ]))
+            ->sortByDesc('date')
+            ->values(); // Reset keys
 
-    //             // Ambil semua sub_category berdasarkan category_id yang telah ditemukan
-    //             $subCategories = SubCategory::where('category_id', $savingCategory->id)
-    //                 ->pluck('id'); // Mengambil hanya ID dalam bentuk array
-
-    //             // Ambil transaksi terbaru untuk setiap sub_category_id
-    //             $latestTransactions = Saving::whereIn('sub_category_id', $subCategories)
-    //                 ->where('user_id', Auth::id())
-    //                 ->orderBy('sub_category_id') // Urutkan berdasarkan sub_category_id
-    //                 ->orderByDesc('created_at') // Urutkan terbaru berdasarkan waktu
-    //                 ->get()
-    //                 ->unique('sub_category_id'); // Ambil hanya satu transaksi terbaru dari setiap sub_category_id
-
-    //             // Hitung total amount dari transaksi terbaru masing-masing sub_category
-    //             $totalBalance = $latestTransactions->sum('balance');
-
-    //             $saldo = AccountBank::find($request->bank_id);
-    //             // Cek apakah id account sama dengan account_id di setting jika sama maka saldo yang bisa di pakai adalah sisa dari pengurangan saldo saving
-
-    //             $saldoBank = $saldo->amount - $totalBalance;
-    //             if ($request->amount > $saldoBank) {
-    //                 $Rp = number_format($saldoBank);
-    //                 return back()->with('error', "Saldo $saldo->name yang Free (Rp. $Rp) Tidak cukup, karena Saldo yang ada adalah saldo Saving (Tabungan).");
-    //             }
-    //         }
-    //     }
-
-    //     // Ambil data rekening bank
-    //     $bank = AccountBank::find($request->bank_id);
-
-    //     // Cek apakah saldo mencukupi
-    //     if ($bank->amount < $request->amount) {
-    //         return back()->with('error', 'Saldo tidak mencukupi.');
-    //     }
-
-    //     // Kurangi saldo rekening bank
-    //     $bank->amount -= $request->amount;
-    //     $bank->save();
-
-    //     // Tambahkan data ke tabel Debit
-    //     $latestDebit = Debit::where('user_id', Auth::id())->latest()->first();
-    //     $balance = $latestDebit ? $latestDebit->balance : 0;
-
-    //     Debit::create([
-    //         'user_id' => Auth::id(),
-    //         'type' => 'withdraw',
-    //         'note' => $request->note ?? 'Tarik Tunai dari ' . $bank->name,
-    //         'amount' => $request->amount,
-    //         'balance' => $balance + $request->amount,
-    //     ]);
-
-    //     return back()->with('success', 'Tarik tunai berhasil.');
-    // }
-
+        return inertia('MasterData/AccountBank/Mutation', [
+            'transactions' => $transactions,
+        ]);
+    }
     public function withdraw(Request $request)
     {
         // Validasi input dengan pesan error dalam bahasa Indonesia

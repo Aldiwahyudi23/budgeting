@@ -66,31 +66,59 @@ class MenuController extends Controller
         // --------------------------------Transaksi baru- Belum berfungsi---------------------
 
 
-        // Ambil data dari tabel Income
-        $income = Income::where('user_id', Auth::id())
-            ->select(
-                'id',
-                'amount',
-                'date',
-                'source_id AS category_id',
-                'sub_source_id AS sub_kategori_id',
-                DB::raw("'income' AS type")
-            );
+        // // Ambil data dari tabel Income
+        // $income = Income::where('user_id', Auth::id())
+        //     ->select(
+        //         'id',
+        //         'amount',
+        //         'date',
+        //         'source_id AS category_id',
+        //         'sub_source_id AS sub_kategori_id',
+        //         DB::raw("'income' AS type")
+        //     );
 
-        // Ambil data dari tabel Expenses dan gabungkan dengan Income
-        $transactions = Expenses::where('user_id', Auth::id())
-            ->select(
-                'id',
-                'amount',
-                'date',
-                'category_id',
-                'sub_kategori_id',
-                DB::raw("'expense' AS type")
-            )
-            ->union($income) // Gabungkan data Income & Expenses
-            ->orderBy('date', 'desc') // Urutkan berdasarkan tanggal terbaru
-            ->take(5) // Ambil 5 transaksi terbaru
+        // // Ambil data dari tabel Expenses dan gabungkan dengan Income
+        // $transactions = Expenses::where('user_id', Auth::id())
+        //     ->select(
+        //         'id',
+        //         'amount',
+        //         'date',
+        //         'category_id',
+        //         'sub_kategori_id',
+        //         DB::raw("'expense' AS type")
+        //     )
+        //     ->union($income) // Gabungkan data Income & Expenses
+
+        $expenses = Expenses::where('user_id', Auth::id())
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
             ->get();
+        // Ambil data pendapatan
+        $incomes = Income::where('user_id', Auth::id())
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->get();
+        // Gabungkan transaksi
+        $transactions = collect()
+            ->merge($expenses->map(fn($expense) => [
+                'id' => $expense->id,
+                'date' => $expense->date,
+                'category' => $expense->category->name,
+                'description' => $expense->subCategory->name,
+                'amount' => $expense->amount,
+                'type' => 'expense',
+            ]))
+            ->merge($incomes->map(fn($income) => [
+                'id' => $income->id,
+                'date' => $income->date,
+                'category' => $income->source->name,
+                'description' => $income->subSource->name,
+                'amount' => $income->amount,
+                'type' => 'income',
+            ]))
+            ->sortByDesc('date')
+            ->take(5) // Ambil 5 transaksi terbaru
+        ;
         // DD($transactions);
         // --------------------------Untuk jumlah saldo------------------------
         // Hitung total saldo dari AccountBank
@@ -202,7 +230,7 @@ class MenuController extends Controller
                 'amount' => $income->amount,
                 'type' => 'income',
             ]))
-            ->sortBy('date');
+            ->sortByDesc('date');
 
         // dd([
         //     'total_expenses' => $totalExpenses,

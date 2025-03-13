@@ -100,37 +100,51 @@
       </div>
 
       <!-- Grafik Laporan -->
-      <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-lg font-semibold mb-4">Grafik Laporan</h2>
-        <div class="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-          <p class="text-gray-500">Grafik akan ditampilkan di sini</p>
-        </div>
-      </div>
 
-      <!-- Tabel Detail Laporan -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-semibold mb-4">Detail Laporan</h2>
-        <table class="min-w-full">
-          <thead>
-            <tr>
-              <th class="text-left py-2">Tanggal</th>
-              <th class="text-left py-2">Kategori</th>
-              <th class="text-left py-2">Deskripsi</th>
-              <th class="text-right py-2">Jumlah</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in reportData.transactions" :key="item.id" class="border-b">
-              <td class="py-2">{{ formatDate(item.date) }}</td>
-              <td class="py-2">{{ item.category }}</td>
-              <td class="py-2">{{ item.description }}</td>
-              <td class="text-right" :class="item.type === 'income' ? 'text-green-500' : 'text-red-500'">
-                {{ item.type === 'income' ? '+' : '-' }} {{ formatCurrency(item.amount) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <h2 class="text-lg font-semibold mb-4">Grafik Laporan</h2>
+    <div class="h-64">
+      <canvas ref="chart"></canvas>
+    </div>
+  </div>
+
+<div class="bg-white p-6 rounded-lg shadow-md">
+  <h2 class="text-lg font-semibold mb-4">Detail Laporan</h2>
+
+  <!-- Input Pencarian -->
+  <div class="mb-4">
+    <input
+      v-model="searchQuery"
+      type="text"
+      placeholder="Cari transaksi..."
+      class="w-full p-2 border rounded-md"
+    />
+  </div>
+
+  <!-- Tabel Responsif -->
+  <div class="responsive-table">
+    <table class="min-w-full">
+      <thead>
+        <tr>
+          <th class="text-left py-2">Tanggal</th>
+          <th class="text-left py-2">Kategori</th>
+          <th class="text-left py-2">Deskripsi</th>
+          <th class="text-right py-2">Jumlah</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in filteredTransactions" :key="item.id" class="border-b">
+          <td class="py-2">{{ formatDate(item.date) }}</td>
+          <td class="py-2">{{ item.category }}</td>
+          <td class="py-2">{{ item.description }}</td>
+          <td class="text-right" :class="item.type === 'income' ? 'text-green-500' : 'text-red-500'">
+            {{ item.type === 'income' ? '+' : '-' }} {{ formatCurrency(item.amount) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
     </div>
   </AppLayout>
 </template>
@@ -139,6 +153,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { ref, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
+import Chart from 'chart.js/auto';
 
 // Data untuk filter
 const selectedYear = ref(new Date().getFullYear());
@@ -149,6 +164,8 @@ const months = ref([
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ]);
 
+const searchQuery = ref('');
+
 // Data laporan
 const reportData = ref({
   total_expenses: '',
@@ -156,6 +173,58 @@ const reportData = ref({
   total_savings: '',
   net_balance: '',
   transactions: [],
+});
+
+// Filter transaksi berdasarkan pencarian
+const filteredTransactions = computed(() => {
+  if (!searchQuery.value) return reportData.value.transactions;
+  return reportData.value.transactions.filter(item =>
+    item.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+// Referensi ke elemen canvas
+const chart = ref(null);
+
+// Buat grafik saat komponen dimuat
+onMounted(() => {
+  const ctx = chart.value.getContext('2d');
+
+  new Chart(ctx, {
+    type: 'pie', // Jenis grafik (pie chart)
+    data: {
+      labels: ['Pengeluaran', 'Pendapatan'], // Label untuk setiap bagian
+      datasets: [
+        {
+          data: [reportData.value.total_expenses, reportData.value.total_income], // Data untuk grafik
+          backgroundColor: ['#EF4444', '#10B981'], // Warna untuk setiap bagian
+          hoverBackgroundColor: ['#DC2626', '#059669'], // Warna saat dihover
+        },
+      ],
+    },
+    options: {
+      responsive: true, // Grafik responsif
+      maintainAspectRatio: false, // Tidak mempertahankan rasio aspek
+      plugins: {
+        legend: {
+          position: 'bottom', // Posisi legenda
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              return `${label}: ${new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+              }).format(value)}`;
+            },
+          },
+        },
+      },
+    },
+  });
 });
 
 // Format mata uang
@@ -189,3 +258,25 @@ onMounted(() => {
   fetchReport();
 });
 </script>
+
+<style>
+/* Tambahkan scroll horizontal pada tabel di layar kecil */
+@media (max-width: 640px) {
+  .responsive-table {
+    overflow-x: auto;
+    display: block;
+    white-space: nowrap;
+  }
+}
+
+/* Pastikan container grafik memiliki ukuran yang cukup */
+.h-64 {
+  height: 16rem; /* 16 * 0.25rem = 4rem */
+}
+
+/* Pastikan canvas mengisi container-nya */
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+</style>

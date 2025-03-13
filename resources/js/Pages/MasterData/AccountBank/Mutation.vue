@@ -100,27 +100,18 @@ const nextPage = () => {
           <thead>
             <tr class="bg-gray-200">
               <th class="p-2 text-left">Tanggal</th>
-              <th class="p-2 text-left">Tipe</th>
-              <th class="p-2 text-left">Nominal</th>
               <th class="p-2 text-left">Keterangan</th>
+              <th class="p-2 text-left">Nominal</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="transaction in filteredTransactions" :key="transaction.id" class="border-b">
               <td class="p-2">{{ formatDate(transaction.date) }}</td>
               <td class="p-2">
-                <span
-                  :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'"
-                  class="font-semibold"
-                >
-                  {{ transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}
-                </span>
+                  {{ transaction.category }} {{ transaction.description }}
               </td>
               <td class="p-2 font-bold" :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
                 {{ formatCurrency(transaction.amount) }}
-              </td>
-              <td class="p-2">
-                {{ getDescription(transaction) }}
               </td>
             </tr>
           </tbody>
