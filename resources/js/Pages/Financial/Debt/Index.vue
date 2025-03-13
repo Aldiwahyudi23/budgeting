@@ -46,14 +46,14 @@
               class="flex justify-between items-center py-2 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
               @click="openModal('detail', debt)"
             >
-              <span class="text-gray-800">{{ debt.sub_category?.name || 'Tanpa Kategori' }} ({{ debt.type }})</span>
-              <span class="text-purple-600 font-semibold">Rp. {{ formatCurrency(debt.amount) }}</span>
+              <span class="text-gray-800">{{ debt.sub_category?.name || 'Tanpa Kategori' }} ({{ debt.type == 'installment' ? 'Kredit/Cicilan' : debt.type }})</span>
+              <span class="text-purple-600 font-semibold">Rp {{ formatCurrency(debt.amount) }}</span>
             </div>
           </div>
         </div>
 
             <!-- Daftar Hutang Aktif -->
-        <div v-if="activeDebts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        <div v-if="activeDebts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           <div v-for="debt in activeDebts" :key="debt.id" class="bg-white p-6 rounded-lg shadow-md">
             <div class="flex items-center justify-between">
               <h2 class="text-lg font-semibold">{{ debt.sub_category?.name || 'Tanpa Kategori' }}  
@@ -67,7 +67,7 @@
                 </span>
             </div>
             <p class="text-sm text-gray-500">{{ debt.note }}</p>
-            <p class="text-xl font-bold text-purple-600">Rp. {{ formatCurrency(debt.amount) }}</p>
+            <p class="text-xl font-bold text-purple-600">Rp {{ formatCurrency(debt.amount) }}</p>
 
             <!-- Tampilkan paid_amount jika tipe personal -->
             <p v-if="debt.type === 'personal'" class="text-sm text-gray-500">
@@ -98,7 +98,7 @@
         </div>
 
         <!-- Pesan Jika Tidak Ada Data -->
-        <div v-else class="text-center bg-white p-2 rounded-lg shadow-md">
+        <div v-else class="text-center bg-white p-2 rounded-lg shadow-md mt-4">
           <p class="text-gray-500 text-sm">Belum ada hutang yang tercatat. Silakan tambahkan hutang baru.</p>
         </div>
 

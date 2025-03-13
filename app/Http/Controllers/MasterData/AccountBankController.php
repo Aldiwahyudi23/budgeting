@@ -4,6 +4,8 @@ namespace App\Http\Controllers\MasterData;
 
 use App\Models\MasterData\AccountBank;
 use App\Http\Controllers\Controller;
+use App\Models\Aktivitas\Expenses;
+use App\Models\Aktivitas\Income;
 use App\Models\Assets\Saving;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\Debit;
@@ -167,23 +169,38 @@ class AccountBankController extends Controller
         return redirect()->back()->with('success', 'Data Berhasil Dihapus');
     }
 
-    public function mutation(AccountBank $accountBank)
+    public function mutation($id)
     {
-        // Pastikan rekening bank milik pengguna yang sedang login
-        if ($accountBank->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
 
-        // Ambil data log activity untuk rekening bank ini
-        $activities = Activity::where('subject_type', AccountBank::class)
-            ->where('subject_id', $accountBank->id)
-            ->whereJsonContains('properties->attributes', ['amount' => $accountBank->amount])
-            ->latest()
+
+        // Ambil data dari tabel Income
+        $income = Income::where('user_id', Auth::id())
+            ->select(
+                'id',
+                'amount',
+                'date',
+                'source_id AS category_id',
+                'sub_source_id AS sub_kategori_id',
+                DB::raw("'income' AS type")
+            );
+
+        // Ambil data dari tabel Expenses dan gabungkan dengan Income
+        $transactions = Expenses::where('user_id', Auth::id())
+            ->select(
+                'id',
+                'amount',
+                'date',
+                'category_id',
+                'sub_kategori_id',
+                DB::raw("'expense' AS type")
+            )
+            ->union($income) // Gabungkan data Income & Expenses
+            ->orderBy('date', 'desc') // Urutkan berdasarkan tanggal terbaru
+            ->where('account_id', $id)
             ->get();
 
-        return inertia('AccountBank/Mutation', [
-            'accountBank' => $accountBank,
-            'activities' => $activities,
+        return inertia('MasterData/AccountBank/Mutation', [
+            'transactions' => $transactions,
         ]);
     }
 

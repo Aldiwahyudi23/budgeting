@@ -6,32 +6,26 @@
       <!-- Filter Laporan -->
       <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-lg font-semibold mb-4">Filter Laporan</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Pilih Periode -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- Pilih Tahun -->
           <div>
-            <label class="block text-sm font-medium text-gray-700">Periode</label>
-            <select class="mt-1 block w-full border rounded-md p-2">
-              <option>Bulan Ini</option>
-              <option>3 Bulan Terakhir</option>
-              <option>6 Bulan Terakhir</option>
-              <option>Tahun Ini</option>
+            <label class="block text-sm font-medium text-gray-700">Tahun</label>
+            <select v-model="selectedYear" class="mt-1 block w-full border rounded-md p-2">
+              <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
             </select>
           </div>
 
-          <!-- Pilih Jenis Laporan -->
+          <!-- Pilih Bulan -->
           <div>
-            <label class="block text-sm font-medium text-gray-700">Jenis Laporan</label>
-            <select class="mt-1 block w-full border rounded-md p-2">
-              <option>Pengeluaran</option>
-              <option>Pendapatan</option>
-              <option>Tabungan</option>
-              <option>Saldo Bersih</option>
+            <label class="block text-sm font-medium text-gray-700">Bulan</label>
+            <select v-model="selectedMonth" class="mt-1 block w-full border rounded-md p-2">
+              <option v-for="(month, index) in months" :key="index" :value="index + 1">{{ month }}</option>
             </select>
           </div>
 
           <!-- Tombol Filter -->
           <div class="flex items-end">
-            <button class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+            <button @click="fetchReport" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
               Terapkan Filter
             </button>
           </div>
@@ -50,8 +44,8 @@
             </div>
             <div class="ml-4">
               <h2 class="text-lg font-semibold">Total Pengeluaran</h2>
-              <p class="text-2xl font-bold text-red-600">Rp 8.000.000</p>
-              <p class="text-sm text-gray-500">Bulan Ini</p>
+              <p class="text-2xl font-bold text-red-600">{{ formatCurrency(reportData.total_expenses) }}</p>
+              <p class="text-sm text-gray-500">{{ selectedMonthName }} {{ selectedYear }}</p>
             </div>
           </div>
         </div>
@@ -66,8 +60,8 @@
             </div>
             <div class="ml-4">
               <h2 class="text-lg font-semibold">Total Pendapatan</h2>
-              <p class="text-2xl font-bold text-green-600">Rp 15.000.000</p>
-              <p class="text-sm text-gray-500">Bulan Ini</p>
+              <p class="text-2xl font-bold text-green-600">{{ formatCurrency(reportData.total_income) }}</p>
+              <p class="text-sm text-gray-500">{{ selectedMonthName }} {{ selectedYear }}</p>
             </div>
           </div>
         </div>
@@ -82,7 +76,7 @@
             </div>
             <div class="ml-4">
               <h2 class="text-lg font-semibold">Saldo Tabungan</h2>
-              <p class="text-2xl font-bold text-blue-600">Rp 25.000.000</p>
+              <p class="text-2xl font-bold text-blue-600">{{ formatCurrency(reportData.total_savings) }}</p>
               <p class="text-sm text-gray-500">Saldo Saat Ini</p>
             </div>
           </div>
@@ -98,8 +92,8 @@
             </div>
             <div class="ml-4">
               <h2 class="text-lg font-semibold">Saldo Bersih</h2>
-              <p class="text-2xl font-bold text-purple-600">Rp 17.000.000</p>
-              <p class="text-sm text-gray-500">Bulan Ini</p>
+              <p class="text-2xl font-bold text-purple-600">{{ formatCurrency(reportData.net_balance) }}</p>
+              <p class="text-sm text-gray-500">{{ selectedMonthName }} {{ selectedYear }}</p>
             </div>
           </div>
         </div>
@@ -126,23 +120,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="border-b">
-              <td class="py-2">12 Oktober 2023</td>
-              <td class="py-2">Belanja</td>
-              <td class="py-2">Belanja Bulanan</td>
-              <td class="text-right text-red-500">- Rp 1.500.000</td>
-            </tr>
-            <tr class="border-b">
-              <td class="py-2">10 Oktober 2023</td>
-              <td class="py-2">Pendapatan</td>
-              <td class="py-2">Gaji Bulanan</td>
-              <td class="text-right text-green-500">+ Rp 5.000.000</td>
-            </tr>
-            <tr class="border-b">
-              <td class="py-2">8 Oktober 2023</td>
-              <td class="py-2">Tagihan</td>
-              <td class="py-2">Bayar Listrik</td>
-              <td class="text-right text-red-500">- Rp 500.000</td>
+            <tr v-for="item in reportData.transactions" :key="item.id" class="border-b">
+              <td class="py-2">{{ formatDate(item.date) }}</td>
+              <td class="py-2">{{ item.category }}</td>
+              <td class="py-2">{{ item.description }}</td>
+              <td class="text-right" :class="item.type === 'income' ? 'text-green-500' : 'text-red-500'">
+                {{ item.type === 'income' ? '+' : '-' }} {{ formatCurrency(item.amount) }}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -153,4 +137,55 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { ref, computed, onMounted } from 'vue';
+import { router } from '@inertiajs/vue3';
+
+// Data untuk filter
+const selectedYear = ref(new Date().getFullYear());
+const selectedMonth = ref(new Date().getMonth() + 1);
+const years = ref(Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i));
+const months = ref([
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+]);
+
+// Data laporan
+const reportData = ref({
+  total_expenses: '',
+  total_income: '',
+  total_savings: '',
+  net_balance: '',
+  transactions: [],
+});
+
+// Format mata uang
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+};
+
+// Format tanggal
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('id-ID');
+};
+
+// Ambil nama bulan yang dipilih
+const selectedMonthName = computed(() => months.value[selectedMonth.value - 1]);
+
+// Ambil data laporan
+const fetchReport = async () => {
+  router.get(route('laporan'), {
+    year: selectedYear.value,
+    month: selectedMonth.value,
+  }, {
+    preserveState: true,
+    onSuccess: (data) => {
+      reportData.value = data.props.report;
+    },
+  });
+};
+
+// Ambil data laporan saat komponen dimuat
+onMounted(() => {
+  fetchReport();
+});
 </script>

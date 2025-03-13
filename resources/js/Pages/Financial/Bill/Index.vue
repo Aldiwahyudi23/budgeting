@@ -27,7 +27,7 @@
             </span>
           </div>
         <p class="text-sm text-gray-500">{{ bill.note }}</p>
-        <p class="text-xl font-bold text-purple-600">{{ formatCurrency(bill.amount) }}</p>
+        <p class="text-xl font-bold text-purple-600">Rp {{ formatCurrency(bill.amount) }}</p>
         <p class="text-sm text-gray-500">Tanggal Batas Akhir : {{ formatDate(bill.date) }}</p>
 
         <!-- Pesan Reminder -->

@@ -139,39 +139,33 @@
           </div>
         </div>
 
-        <!-- Daftar Transaksi Terbaru -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
-          <h2 class="text-lg font-semibold mb-4">Transaksi Terbaru</h2>
-          <ul>
-            <li class="flex items-center justify-between py-2 border-b">
-              <div>
-                <p class="font-semibold">Belanja Bulanan</p>
-                <p class="text-sm text-gray-500">12 Oktober 2023</p>
-              </div>
-              <p class="text-red-500">- Rp 1.500.000</p>
-            </li>
-            <li class="flex items-center justify-between py-2 border-b">
-              <div>
-                <p class="font-semibold">Gaji Bulanan</p>
-                <p class="text-sm text-gray-500">10 Oktober 2023</p>
-              </div>
-              <p class="text-green-500">+ Rp 5.000.000</p>
-            </li>
-            <li class="flex items-center justify-between py-2 border-b">
-              <div>
-                <p class="font-semibold">Bayar Listrik</p>
-                <p class="text-sm text-gray-500">8 Oktober 2023</p>
-              </div>
-              <p class="text-red-500">- Rp 500.000</p>
-            </li>
-          </ul>
-          <Link
-            :href="route('expense.index')"
-            class="text-blue-500 hover:text-blue-700 text-sm mt-4 block"
-          >
-            Lihat Semua Transaksi →
-          </Link>
+ <!-- Daftar Transaksi Terbaru -->
+  <div class="bg-white p-4 rounded-lg shadow-md">
+    <h2 class="text-sm font-semibold mb-3">Transaksi Terbaru</h2>
+    <ul>
+      <li
+        v-for="transaction in props.latestTransactions"
+        :key="transaction.id"
+        class="flex items-center justify-between py-1 border-b"
+      >
+        <div>
+          <p class="text-xs font-semibold">{{ transaction.type }}</p>
+          <p class="text-[10px] text-gray-500">
+            {{ new Date(transaction.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}
+          </p>
         </div>
+        <p :class="transaction.type === 'income' ? 'text-green-500' : 'text-red-500'">
+          {{ transaction.type === 'income' ? '+' : '-' }} Rp {{ transaction.amount.toLocaleString() }}
+        </p>
+      </li>
+    </ul>
+    <Link
+      :href="route('expense.index')"
+      class="text-blue-500 hover:text-blue-700 text-[12px] mt-3 block"
+    >
+      Lihat Semua Transaksi →
+    </Link>
+  </div>
       </div>
 
       
@@ -271,6 +265,7 @@ const props = defineProps({
   totalBankBalance: Number,
   totalCashBalance: Number,
   transactions: Array, // Tambahkan transaksi
+  latestTransactions: Array
 });
 
 const formatCurrency = (value) => {
@@ -341,5 +336,5 @@ onMounted(() => {
 .icon {
   @apply w-10 h-10 mb-2;
 }
-</style>
 
+</style>
