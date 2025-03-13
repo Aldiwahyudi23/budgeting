@@ -85,62 +85,62 @@
         </div>
 
         <!-- Modal Create / Edit -->
-<!-- Modal Create / Edit -->
-  <CustomModal :show="modalOpen" :title="isEditMode ? 'Edit Pengeluaran' : 'Tambah Pengeluaran'" @close="closeModal">
+<CustomModal :show="modalOpen" :title="isEditMode ? 'Edit Pengeluaran' : 'Tambah Pengeluaran'" @close="closeModal">
     <template #content>
       <form @submit.prevent="submitForm">
-        <!-- Form fields -->
         <div class="mb-4">
           <InputLabel for="date">
-            Tanggal
-            <span class="text-red-500 text-sm">*</span>
+          Tanggal
+          <span class="text-red-500 text-sm ">*</span>
           </InputLabel>
           <TextInput id="date" type="date" v-model="form.date" class="block w-full" />
           <InputError :message="form.errors.date" />
         </div>
 
         <div class="mb-4">
-          <InputLabel for="category_id">
-            Kategori
-            <span class="text-red-500 text-sm">*</span>
+          <InputLabel for="category_id" >
+          Kategori
+          <span class="text-red-500 text-sm ">*</span>
           </InputLabel>
           <select id="category_id" v-model="form.category_id" class="block w-full border rounded-md p-2" @change="onCategoryChange">
             <option disabled value="">Pilih Kategori</option>
-            <option v-for="category in categories" :key="category.id" :value="category.id" :disabled="!category.is_active">
-              {{ category.name }} <span v-if="!category.is_active">(Tidak Aktif)</span>
-            </option>
+            <option v-for="category in categories" :key="category.id" :value="category.id" :disabled="!category.is_active">{{ category.name }} <span v-if="!category.is_active">(Tidak Aktif)</span></option>
           </select>
           <InputError :message="form.errors.category_id" />
         </div>
 
         <div class="mb-4">
-          <InputLabel for="sub_kategori_id">
-            Keterangan
-            <span class="text-red-500 text-sm">*</span>
+          <InputLabel for="sub_kategori_id" >
+          Keterangan
+          <span class="text-red-500 text-sm ">*</span>
           </InputLabel>
           <select id="sub_kategori_id" v-model="form.sub_kategori_id" class="block w-full border rounded-md p-2" :disabled="!form.category_id" @change="onSubCategoryChange">
             <option disabled value="">Pilih Keterangan</option>
-            <option v-for="subCategory in filteredSubCategories" :key="subCategory.id" :value="subCategory.id" :disabled="!subCategory.is_active">
-              {{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span>
-            </option>
+            <option v-for="subCategory in filteredSubCategories" :key="subCategory.id" :value="subCategory.id" :disabled="!subCategory.is_active">{{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span></option>
           </select>
           <InputError :message="form.errors.sub_kategori_id" />
         </div>
 
         <div class="mb-4">
-          <InputLabel for="amount">
-            Nominal
-            <span class="text-red-500 text-sm">*</span>
-          </InputLabel>
-          <TextInput id="amount" type="text" v-model="formattedAmount" @input="handleAmountInput" class="block w-full" />
+          <InputLabel for="amount" >
+                Nominal
+                <span class="text-red-500 text-sm ">*</span>
+                </InputLabel>
+          <TextInput
+            id="amount"
+            type="text"
+            v-model="formattedAmount"
+            @input="handleAmountInput"
+            class="block w-full"
+          />
           <InputError :message="form.errors.amount" />
         </div>
 
-        <!-- Payment and Account fields -->
+
         <div class="mb-4">
-          <InputLabel for="payment">
-            Pembayaran
-            <span class="text-red-500 text-sm">*</span>
+          <InputLabel for="payment" >
+          Pembayaran
+          <span class="text-red-500 text-sm ">*</span>
           </InputLabel>
           <div class="flex space-x-4 mt-2">
             <label class="flex items-center">
@@ -156,21 +156,17 @@
         </div>
 
         <div class="mb-4" v-if="form.payment === 'Transfer'">
-          <InputLabel for="account_id">
-            Sumber Rekening
-            <span class="text-red-500 text-sm">*</span>
+          <InputLabel for="account_id" >
+          Sumber Rekening
+          <span class="text-red-500 text-sm ">*</span>
           </InputLabel>
           <select id="account_id" v-model="form.account_id" class="block w-full border rounded-md p-2" required>
             <option disabled value="">Pilih Rekening</option>
             <optgroup label="Rekening">
-              <option v-for="account in accountBanks" :key="account.id" :value="`account_${account.id}`" :disabled="!account.is_active">
-                {{ account.name }} <span v-if="!account.is_active">(Tidak Aktif)</span>
-              </option>
+              <option v-for="account in accountBanks" :key="account.id" :value="`account_${account.id}`" :disabled="!account.is_active">{{ account.name }} <span v-if="!account.is_active">(Tidak Aktif)</span></option>
             </optgroup>
-            <optgroup v-if="!isSavingCategory && settings.saving_expense" label="Saving (Tabungan)">
-              <option v-for="subCategory in savingSubCategories" :key="subCategory.id" :value="`subcategory_${subCategory.id}`" :disabled="!subCategory.is_active">
-                {{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span>
-              </option>
+            <optgroup v-if="!isSavingCategory && settings.saving_expense" label="Saving (Tabungan)" >
+              <option v-for="subCategory in savingSubCategories" :key="subCategory.id" :value="`subcategory_${subCategory.id}`" :disabled="!subCategory.is_active">{{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span></option>
             </optgroup>
           </select>
           <InputError :message="form.errors.account_id" />
@@ -252,7 +248,7 @@ const form = useForm({
 });
 
 const filteredSubCategories = computed(() => {
-  return props.subCategories.filter(sub => sub.category_id === form.category_id);
+    return props.subCategories.filter(sub => sub.category_id === form.category_id);
 });
 
 const formatCurrency = (value) => {
@@ -274,57 +270,60 @@ watchEffect(() => {
     formattedAmount.value = formatCurrency(form.amount);
 });
 
+// Cek apakah kategori yang dipilih adalah "Saving (Tabungan)"
 const isSavingCategory = computed(() => {
-  const selectedCategory = props.categories.find(cat => cat.id === form.category_id);
-  return selectedCategory && selectedCategory.name === 'Saving (Tabungan)';
+    const selectedCategory = props.categories.find(cat => cat.id === form.category_id);
+    return selectedCategory && selectedCategory.name === 'Saving (Tabungan)';
 });
 
+// **Cek apakah kategori adalah "Bills (Tagihan)"**
 const isBillsCategory = computed(() => {
-  const selectedCategory = props.categories.find(cat => cat.id === form.category_id);
-  return selectedCategory && selectedCategory.name === 'Bills (Tagihan)';
+    const selectedCategory = props.categories.find(cat => cat.id === form.category_id);
+    return selectedCategory && selectedCategory.name === 'Bills (Tagihan)';
 });
 
+// **Cek apakah kategori adalah "Debt (Hutang)"**
 const isDebtCategory = computed(() => {
-  const selectedCategory = props.categories.find(cat => cat.id === form.category_id);
-  return selectedCategory && selectedCategory.name === 'Debt (Hutang)';
+    const selectedCategory = props.categories.find(cat => cat.id === form.category_id);
+    return selectedCategory && selectedCategory.name === 'Debt (Hutang)';
 });
 
 // **Handle perubahan sub kategori untuk Bills dan Debt**
 const onSubCategoryChange = () => {
-  if (isBillsCategory.value && form.sub_kategori_id) {
-    const selectedBill = props.bills.find(bill => bill.sub_category_id === form.sub_kategori_id);
-    console.log('Selected Bill:', selectedBill); // Debugging
-    form.amount = selectedBill ? selectedBill.amount : '';
-  }
+    if (isBillsCategory.value && form.sub_kategori_id) {
+        const selectedBill = props.bills.find(bill => bill.sub_category_id === form.sub_kategori_id);
+        form.amount = selectedBill ? selectedBill.amount : '';
+    }
 
-  if (isDebtCategory.value && form.sub_kategori_id) {
-    const selectedDebt = props.debts.find(debt => debt.sub_category_id === form.sub_kategori_id);
-    console.log('Selected Debt:', selectedDebt); // Debugging
-    form.amount = selectedDebt ? selectedDebt.amount : '';
-  }
+    if (isDebtCategory.value && form.sub_kategori_id) {
+        const selectedDebt = props.debts.find(debt => debt.sub_category_id === form.sub_kategori_id);
+        form.amount = selectedDebt ? selectedDebt.amount : '';
+    }
 };
 
 // **Perubahan dipantau dengan watch**
 watch(() => form.sub_kategori_id, (newVal) => {
-  if (newVal) {
-    onSubCategoryChange();
-  }
+    if (newVal) {
+        onSubCategoryChange();
+    }
 });
 
 const openModal = (mode, item = null) => {
-  isEditMode.value = mode === 'edit';
-  if (isEditMode.value && item) {
-    form.id = item.id;
-    form.date = item.date;
-    form.amount = item.amount;
-    form.category_id = item.category_id;
-    form.sub_kategori_id = item.sub_kategori_id;
-    form.payment = item.payment;
-    form.account_id = item.account_id;
-  } else {
-    form.reset();
-  }
-  modalOpen.value = true;
+    isEditMode.value = mode === 'edit';
+    
+    if (isEditMode.value && item) {
+        form.id = item.id;
+        form.date = item.date;
+        form.amount = item.amount;
+        form.category_id = item.category_id;
+        form.sub_kategori_id = item.sub_kategori_id;
+        form.payment = item.payment;
+        form.account_id = item.account_id;
+    } else {
+        form.reset();
+    }
+    
+    modalOpen.value = true;
 };
 
 const closeModal = () => {
@@ -355,9 +354,9 @@ const confirmDelete = (id) => {
 };
 
 onMounted(() => {
-  if (settings.value.saving_expense) {
-    console.log(savingSubCategories.value);
-  }
+    if (settings.value.saving_expense) {
+        console.log(savingSubCategories.value);
+    }
 });
 </script>
 

@@ -72,26 +72,38 @@
         <template #content>
           <form @submit.prevent="submitForm">
             <div class="mb-4">
-            <InputLabel for="name" value="Nama Bill (Tagihan)" />
+            <InputLabel for="name">
+              Nama Bill (Tagihan)
+              <span class="text-red-500 text-sm" >*</span>
+              </InputLabel>
             <TextInput id="name" v-model="form.name" class="block w-full" :disabled="isEditMode" :readonly="isEditMode"/>
             <InputError :message="form.errors.name" />
           </div>
 
             <div class="mb-4">
-              <InputLabel for="note" value="Keterangan" />
+              <InputLabel for="note" >
+              Catatan
+             
+              </InputLabel>
               <TextInput id="note" v-model="form.note" class="block w-full" />
               <InputError :message="form.errors.note" />
             </div>
 
             <div class="mb-4">
-              <InputLabel for="amount" value="Jumlah Tagihan" />
-              <TextInput id="amount" type="number" v-model="form.amount" class="block w-full" required />
+              <InputLabel for="amount" >
+              Nominal Tagihan
+              <span class="text-red-500 text-sm" >*</span>
+              </InputLabel>
+              <TextInput id="amount" type="number" v-model="form.amount" class="block w-full"  />
               <InputError :message="form.errors.amount" />
             </div>
 
             <div class="mb-4">
-              <InputLabel for="date" value="Tanggal Tagihan" />
-              <TextInput id="date" type="date" v-model="form.date" class="block w-full" required />
+              <InputLabel for="date" >
+              Tangga Tagihan
+              <span class="text-red-500 text-sm" >*</span>
+              </InputLabel>
+              <TextInput id="date" type="date" v-model="form.date" class="block w-full"  />
               <InputError :message="form.errors.date" />
             </div>
 

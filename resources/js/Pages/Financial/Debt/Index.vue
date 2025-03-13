@@ -3,31 +3,83 @@
     <div class="p-4">
       <div class="container mx-auto p-2">
         <!-- Header & Tombol Tambah -->
+
+        <!-- Header dan Tombol Tambah Hutang -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg shadow-md mb-2">
           <div>
             <h1 class="text-xl font-semibold text-gray-800">Kelola Hutang</h1>
             <p class="text-sm text-gray-600 mt-1">
               Halaman ini digunakan untuk mengelola dan menambahkan data hutang seperti hutang pribadi, cicilan, atau hutang bisnis.
             </p>
+                <!-- Link untuk membuka data tidak aktif (Desktop/Tablet) -->
+            <div v-if="inactiveDebts.length > 0" class="mt-6 text-ligth hidden sm:block">
+              <a 
+                @click="toggleInactiveDebts" 
+                class="text-sm text-blue-500 hover:text-blue-700 cursor-pointer"
+              >
+                {{ showInactiveDebts ? 'Sembunyikan Hutang Selesai' : 'Lihat Hutang Selesai' }}
+              </a>
+            </div>
           </div>
-          <PrimaryButton @click="openModal('create')" class="mt-4 sm:mt-0">Tambah Hutang</PrimaryButton>
+          <div class="flex items-center gap-2 mt-4 sm:mt-0">
+          
+            <PrimaryButton @click="openModal('create')">Tambah Hutang</PrimaryButton>
+
+              <!-- Link untuk membuka data tidak aktif (hanya tampil jika ada data tidak aktif) -->
+            <a 
+              v-if="inactiveDebts.length > 0" 
+              @click="toggleInactiveDebts" 
+              class="text-sm text-blue-500 hover:text-blue-700 cursor-pointer sm:hidden text-right"
+            >
+              {{ showInactiveDebts ? 'Sembunyikan Hutang Selesai' : 'Lihat Hutang Selesai' }}
+            </a>
+          </div>
         </div>
 
-        <!-- Daftar Hutang -->
-        <div v-if="debts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div v-for="debt in debts" :key="debt.id" class="bg-white p-6 rounded-lg shadow-md">
+        <!-- List Data yang Sudah Paid -->
+        <div v-if="showInactiveDebts && paidDebts.length > 0" >
+          <h2 class="text-lg font-semibold mb-4">Hutang yang Sudah Dibayar</h2>
+          <div class="bg-white p-4 rounded-lg shadow-md">
+            <div 
+              v-for="debt in paidDebts" 
+              :key="debt.id" 
+              class="flex justify-between items-center py-2 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
+              @click="openModal('detail', debt)"
+            >
+              <span class="text-gray-800">{{ debt.sub_category?.name || 'Tanpa Kategori' }} ({{ debt.type }})</span>
+              <span class="text-purple-600 font-semibold">Rp. {{ formatCurrency(debt.amount) }}</span>
+            </div>
+          </div>
+        </div>
+
+            <!-- Daftar Hutang Aktif -->
+        <div v-if="activeDebts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+          <div v-for="debt in activeDebts" :key="debt.id" class="bg-white p-6 rounded-lg shadow-md">
             <div class="flex items-center justify-between">
-              <h2 class="text-lg font-semibold">{{ debt.sub_category?.name || 'Tanpa Kategori' }}</h2>
-              <span 
-                class="px-2 py-1 text-xs font-semibold rounded-lg"
-                :class="debt.sub_category?.is_active ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
-              >
-                {{ debt.sub_category?.is_active ? 'Aktif' : 'Tidak Aktif' }}
-              </span>
+              <h2 class="text-lg font-semibold">{{ debt.sub_category?.name || 'Tanpa Kategori' }}  
+                <span class="text-gray-500 text-sm">({{ debt.type == 'installment' ? 'Kredit/Cicilan' : debt.type }})</span>
+              </h2>
+            <span 
+                  class="px-2 py-1 text-xs font-semibold rounded-lg"
+                  :class="debt.sub_category?.is_active ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
+                >
+                  {{ debt.sub_category?.is_active ? 'Aktif' : 'Tidak Aktif' }}
+                </span>
             </div>
             <p class="text-sm text-gray-500">{{ debt.note }}</p>
-            <p class="text-xl font-bold text-purple-600">{{ formatCurrency(debt.amount) }}</p>
-            <p class="text-sm text-gray-500">Tanggal Jatuh Tempo: {{ formatDate(debt.due_date) }}</p>
+            <p class="text-xl font-bold text-purple-600">Rp. {{ formatCurrency(debt.amount) }}</p>
+
+            <!-- Tampilkan paid_amount jika tipe personal -->
+            <p v-if="debt.type === 'personal'" class="text-sm text-gray-500">
+              Pembayaran = {{ formatCurrency(debt.paid_amount) }}
+            </p>
+
+            <!-- Tampilkan Tenor jika tipe installment -->
+            <p v-if="debt.type === 'installment'" class="text-sm text-gray-500">
+              Tenor = {{ getTenor(debt) }}
+            </p>
+
+            <p v-if="debt.type === 'installment'" class="text-sm text-gray-500">Tanggal Jatuh Tempo: {{ formatDate(debt.due_date) }}</p>
 
             <!-- Pesan Reminder -->
             <p v-if="debt.reminder" class="text-sm text-green-500">
@@ -69,50 +121,63 @@
         <template #content>
           <form @submit.prevent="submitForm">
             <div class="mb-4">
-              <InputLabel for="name" value="Nama Hutang" />
+              <InputLabel for="name">
+              Nama Hutang
+              <span class="text-red-500 text-sm" >*</span>
+              </InputLabel>
               <TextInput id="name" v-model="form.name" class="block w-full" :disabled="isEditMode" :readonly="isEditMode"/>
               <InputError :message="form.errors.name" />
             </div>
 
             <div class="mb-4">
-              <InputLabel for="kategori" value="Kategori" />
-              <TextInput id="kategori" v-model="form.kategori" class="block w-full" />
-              <InputError :message="form.errors.kategori" />
-            </div>
-
-            <div class="mb-4">
-              <InputLabel for="amount" value="Jumlah Hutang" />
-              <TextInput id="amount" type="number" v-model="form.amount" class="block w-full" required />
+              <InputLabel for="amount" >
+              Nominal Hutang
+              <span class="text-red-500 text-sm" >*</span>
+              </InputLabel>
+              <TextInput id="amount" type="number" v-model="form.amount" class="block w-full" />
               <InputError :message="form.errors.amount" />
             </div>
 
             <div class="mb-4">
-              <InputLabel for="note" value="Catatan" />
+              <InputLabel for="note">
+             Catatan
+              </InputLabel>
               <TextInput id="note" v-model="form.note" class="block w-full" />
               <InputError :message="form.errors.note" />
             </div>
 
             <div class="mb-4">
-              <InputLabel for="type" value="Tipe Hutang" />
+              <InputLabel for="type" >
+              Type Hutang
+              <span class="text-red-500 text-sm" >*</span>
+              </InputLabel>
               <select id="type" v-model="form.type" class="block w-full">
+                <option disabled value="">Pilih Tipe</option>
                 <option value="personal">Personal</option>
                 <option value="installment">Cicilan</option>
-                <option value="business">Bisnis</option>
               </select>
               <InputError :message="form.errors.type" />
             </div>
 
             <div v-if="form.type === 'installment'" class="mb-4">
-              <InputLabel for="due_date" value="Tanggal Jatuh Tempo" />
-              <select id="due_date" v-model="form.due_date" class="block w-full">
+              <InputLabel for="due_date" >
+             Tanggal Jatuh Tempo
+              <span class="text-red-500 text-sm" >*</span>
+              </InputLabel>
+              <select id="due_date" v-model="form.due_date" class="block w-full" required>
                 <option v-for="day in 31" :key="day" :value="day">{{ day }}</option>
               </select>
               <InputError :message="form.errors.due_date" />
             </div>
 
             <div v-if="form.type === 'installment'" class="mb-4">
-              <InputLabel for="tenor_months" value="Tenor (Bulan)" />
-              <TextInput id="tenor_months" type="number" v-model="form.tenor_months" class="block w-full" />
+              <InputLabel for="tenor_months" >
+              Tenor (Bulan)
+              <span class="text-red-500 text-sm" >*</span>
+              </InputLabel>
+               <select id="tenor_months" v-model="form.tenor_months" class="block w-full" required>
+                <option v-for="month in 12" :key="month" :value="month">{{ month }}</option>
+              </select>
               <InputError :message="form.errors.tenor_months" />
             </div>
 
@@ -170,21 +235,26 @@ const props = defineProps({
 // State untuk modal
 const modalOpen = ref(false);
 const isEditMode = ref(false);
+const showInactiveDebts = ref(false); // Tambahan state untuk toggle data tidak aktif
 
 // Form untuk tambah/edit Debt
 const form = useForm({
   id: null,
   name: '',
-  kategori: '',
   amount: '',
   note: '',
-  type: 'personal',
+  type: '',
   due_date: null,
   tenor_months: null,
   is_active: false,
   reminder: false,
   auto: false,
 });
+
+// Filter data berdasarkan status
+const activeDebts = computed(() => props.debts.filter(debt => debt.status === 'active'));
+const inactiveDebts = computed(() => props.debts.filter(debt => debt.status !== 'Active'));
+const paidDebts = computed(() => props.debts.filter(debt => debt.status === 'paid'));
 
 // Format mata uang
 const formatCurrency = (value) => {
@@ -193,10 +263,8 @@ const formatCurrency = (value) => {
 };
 
 // Watch perubahan amount
-watch(() => {
-  if (form) {
-    form.amount = formatCurrency(String(form.amount));
-  }
+watch(() => form.amount, (newValue) => {
+  form.amount = formatCurrency(String(newValue));
 });
 
 // Buka modal
@@ -205,7 +273,6 @@ const openModal = (mode, debt = null) => {
   if (isEditMode.value && debt) {
     form.id = debt.id;
     form.name = debt.sub_category?.name || '';
-    form.kategori = debt.sub_category?.name || '';
     form.note = debt.note;
     form.amount = formatCurrency(String(debt.amount)); // Format sebelum ditampilkan
     form.type = debt.type;
@@ -254,5 +321,19 @@ const formatDate = (date) => {
   if (!date) return "";
   const parsedDate = new Date(date);
   return parsedDate.getDate();
+};
+
+// Fungsi untuk mendapatkan Tenor (hanya untuk tipe installment)
+const getTenor = (debt) => {
+  if (debt.type === 'installment' && debt.expenses) {
+    const paidTenor = debt.expenses.length;
+    return `${paidTenor}-${debt.tenor_months}`;
+  }
+  return '';
+};
+
+// Toggle tampilan data tidak aktif
+const toggleInactiveDebts = () => {
+  showInactiveDebts.value = !showInactiveDebts.value;
 };
 </script>

@@ -51,7 +51,7 @@
                         <tr>
                             <th class="px-4 py-2 text-left">No</th>
                             <th class="px-4 py-2 text-left">Tanggal</th>
-                            <th class="px-4 py-2 text-left">Jumlah</th>
+                            <th class="px-4 py-2 text-left">Nominal</th>
                             <th class="px-4 py-2 text-left">Sumber</th>
                             <th class="px-4 py-2 text-left">Keterangan</th>
                             <th class="px-4 py-2 text-left">Pembayaran</th>
@@ -82,13 +82,19 @@
                 <template #content>
                     <form @submit.prevent="submitForm">
                         <div class="mb-4">
-                            <InputLabel for="date" value="Tanggal" />
+                            <InputLabel for="date">
+                            Tanggal
+                            <span class="text-red-500 text-sm">*</span>
+                            </InputLabel>
                             <TextInput id="date" type="date" v-model="form.date" class="block w-full" />
                             <InputError :message="form.errors.date" />
                         </div>
     
                           <div class="mb-4">
-                            <InputLabel for="amount" value="Jumlah" />
+                            <InputLabel for="amount" >
+                            Nominal
+                            <span class="text-red-500 text-sm">*</span>
+                            </InputLabel>
                             <TextInput
                             id="amount"
                             type="text"
@@ -100,7 +106,10 @@
                         </div>
     
                         <div class="mb-4">
-                            <InputLabel for="source_id" value="Sumber" />
+                            <InputLabel for="source_id" >
+                            Sumber
+                            <span class="text-red-500 text-sm">*</span>
+                            </InputLabel>
                             <select id="source_id" v-model="form.source_id" class="block w-full border rounded-md p-2" @change="form.sub_source_id = null">
                                 <option disabled value="">Pilih Sumber</option>
                                 <option v-for="source in sources" :key="source.id" :value="source.id" :disabled="!source.is_active">{{ source.name }} <span v-if="!source.is_active">(Tidak Aktif)</span> </option>
@@ -109,7 +118,10 @@
                         </div>
     
                         <div class="mb-4">
-                            <InputLabel for="sub_source_id" value="Keterangan" />
+                            <InputLabel for="sub_source_id" >
+                            Keterangan
+                            <span class="text-red-500 text-sm">*</span>
+                            </InputLabel>
                             <select id="sub_source_id" v-model="form.sub_source_id" class="block w-full border rounded-md p-2" :disabled="!form.source_id">
                                 <option disabled value="">Pilih Keterangan</option>
                                 <option v-for="subSource in filteredSubSources" :key="subSource.id" :value="subSource.id" :disabled="!subSource.is_active">{{ subSource.name }} <span v-if="!subSource.is_active"  >(Tidak Aktif)</span> </option>
@@ -118,7 +130,10 @@
                         </div>
     
                         <div class="mb-4">
-                            <InputLabel for="payment" value="Pembayaran" />
+                            <InputLabel for="payment" >
+                            Pembayaran
+                            <span class="text-red-500 text-sm">*</span>
+                            </InputLabel>
                             <div class="flex space-x-4 mt-2">
                                 <label class="flex items-center">
                                     <input type="radio" v-model="form.payment" value="Transfer" class="mr-2" @change="form.account_id = ''" />
@@ -133,8 +148,11 @@
                         </div>
     
                         <div class="mb-4" v-if="form.payment === 'Transfer'">
-                            <InputLabel for="account_id" value="Rekening Tujuan" />
-                            <select id="account_id" v-model="form.account_id" class="block w-full border rounded-md p-2">
+                            <InputLabel for="account_id" >
+                            Rekening Tujuan
+                            <span class="text-red-500 text-sm">*</span>
+                            </InputLabel>
+                            <select id="account_id" v-model="form.account_id" class="block w-full border rounded-md p-2" required>
                                 <option disabled value="">Pilih Rekening</option>
                                 <option v-for="account in accountBanks" :key="account.id" :value="account.id" :disabled="!account.is_active">{{ account.name }} <span v-if="!account.is_active">(Tidak Aktif)</span></option>
                             </select>

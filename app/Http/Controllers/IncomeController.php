@@ -67,6 +67,23 @@ class IncomeController extends Controller
             'sub_source_id' => 'nullable|exists:sub_sources,id',
             'payment' => 'required|in:Transfer,Tunai',
             'account_id' => 'nullable|exists:account_banks,id',
+        ], [
+            'date.required' => 'Tanggal harus diisi.',
+            'date.date' => 'Format tanggal tidak valid.',
+
+            'amount.required' => 'Jumlah harus diisi.',
+            'amount.numeric' => 'Jumlah harus berupa angka.',
+            'amount.min' => 'Jumlah tidak boleh kurang dari 0.',
+
+            'source_id.required' => 'Sumber harus dipilih.',
+            'source_id.exists' => 'Sumber yang dipilih tidak valid.',
+
+            'sub_source_id.exists' => 'Sub-sumber yang dipilih tidak valid.',
+
+            'payment.required' => 'Metode pembayaran harus dipilih.',
+            'payment.in' => 'Metode pembayaran harus Transfer atau Tunai.',
+
+            'account_id.exists' => 'Rekening yang dipilih tidak valid.',
         ]);
 
         // Jika payment adalah "Tunai", set account_id ke null
@@ -142,7 +159,25 @@ class IncomeController extends Controller
             'sub_source_id' => 'nullable|exists:sub_sources,id',
             'payment' => 'required|in:Transfer,Tunai',
             'account_id' => 'nullable|exists:account_banks,id',
+        ], [
+            'date.required' => 'Tanggal harus diisi.',
+            'date.date' => 'Format tanggal tidak valid.',
+
+            'amount.required' => 'Jumlah harus diisi.',
+            'amount.numeric' => 'Jumlah harus berupa angka.',
+            'amount.min' => 'Jumlah tidak boleh kurang dari 0.',
+
+            'source_id.required' => 'Sumber harus dipilih.',
+            'source_id.exists' => 'Sumber yang dipilih tidak valid.',
+
+            'sub_source_id.exists' => 'Sub-sumber yang dipilih tidak valid.',
+
+            'payment.required' => 'Metode pembayaran harus dipilih.',
+            'payment.in' => 'Metode pembayaran harus Transfer atau Tunai.',
+
+            'account_id.exists' => 'Rekening yang dipilih tidak valid.',
         ]);
+
 
         // Jika payment adalah "Tunai", set account_id ke null
         $accountId = $request->payment === 'Tunai' ? null : $request->account_id;
