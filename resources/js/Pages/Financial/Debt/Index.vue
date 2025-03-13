@@ -3,15 +3,13 @@
     <div class="p-4">
       <div class="container mx-auto p-2">
         <!-- Header & Tombol Tambah -->
-
-        <!-- Header dan Tombol Tambah Hutang -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg shadow-md mb-2">
           <div>
             <h1 class="text-xl font-semibold text-gray-800">Kelola Hutang</h1>
             <p class="text-sm text-gray-600 mt-1">
               Halaman ini digunakan untuk mengelola dan menambahkan data hutang seperti hutang pribadi, cicilan, atau hutang bisnis.
             </p>
-                <!-- Link untuk membuka data tidak aktif (Desktop/Tablet) -->
+            <!-- Link untuk membuka data tidak aktif (Desktop/Tablet) -->
             <div v-if="inactiveDebts.length > 0" class="mt-6 text-ligth hidden sm:block">
               <a 
                 @click="toggleInactiveDebts" 
@@ -22,10 +20,8 @@
             </div>
           </div>
           <div class="flex items-center gap-2 mt-4 sm:mt-0">
-          
             <PrimaryButton @click="openModal('create')">Tambah Hutang</PrimaryButton>
-
-              <!-- Link untuk membuka data tidak aktif (hanya tampil jika ada data tidak aktif) -->
+            <!-- Link untuk membuka data tidak aktif (hanya tampil jika ada data tidak aktif) -->
             <a 
               v-if="inactiveDebts.length > 0" 
               @click="toggleInactiveDebts" 
@@ -37,7 +33,7 @@
         </div>
 
         <!-- List Data yang Sudah Paid -->
-        <div v-if="showInactiveDebts && paidDebts.length > 0" >
+        <div v-if="showInactiveDebts && paidDebts.length > 0">
           <h2 class="text-lg font-semibold mb-4">Hutang yang Sudah Dibayar</h2>
           <div class="bg-white p-4 rounded-lg shadow-md">
             <div 
@@ -52,19 +48,19 @@
           </div>
         </div>
 
-            <!-- Daftar Hutang Aktif -->
+        <!-- Daftar Hutang Aktif -->
         <div v-if="activeDebts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           <div v-for="debt in activeDebts" :key="debt.id" class="bg-white p-6 rounded-lg shadow-md">
             <div class="flex items-center justify-between">
               <h2 class="text-lg font-semibold">{{ debt.sub_category?.name || 'Tanpa Kategori' }}  
                 <span class="text-gray-500 text-sm">({{ debt.type == 'installment' ? 'Kredit/Cicilan' : debt.type }})</span>
               </h2>
-            <span 
-                  class="px-2 py-1 text-xs font-semibold rounded-lg"
-                  :class="debt.sub_category?.is_active ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
-                >
-                  {{ debt.sub_category?.is_active ? 'Aktif' : 'Tidak Aktif' }}
-                </span>
+              <span 
+                class="px-2 py-1 text-xs font-semibold rounded-lg"
+                :class="debt.sub_category?.is_active ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
+              >
+                {{ debt.sub_category?.is_active ? 'Aktif' : 'Tidak Aktif' }}
+              </span>
             </div>
             <p class="text-sm text-gray-500">{{ debt.note }}</p>
             <p class="text-xl font-bold text-purple-600">Rp {{ formatCurrency(debt.amount) }}</p>
@@ -122,34 +118,34 @@
           <form @submit.prevent="submitForm">
             <div class="mb-4">
               <InputLabel for="name">
-              Nama Hutang
-              <span class="text-red-500 text-sm" >*</span>
+                Nama Hutang
+                <span class="text-red-500 text-sm">*</span>
               </InputLabel>
               <TextInput id="name" v-model="form.name" class="block w-full" :disabled="isEditMode" :readonly="isEditMode"/>
               <InputError :message="form.errors.name" />
             </div>
 
             <div class="mb-4">
-              <InputLabel for="amount" >
-              Nominal Hutang
-              <span class="text-red-500 text-sm" >*</span>
+              <InputLabel for="amount">
+                Nominal Hutang
+                <span class="text-red-500 text-sm">*</span>
               </InputLabel>
-              <TextInput id="amount" type="number" v-model="form.amount" class="block w-full" />
+              <TextInput id="amount" type="text" v-model="formattedAmount" @input="handleAmountInput" class="block w-full" />
               <InputError :message="form.errors.amount" />
             </div>
 
             <div class="mb-4">
               <InputLabel for="note">
-             Catatan
+                Catatan
               </InputLabel>
               <TextInput id="note" v-model="form.note" class="block w-full" />
               <InputError :message="form.errors.note" />
             </div>
 
             <div class="mb-4">
-              <InputLabel for="type" >
-              Type Hutang
-              <span class="text-red-500 text-sm" >*</span>
+              <InputLabel for="type">
+                Type Hutang
+                <span class="text-red-500 text-sm">*</span>
               </InputLabel>
               <select id="type" v-model="form.type" class="block w-full">
                 <option disabled value="">Pilih Tipe</option>
@@ -160,9 +156,9 @@
             </div>
 
             <div v-if="form.type === 'installment'" class="mb-4">
-              <InputLabel for="due_date" >
-             Tanggal Jatuh Tempo
-              <span class="text-red-500 text-sm" >*</span>
+              <InputLabel for="due_date">
+                Tanggal Jatuh Tempo
+                <span class="text-red-500 text-sm">*</span>
               </InputLabel>
               <select id="due_date" v-model="form.due_date" class="block w-full" required>
                 <option v-for="day in 31" :key="day" :value="day">{{ day }}</option>
@@ -171,11 +167,11 @@
             </div>
 
             <div v-if="form.type === 'installment'" class="mb-4">
-              <InputLabel for="tenor_months" >
-              Tenor (Bulan)
-              <span class="text-red-500 text-sm" >*</span>
+              <InputLabel for="tenor_months">
+                Tenor (Bulan)
+                <span class="text-red-500 text-sm">*</span>
               </InputLabel>
-               <select id="tenor_months" v-model="form.tenor_months" class="block w-full" required>
+              <select id="tenor_months" v-model="form.tenor_months" class="block w-full" required>
                 <option v-for="month in 12" :key="month" :value="month">{{ month }}</option>
               </select>
               <InputError :message="form.errors.tenor_months" />
@@ -218,7 +214,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, reactive, computed, watch } from 'vue';
+import { ref, reactive, computed, watch, watchEffect } from 'vue';
 import { useForm, usePage, router } from '@inertiajs/vue3';
 import CustomModal from '@/Components/CustomModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -253,18 +249,27 @@ const form = useForm({
 
 // Filter data berdasarkan status
 const activeDebts = computed(() => props.debts.filter(debt => debt.status === 'active'));
-const inactiveDebts = computed(() => props.debts.filter(debt => debt.status !== 'Active'));
+const inactiveDebts = computed(() => props.debts.filter(debt => debt.status !== 'active'));
 const paidDebts = computed(() => props.debts.filter(debt => debt.status === 'paid'));
 
 // Format mata uang
 const formatCurrency = (value) => {
-  if (!value) return '';
-  return new Intl.NumberFormat('id-ID').format(value.replace(/\D/g, ''));
+    if (!value) return '';
+    return new Intl.NumberFormat('id-ID').format(value);
 };
 
-// Watch perubahan amount
-watch(() => form.amount, (newValue) => {
-  form.amount = formatCurrency(String(newValue));
+const parseCurrency = (value) => {
+    if (!value) return '';
+    return value.replace(/\./g, '');
+};
+
+const formattedAmount = computed({
+    get: () => formatCurrency(form.amount),
+    set: (value) => { form.amount = parseCurrency(value); }
+});
+
+watchEffect(() => {
+    formattedAmount.value = formatCurrency(form.amount);
 });
 
 // Buka modal
@@ -274,7 +279,7 @@ const openModal = (mode, debt = null) => {
     form.id = debt.id;
     form.name = debt.sub_category?.name || '';
     form.note = debt.note;
-    form.amount = formatCurrency(String(debt.amount)); // Format sebelum ditampilkan
+    form.amount = debt.amount; // Format sebelum ditampilkan
     form.type = debt.type;
     form.due_date = debt.due_date;
     form.tenor_months = debt.tenor_months;

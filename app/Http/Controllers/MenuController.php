@@ -118,6 +118,7 @@ class MenuController extends Controller
             ]))
             ->sortByDesc('date')
             ->take(5) // Ambil 5 transaksi terbaru
+            ->values(); // Reset keys
         ;
         // DD($transactions);
         // --------------------------Untuk jumlah saldo------------------------
@@ -190,7 +191,10 @@ class MenuController extends Controller
                 ->where('category_id', '!=', $savingCategory->id)
                 ->get();
         } else {
-            $expenses = 0;
+            $expenses = Expenses::where('user_id', $user->id)
+                ->whereYear('date', $year)
+                ->whereMonth('date', $month)
+                ->get();
         }
 
 
@@ -230,15 +234,9 @@ class MenuController extends Controller
                 'amount' => $income->amount,
                 'type' => 'income',
             ]))
-            ->sortByDesc('date');
+            ->sortByDesc('date')
+            ->values(); // Reset keys
 
-        // dd([
-        //     'total_expenses' => $totalExpenses,
-        //     'total_income' => $totalIncome,
-        //     'total_savings' => $totalSavings,
-        //     'net_balance' => $netBalance,
-        //     'transactions' => $transactions,
-        // ]);
 
         return Inertia::render('Menu/Laporan', [
             'report' => [

@@ -155,7 +155,7 @@
           </p>
         </div>
         <p :class="transaction.type === 'income' ? 'text-green-500' : 'text-red-500'">
-          {{ transaction.type === 'income' ? '+' : '-' }} Rp {{ transaction.amount.toLocaleString() }}
+          {{ transaction.type === 'income' ? '+' : '-' }} {{ formatCurrency(transaction.amount) }}
         </p>
       </li>
     </ul>

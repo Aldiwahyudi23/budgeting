@@ -94,13 +94,13 @@
               Nominal Tagihan
               <span class="text-red-500 text-sm" >*</span>
               </InputLabel>
-              <TextInput id="amount" type="number" v-model="form.amount" class="block w-full"  />
+               <TextInput id="amount" type="text" v-model="formattedAmount" @input="handleAmountInput" class="block w-full" />
               <InputError :message="form.errors.amount" />
             </div>
 
             <div class="mb-4">
               <InputLabel for="date" >
-              Tangga Tagihan
+              Tanggal Tagihan
               <span class="text-red-500 text-sm" >*</span>
               </InputLabel>
               <TextInput id="date" type="date" v-model="form.date" class="block w-full"  />
@@ -144,7 +144,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, reactive, computed, watch } from 'vue';
+import { ref, reactive, computed, watch, watchEffect } from 'vue';
 import { useForm, usePage, router } from '@inertiajs/vue3';
 import CustomModal from '@/Components/CustomModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -175,19 +175,24 @@ const form = useForm({
   is_active: false,
 });
 
-// Format mata uang
+
 const formatCurrency = (value) => {
-  if (!value) return '';
-  return new Intl.NumberFormat('id-ID').format(value.replace(/\D/g, ''));
+    if (!value) return '';
+    return new Intl.NumberFormat('id-ID').format(value);
 };
 
-// Watch perubahan amount & balance, lalu format otomatis
-// **Gunakan watchEffect untuk memastikan form sudah ada sebelum mengamati perubahan**
-watch(() => {
-  if (form) {
-    form.amount = formatCurrency(String(form.amount));
-    form.balance = formatCurrency(String(form.balance));
-  }
+const parseCurrency = (value) => {
+    if (!value) return '';
+    return value.replace(/\./g, '');
+};
+
+const formattedAmount = computed({
+    get: () => formatCurrency(form.amount),
+    set: (value) => { form.amount = parseCurrency(value); }
+});
+
+watchEffect(() => {
+    formattedAmount.value = formatCurrency(form.amount);
 });
 
 // Buka modal
@@ -197,8 +202,8 @@ const openModal = (mode, bill = null) => {
     form.id = bill.id;
     form.name = bill.sub_category?.name || '';
     form.note = bill.note;
-    form.amount = formatCurrency(String(bill.amount)); // Format sebelum ditampilkan
-    form.balance = formatCurrency(String(bill.balance)); // Format sebelum ditampilkan
+    form.amount = bill.amount; // Format sebelum ditampilkan
+    form.balance = bill.balance; // Format sebelum ditampilkan
     form.date = bill.date;
     form.reminder = Boolean(bill.reminder);
     form.auto = Boolean(bill.auto);

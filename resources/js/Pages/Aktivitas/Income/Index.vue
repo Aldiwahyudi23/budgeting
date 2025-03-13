@@ -173,7 +173,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, computed, watchEffect } from 'vue';
+import { ref, computed, watchEffect,watch } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -195,6 +195,7 @@ const settings = ref(usePage().props.settings);
 const searchQuery = ref('');
 const modalOpen = ref(false);
 const isEditMode = ref(false);
+const page = usePage();
 
 // Filter Tahun dan Bulan
 const years = Array.from({ length: 6 }, (_, i) => 2025 + i); // Tahun 2025-2030
@@ -206,19 +207,33 @@ const months = [
 const selectedYear = ref(new Date().getFullYear()); // Default: Tahun saat ini
 const selectedMonth = ref(new Date().getMonth() + 1); // Default: Bulan saat ini
 
-// Filter data berdasarkan tahun, bulan, dan pencarian
+// Fungsi untuk memperbarui data dari backend jika diperlukan
+const fetchData = () => {
+    const params = { year: selectedYear.value, month: selectedMonth.value };
+    router.get(route('income.index'), params, { preserveState: true, replace: true });
+};
+
+// Watch untuk memantau perubahan tahun dan bulan
+watch([selectedYear, selectedMonth], () => {
+    fetchData();
+});
+
+// **Perbaikan filter bulan agar data muncul**
 const filteredIncomes = computed(() => {
     return props.incomes.filter(item => {
         const date = new Date(item.date);
         const matchesYear = date.getFullYear() === selectedYear.value;
         const matchesMonth = date.getMonth() + 1 === selectedMonth.value;
-        const matchesSearch = item.source.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                              item.sub_source?.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                              item.payment.toLowerCase().includes(searchQuery.value.toLowerCase());
+        const matchesSearch = searchQuery.value
+            ? item.source.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+              item.sub_source?.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+              item.payment.toLowerCase().includes(searchQuery.value.toLowerCase())
+            : true; 
 
         return matchesYear && matchesMonth && matchesSearch;
     });
 });
+
 
 // **Deklarasikan form SEBELUM watchEffect**
 const form = useForm({

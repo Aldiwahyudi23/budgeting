@@ -164,8 +164,6 @@ const months = ref([
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ]);
 
-const searchQuery = ref('');
-
 // Data laporan
 const reportData = ref({
   total_expenses: '',
@@ -175,6 +173,7 @@ const reportData = ref({
   transactions: [],
 });
 
+const searchQuery = ref('');
 // Filter transaksi berdasarkan pencarian
 const filteredTransactions = computed(() => {
   if (!searchQuery.value) return reportData.value.transactions;

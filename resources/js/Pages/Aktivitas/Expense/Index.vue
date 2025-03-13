@@ -225,6 +225,17 @@ const months = [
 const selectedYear = ref(new Date().getFullYear());
 const selectedMonth = ref(new Date().getMonth() + 1);
 
+// Fungsi untuk memperbarui data dari backend jika diperlukan
+const fetchData = () => {
+    const params = { year: selectedYear.value, month: selectedMonth.value };
+    router.get(route('expense.index'), params, { preserveState: true, replace: true });
+};
+
+// Watch untuk memantau perubahan tahun dan bulan
+watch([selectedYear, selectedMonth], () => {
+    fetchData();
+});
+
 // **Perbaikan filter bulan agar data muncul**
 const filteredExpenses = computed(() => {
     return props.expenses.filter(item => {
