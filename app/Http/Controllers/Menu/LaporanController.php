@@ -9,6 +9,7 @@ use App\Models\Alokasi\AllocationEx;
 use App\Models\Alokasi\AllocationIn;
 use App\Models\Assets\Saving;
 use App\Models\MasterData\Category;
+use App\Models\MasterData\Source;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -84,12 +85,7 @@ class LaporanController extends Controller
             ->sortByDesc('date')
             ->values(); // Reset keys
 
-        // $allocation_ex = AllocationEx::with('Category')
-        //     ->where('user_id', $user->id)
-        //     ->whereYear('date', $year)
-        //     ->whereMonth('date', $month)
-        //     ->get();
-
+        // --------------------------Untuk perbandingan alocasi ex -----------------------
 
         // Ambil data kategori dengan relasi allocation dan expenses
         $categories = Category::with(['allocation', 'expenses' => function ($query) use ($year, $month) {
@@ -100,20 +96,6 @@ class LaporanController extends Controller
             ->where('user_id', $user->id)
             ->get();
 
-        // // Hitung total alokasi, aktual, dan selisih
-        // $report = $categories->map(function ($category) {
-        //     $alokasi = $category->allocation ? $category->allocation->amount : 0;
-        //     $aktual = $category->expenses ? $category->expenses->sum('amount') : 0;
-        //     $selisih = $aktual - $alokasi;
-
-        //     return [
-        //         'name' => $category->name,
-        //         'alokasi' => $alokasi,
-        //         'aktual' => $aktual,
-        //         'selisih' => $selisih,
-        //     ];
-        // });
-
         // Ambil data kategori dengan relasi allocation dan expenses
         $categories = Category::with(['allocation', 'expenses' => function ($query) use ($year, $month) {
             // Filter expenses berdasarkan tahun dan bulan
@@ -121,6 +103,7 @@ class LaporanController extends Controller
                 ->whereMonth('date', $month);
         }])
             ->where('user_id', $user->id)
+            ->where('is_active', true)
             ->get();
 
         // Hitung total alokasi, aktual, dan selisih
@@ -136,9 +119,10 @@ class LaporanController extends Controller
 
             // Aktual diambil dari expenses yang sudah difilter
             $aktual = $category->expenses ? $category->expenses->sum('amount') : 0;
-
             // Hitung selisih
             $selisih = $aktual - $alokasi;
+
+            // -------------------Untuk perbandingan alocasi in------------------------------------------
 
             return [
                 'name' => $category->name,
@@ -147,9 +131,45 @@ class LaporanController extends Controller
                 'selisih' => $selisih,
             ];
         });
+        // Ambil data kategori dengan relasi allocation dan expenses
+        $sources = Source::with(['allocationIn', 'income' => function ($query) use ($year, $month) {
+            // Filter expenses berdasarkan tahun dan bulan
+            $query->whereYear('date', $year)
+                ->whereMonth('date', $month);
+        }])
+            ->where('user_id', $user->id)
+            ->where('is_active', true)
+            ->get();
+
+        // Hitung total alokasi, aktual, dan selisih
+        $reportIn = $sources->map(function ($source) use ($year, $month, $user) {
+            // Format date menjadi YYYY-MM
+            $date = sprintf('%04d-%02d', $year, $month); // Memastikan format YYYY-MM
+
+            // Filter allocation berdasarkan tahun dan bulan (format string YYYY-MM)
+            $alokasi = $source->allocationIn()
+                ->where('user_id', $user->id)
+                ->where('date', $date) // Filter berdasarkan format YYYY-MM
+                ->value('amount') ?? 0; // Ambil nilai amount, default ke 0 jika tidak ada
+
+            // Aktual diambil dari expenses yang sudah difilter
+            $aktual = $source->income ? $source->income->sum('amount') : 0;
+            // Hitung selisih
+            $selisih = $aktual - $alokasi;
 
 
-        // dd($alokasi);
+            // -------------------Untuk------------------------------------------
+
+            return [
+                'name' => $source->name,
+                'alokasi' => $alokasi,
+                'aktual' => $aktual,
+                'selisih' => $selisih,
+            ];
+        });
+
+
+        // dd($reportIn);
 
         // Kirim data ke frontend
         return Inertia::render('Menu/Laporan', [
@@ -160,6 +180,7 @@ class LaporanController extends Controller
                 'net_balance' => $netBalance,
                 'transactions' => $transactions,
                 'report' => $report,
+                'reportIn' => $reportIn,
             ],
         ]);
     }

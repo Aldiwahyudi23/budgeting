@@ -99,44 +99,71 @@
         </div>
       </div>
 
-              <!-- Tabel Laporan -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden responsive-table">
+      <div class="flex flex-col md:flex-row gap-4">
+        <!-- Tabel Laporan Pengeluaran -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden responsive-table w-full md:w-1/2">
+          <!-- Subjudul -->
+          <div class="bg-gray-700 text-white text-lg font-bold px-4 py-3">Pengeluaran</div>
           <table class="min-w-full">
-            <thead class="bg-gray-50">
+            <thead class="bg-gray-600 text-white text-sm uppercase tracking-wider">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alokasi</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aktual</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Selisih</th>
+                <th class="px-4 py-3 text-left">No</th>
+                <th class="px-4 py-3 text-left">Kategori</th>
+                <th class="px-4 py-3 text-left">Rencana</th>
+                <th class="px-4 py-3 text-left">Aktual</th>
+                <th class="px-4 py-3 text-left">Selisih</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr 
-                v-for="(item, index) in reportData.report" 
-                :key="index" 
-                class="hover:bg-gray-50"
-              >
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ index + 1 }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.name || '-' }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rp {{ formatCurrency(item.alokasi) }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rp {{ formatCurrency(item.aktual) }}</td>
-                <td 
-                  class="px-6 py-4 whitespace-nowrap text-sm font-semibold"
-                  :class="getSelisihClass(item.selisih)"
-                >
+            <tbody class="divide-y divide-gray-300 text-gray-700">
+              <tr v-for="(item, index) in reportData.report" :key="index" class="hover:bg-gray-100">
+                <td class="px-4 py-3">{{ index + 1 }}</td>
+                <td class="px-4 py-3">{{ item.name || '-' }}</td>
+                <td class="px-4 py-3">Rp {{ formatCurrency(item.alokasi) }}</td>
+                <td class="px-4 py-3">Rp {{ formatCurrency(item.aktual) }}</td>
+                <td class="px-4 py-3 font-semibold" :class="getSelisihClass(item.selisih)">
                   Rp {{ formatCurrency(item.selisih) }}
                 </td>
               </tr>
               <tr v-if="reportData.report.length === 0">
-                <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data laporan.</td>
+                <td colspan="5" class="px-4 py-3 text-center text-gray-500">Tidak ada data laporan.</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-      <!-- Grafik Laporan -->
+        <!-- Tabel Laporan Pemasukan -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden responsive-table w-full md:w-1/2">
+          <!-- Subjudul -->
+          <div class="bg-gray-700 text-white text-lg font-bold px-4 py-3">Pemasukan</div>
+          <table class="min-w-full">
+            <thead class="bg-gray-600 text-white text-sm uppercase tracking-wider">
+              <tr>
+                <th class="px-4 py-3 text-left">No</th>
+                <th class="px-4 py-3 text-left">Sumber</th>
+                <th class="px-4 py-3 text-left">Rencana</th>
+                <th class="px-4 py-3 text-left">Aktual</th>
+                <th class="px-4 py-3 text-left">Selisih</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-300 text-gray-700">
+              <tr v-for="(item, index) in reportData.reportIn" :key="index" class="hover:bg-gray-100">
+                <td class="px-4 py-3">{{ index + 1 }}</td>
+                <td class="px-4 py-3">{{ item.name || '-' }}</td>
+                <td class="px-4 py-3">Rp {{ formatCurrency(item.alokasi) }}</td>
+                <td class="px-4 py-3">Rp {{ formatCurrency(item.aktual) }}</td>
+                <td class="px-4 py-3 font-semibold" :class="getSelisihClass(item.selisih)">
+                  Rp {{ formatCurrency(item.selisih) }}
+                </td>
+              </tr>
+              <tr v-if="reportData.reportIn.length === 0">
+                <td colspan="5" class="px-4 py-3 text-center text-gray-500">Tidak ada data laporan.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
+      <!-- Grafik Laporan -->
       <div class="bg-white p-6 rounded-lg shadow-md mb-6 mt-6">
         <h2 class="text-lg font-semibold mb-4">Grafik Laporan</h2>
         <div class="h-64">
@@ -213,6 +240,7 @@ const reportData = ref({
   net_balance: '',
   transactions: [],
   report: [],
+  reportIn: [],
 });
 
 const searchQuery = ref('');
