@@ -45,7 +45,7 @@ Route::middleware([
     // Route::get('/dashboard', function () {
     //     return Inertia::render('Menu/Home');
     // })->name('dashboard');
-    Route::get('/dashboard', [MenuController::class, 'home'])->name('home');
+    Route::get('/dashboard', [HomeContorller::class, 'home'])->name('home');
 
 
 

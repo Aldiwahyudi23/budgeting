@@ -32,6 +32,7 @@ class ExpensesController extends Controller
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->with(['category', 'subCategory', 'accountBank'])
+            ->latest()
             ->get();
 
         $categories = Category::where('user_id', Auth::id())->get();

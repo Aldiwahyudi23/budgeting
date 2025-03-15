@@ -1,8 +1,8 @@
 <template>
   <AppLayout title="Dashboard Keuangan">
     <div class="p-4">
-      <!-- Bagian Card Saldo, Menu, dan Quick Links -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
+
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
     <!-- Card Saldo Bersih -->
     <Link
       :href="route('account-bank.index')"
@@ -132,43 +132,45 @@
       <!-- Grafik dan Data Lainnya -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <!-- Grafik Pengeluaran -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
+       <div class="bg-white p-6 rounded-lg shadow-md">
           <h2 class="text-lg font-semibold mb-4">Grafik Pengeluaran vs Pendapatan</h2>
           <div class="h-64">
             <canvas ref="chartCanvas"></canvas>
           </div>
         </div>
 
-        <!-- Daftar Transaksi Terbaru -->
-        <div class="bg-white p-4 rounded-lg shadow-md">
-          <h2 class="text-sm font-semibold mb-3">Transaksi Terbaru</h2>
-          <ul>
-            <li
-              v-for="transaction in props.latestTransactions"
-              :key="transaction.id"
-              class="flex items-center justify-between py-1 border-b"
-            >
-              <div>
-                <p class="text-xs font-semibold">{{ transaction.category }} {{ transaction.description }}</p>
-                <p class="text-[10px] text-gray-500">
-                  {{ new Date(transaction.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}
-                </p>
-              </div>
-              <p :class="transaction.type === 'income' ? 'text-green-500' : 'text-red-500'">
-                {{ transaction.type === 'income' ? '+' : '-' }} {{ formatCurrency(transaction.amount) }}
-              </p>
-            </li>
-          </ul>
-          <Link
-            :href="route('laporan')"
-            class="text-blue-500 hover:text-blue-700 text-[12px] mt-3 block"
-          >
-            Lihat Semua Transaksi →
-          </Link>
+ <!-- Daftar Transaksi Terbaru -->
+  <div class="bg-white p-4 rounded-lg shadow-md">
+    <h2 class="text-sm font-semibold mb-3">Transaksi Terbaru</h2>
+    <ul>
+      <li
+        v-for="transaction in props.latestTransactions"
+        :key="transaction.id"
+        class="flex items-center justify-between py-1 border-b"
+      >
+        <div>
+          <p class="text-xs font-semibold">{{ transaction.category }} {{ transaction.description }}</p>
+          <p class="text-[10px] text-gray-500">
+            {{ new Date(transaction.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}
+          </p>
         </div>
+        <p :class="transaction.type === 'income' ? 'text-green-500' : 'text-red-500'">
+          {{ transaction.type === 'income' ? '+' : '-' }} {{ formatCurrency(transaction.amount) }}
+        </p>
+      </li>
+    </ul>
+    <Link
+      :href="route('laporan')"
+      class="text-blue-500 hover:text-blue-700 text-[12px] mt-3 block"
+    >
+      Lihat Semua Transaksi →
+    </Link>
+  </div>
       </div>
 
-            <!-- Quick Links -->
+      
+
+      <!-- Quick Links -->
       <div class="mt-6">
         <h2 class="text-lg font-semibold mb-4">Akses Cepat</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -246,7 +248,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted } from 'vue'; // Tambahkan import ref & onMounted
 import { Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Chart from 'chart.js/auto';
@@ -275,6 +277,11 @@ const formatCurrency = (value) => {
   }).format(value);
 };
 
+// Contoh penggunaan
+console.log(formatCurrency(1000000)); // Output: "Rp1.000.000"
+console.log(formatCurrency(50000));   // Output: "Rp50.000"
+
+
 onMounted(() => {
   if (chartCanvas.value) {
     if (chartInstance) {
@@ -289,17 +296,18 @@ onMounted(() => {
           {
             label: 'Jumlah (Rp)',
             data: [props.totalExpenses, props.totalIncome],
-            backgroundColor: ['#f87171', '#4ade80'], // Warna untuk pengeluaran dan pendapatan
-            borderColor: ['#dc2626', '#16a34a'], // Warna border
+            backgroundColor: ['#f87171', '#4ade80'],
+            borderColor: ['#dc2626', '#16a34a'],
             borderWidth: 1,
           },
         ],
       },
       options: {
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          y: {
+          x: {
             beginAtZero: true,
             ticks: {
               callback: function (value) {
@@ -312,13 +320,14 @@ onMounted(() => {
           },
         },
         plugins: {
-          legend: { display: false }, // Sembunyikan legend
+          legend: { display: false },
         },
       },
     });
   }
 });
 </script>
+
 
 <style scoped>
 .menu-item {
@@ -327,4 +336,5 @@ onMounted(() => {
 .icon {
   @apply w-10 h-10 mb-2;
 }
+
 </style>

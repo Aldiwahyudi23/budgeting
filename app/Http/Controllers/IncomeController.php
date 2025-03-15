@@ -28,6 +28,7 @@ class IncomeController extends Controller
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->with(['source', 'subSource', 'accountBank'])
+            ->latest()
             ->get();
 
         $sources = Source::where('user_id', Auth::id())->get();

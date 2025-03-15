@@ -1,6 +1,8 @@
 <template>
   <AppLayout title="Laporan Keuangan">
     <div class="p-4">
+      <!-- <h1 class="text-2xl font-bold mb-6">Laporan Keuangan</h1> -->
+
       <!-- Filter Laporan -->
       <div class="bg-white p-6 rounded-lg shadow-md mb-6 mt-2">
         <h2 class="text-lg font-semibold mb-4">Filter Laporan</h2>
@@ -33,76 +35,76 @@
       <!-- Ringkasan Laporan -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <!-- Card Total Pengeluaran -->
-        <div class="bg-white p-4 rounded-lg shadow-md">
+        <div class="bg-white p-6 rounded-lg shadow-md">
           <div class="flex items-center">
-            <div class="bg-red-100 p-2 rounded-full">
+            <div class="bg-red-100 p-3 rounded-full">
               <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
             <div class="ml-4">
               <h2 class="text-lg font-semibold">Total Pengeluaran</h2>
-              <p class="text-xl font-bold text-red-600">{{ formatCurrency(reportData.total_expenses) }}</p>
+              <p class="text-2xl font-bold text-red-600">{{ formatCurrency(reportData.total_expenses) }}</p>
               <p class="text-sm text-gray-500">{{ selectedMonthName }} {{ selectedYear }}</p>
             </div>
           </div>
         </div>
 
         <!-- Card Total Pendapatan -->
-        <div class="bg-white p-4 rounded-lg shadow-md">
+        <div class="bg-white p-6 rounded-lg shadow-md">
           <div class="flex items-center">
-            <div class="bg-green-100 p-2 rounded-full">
+            <div class="bg-green-100 p-3 rounded-full">
               <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
             <div class="ml-4">
               <h2 class="text-lg font-semibold">Total Pendapatan</h2>
-              <p class="text-xl font-bold text-green-600">{{ formatCurrency(reportData.total_income) }}</p>
+              <p class="text-2xl font-bold text-green-600">{{ formatCurrency(reportData.total_income) }}</p>
               <p class="text-sm text-gray-500">{{ selectedMonthName }} {{ selectedYear }}</p>
             </div>
           </div>
         </div>
 
         <!-- Card Saldo Tabungan -->
-        <div class="bg-white p-4 rounded-lg shadow-md">
+        <div class="bg-white p-6 rounded-lg shadow-md">
           <div class="flex items-center">
-            <div class="bg-blue-100 p-2 rounded-full">
+            <div class="bg-blue-100 p-3 rounded-full">
               <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
               </svg>
             </div>
             <div class="ml-4">
               <h2 class="text-lg font-semibold">Saldo Tabungan</h2>
-              <p class="text-xl font-bold text-blue-600">{{ formatCurrency(reportData.total_savings) }}</p>
+              <p class="text-2xl font-bold text-blue-600">{{ formatCurrency(reportData.total_savings) }}</p>
               <p class="text-sm text-gray-500">Saldo Saat Ini</p>
             </div>
           </div>
         </div>
 
         <!-- Card Saldo Bersih -->
-        <div class="bg-white p-4 rounded-lg shadow-md">
+        <div class="bg-white p-6 rounded-lg shadow-md">
           <div class="flex items-center">
-            <div class="bg-purple-100 p-2 rounded-full">
+            <div class="bg-purple-100 p-3 rounded-full">
               <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
             <div class="ml-4">
               <h2 class="text-lg font-semibold">Saldo Bersih</h2>
-              <p class="text-xl font-bold text-purple-600">{{ formatCurrency(reportData.net_balance) }}</p>
+              <p class="text-2xl font-bold text-purple-600">{{ formatCurrency(reportData.net_balance) }}</p>
               <p class="text-sm text-gray-500">{{ selectedMonthName }} {{ selectedYear }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Tabel Perbandingan Pengeluaran dan Pemasukan -->
-      <div class="flex flex-col md:flex-row gap-4 mb-6">
+      <div class="flex flex-col md:flex-row gap-4">
         <!-- Tabel Laporan Pengeluaran -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden w-full md:w-1/2">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden responsive-table w-full md:w-1/2">
+          <!-- Subjudul -->
           <div class="bg-gray-700 text-white text-lg font-bold px-4 py-3">Pengeluaran</div>
-          <table class="min-w-full responsive-table">
+          <table class="min-w-full">
             <thead class="bg-gray-600 text-white text-sm uppercase tracking-wider">
               <tr>
                 <th class="px-4 py-3 text-left">No</th>
@@ -130,9 +132,10 @@
         </div>
 
         <!-- Tabel Laporan Pemasukan -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden w-full md:w-1/2">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden responsive-table w-full md:w-1/2">
+          <!-- Subjudul -->
           <div class="bg-gray-700 text-white text-lg font-bold px-4 py-3">Pemasukan</div>
-          <table class="min-w-full responsive-table">
+          <table class="min-w-full">
             <thead class="bg-gray-600 text-white text-sm uppercase tracking-wider">
               <tr>
                 <th class="px-4 py-3 text-left">No</th>
@@ -161,14 +164,13 @@
       </div>
 
       <!-- Grafik Laporan -->
-      <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+      <div class="bg-white p-6 rounded-lg shadow-md mb-6 mt-6">
         <h2 class="text-lg font-semibold mb-4">Grafik Laporan</h2>
         <div class="h-64">
-          <canvas id="reportChart"></canvas>
+          
         </div>
       </div>
 
-      <!-- Detail Laporan -->
       <div class="bg-white p-6 rounded-lg shadow-md">
         <h2 class="text-lg font-semibold mb-4">Detail Laporan</h2>
         <!-- Input Pencarian -->
@@ -193,7 +195,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in paginatedTransactions" :key="item.id" class="border-b">
+              <tr v-for="item in filteredTransactions" :key="item.id" class="border-b">
                 <td class="py-2">{{ formatDate(item.date) }}</td>
                 <td class="py-2">{{ item.category }}</td>
                 <td class="py-2">{{ item.description }}</td>
@@ -204,25 +206,6 @@
             </tbody>
           </table>
         </div>
-
-        <!-- Pagination -->
-        <div class="flex justify-between items-center mt-4">
-          <button 
-            @click="previousPage" 
-            :disabled="currentPage === 1" 
-            class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-          >
-            back
-          </button>
-          <span>Hal {{ currentPage }} dari {{ totalPages }}</span>
-          <button 
-            @click="nextPage" 
-            :disabled="currentPage === totalPages" 
-            class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-          >
-            next
-          </button>
-        </div>
       </div>
     </div>
   </AppLayout>
@@ -230,7 +213,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 import Chart from 'chart.js/auto';
 
@@ -248,6 +231,7 @@ const props = defineProps({
   report: Array, // Data laporan dari controller
 });
 
+
 // Data laporan
 const reportData = ref({
   total_expenses: '',
@@ -260,9 +244,6 @@ const reportData = ref({
 });
 
 const searchQuery = ref('');
-const currentPage = ref(1);
-const itemsPerPage = 10;
-
 // Filter transaksi berdasarkan pencarian
 const filteredTransactions = computed(() => {
   if (!searchQuery.value) return reportData.value.transactions;
@@ -272,22 +253,6 @@ const filteredTransactions = computed(() => {
   );
 });
 
-// Pagination
-const paginatedTransactions = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filteredTransactions.value.slice(start, end);
-});
-
-const totalPages = computed(() => Math.ceil(filteredTransactions.value.length / itemsPerPage));
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++;
-};
-
-const previousPage = () => {
-  if (currentPage.value > 1) currentPage.value--;
-};
 
 // Format mata uang
 const formatCurrency = (value) => {
@@ -321,46 +286,6 @@ const fetchReport = async () => {
     onSuccess: (data) => {
       reportData.value = data.props.report;
     },
-  });
-};
-
-// Render grafik
-const renderChart = () => {
-  const ctx = document.getElementById('reportChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Pengeluaran', 'Pendapatan', 'Tabungan', 'Saldo Bersih'],
-      datasets: [{
-        label: 'Jumlah',
-        data: [
-          reportData.value.total_expenses,
-          reportData.value.total_income,
-          reportData.value.total_savings,
-          reportData.value.net_balance
-        ],
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(153, 102, 255, 0.2)'
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(153, 102, 255, 1)'
-        ],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
   });
 };
 

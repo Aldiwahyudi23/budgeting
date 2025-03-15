@@ -15,12 +15,21 @@ const perPage = ref(10);
 const currentPage = ref(1);
 
 // Filter transaksi berdasarkan pencarian
+// const filteredTransactions = computed(() => {
+//   return transactions.value
+//     .filter(trx =>
+//       getDescription(trx).toLowerCase().includes(search.value.toLowerCase())
+//     )
+//     .slice((currentPage.value - 1) * perPage.value, currentPage.value * perPage.value);
+// });
+
+// Filter transaksi berdasarkan pencarian
 const filteredTransactions = computed(() => {
-  return transactions.value
-    .filter(trx =>
-      getDescription(trx).toLowerCase().includes(search.value.toLowerCase())
-    )
-    .slice((currentPage.value - 1) * perPage.value, currentPage.value * perPage.value);
+  if (!search.value) return transactions.value;
+  return transactions.value.filter(item =>
+    item.description.toLowerCase().includes(search.value.toLowerCase()) ||
+    item.category.toLowerCase().includes(search.value.toLowerCase())
+  );
 });
 
 // Fungsi untuk format tanggal
@@ -100,6 +109,7 @@ const nextPage = () => {
           <thead>
             <tr class="bg-gray-200">
               <th class="p-2 text-left">Tanggal</th>
+              <th class="p-2 text-left">Kategori</th>
               <th class="p-2 text-left">Keterangan</th>
               <th class="p-2 text-left">Nominal</th>
             </tr>
@@ -108,7 +118,10 @@ const nextPage = () => {
             <tr v-for="transaction in filteredTransactions" :key="transaction.id" class="border-b">
               <td class="p-2">{{ formatDate(transaction.date) }}</td>
               <td class="p-2">
-                  {{ transaction.category }} {{ transaction.description }}
+                  {{ transaction.category }} 
+              </td>
+              <td class="p-2">
+                  {{ transaction.description }}
               </td>
               <td class="p-2 font-bold" :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
                 {{ formatCurrency(transaction.amount) }}
