@@ -99,52 +99,87 @@
         </div>
       </div>
 
+              <!-- Tabel Laporan -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden responsive-table">
+          <table class="min-w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alokasi</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aktual</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Selisih</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr 
+                v-for="(item, index) in reportData.report" 
+                :key="index" 
+                class="hover:bg-gray-50"
+              >
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ index + 1 }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.name || '-' }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rp {{ formatCurrency(item.alokasi) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rp {{ formatCurrency(item.aktual) }}</td>
+                <td 
+                  class="px-6 py-4 whitespace-nowrap text-sm font-semibold"
+                  :class="getSelisihClass(item.selisih)"
+                >
+                  Rp {{ formatCurrency(item.selisih) }}
+                </td>
+              </tr>
+              <tr v-if="reportData.report.length === 0">
+                <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data laporan.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
       <!-- Grafik Laporan -->
 
-  <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-    <h2 class="text-lg font-semibold mb-4">Grafik Laporan</h2>
-    <div class="h-64">
-      <canvas ref="chart"></canvas>
-    </div>
-  </div>
+      <div class="bg-white p-6 rounded-lg shadow-md mb-6 mt-6">
+        <h2 class="text-lg font-semibold mb-4">Grafik Laporan</h2>
+        <div class="h-64">
+          
+        </div>
+      </div>
 
-<div class="bg-white p-6 rounded-lg shadow-md">
-  <h2 class="text-lg font-semibold mb-4">Detail Laporan</h2>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-lg font-semibold mb-4">Detail Laporan</h2>
+        <!-- Input Pencarian -->
+        <div class="mb-4">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Cari transaksi..."
+            class="w-full p-2 border rounded-md"
+          />
+        </div>
 
-  <!-- Input Pencarian -->
-  <div class="mb-4">
-    <input
-      v-model="searchQuery"
-      type="text"
-      placeholder="Cari transaksi..."
-      class="w-full p-2 border rounded-md"
-    />
-  </div>
-
-  <!-- Tabel Responsif -->
-  <div class="responsive-table">
-    <table class="min-w-full">
-      <thead>
-        <tr>
-          <th class="text-left py-2">Tanggal</th>
-          <th class="text-left py-2">Kategori</th>
-          <th class="text-left py-2">Deskripsi</th>
-          <th class="text-right py-2">Jumlah</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in filteredTransactions" :key="item.id" class="border-b">
-          <td class="py-2">{{ formatDate(item.date) }}</td>
-          <td class="py-2">{{ item.category }}</td>
-          <td class="py-2">{{ item.description }}</td>
-          <td class="text-right" :class="item.type === 'income' ? 'text-green-500' : 'text-red-500'">
-            {{ item.type === 'income' ? '+' : '-' }} {{ formatCurrency(item.amount) }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+        <!-- Tabel Responsif -->
+        <div class="responsive-table">
+          <table class="min-w-full">
+            <thead>
+              <tr>
+                <th class="text-left py-2">Tanggal</th>
+                <th class="text-left py-2">Kategori</th>
+                <th class="text-left py-2">Deskripsi</th>
+                <th class="text-right py-2">Jumlah</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in filteredTransactions" :key="item.id" class="border-b">
+                <td class="py-2">{{ formatDate(item.date) }}</td>
+                <td class="py-2">{{ item.category }}</td>
+                <td class="py-2">{{ item.description }}</td>
+                <td class="text-right" :class="item.type === 'income' ? 'text-green-500' : 'text-red-500'">
+                  {{ item.type === 'income' ? '+' : '-' }} {{ formatCurrency(item.amount) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>
@@ -164,6 +199,12 @@ const months = ref([
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ]);
 
+// Ambil props dari controller
+const props = defineProps({
+  report: Array, // Data laporan dari controller
+});
+
+
 // Data laporan
 const reportData = ref({
   total_expenses: '',
@@ -171,6 +212,7 @@ const reportData = ref({
   total_savings: '',
   net_balance: '',
   transactions: [],
+  report: [],
 });
 
 const searchQuery = ref('');
@@ -183,52 +225,19 @@ const filteredTransactions = computed(() => {
   );
 });
 
-// Referensi ke elemen canvas
-const chart = ref(null);
-
-// Buat grafik saat komponen dimuat
-onMounted(() => {
-  const ctx = chart.value.getContext('2d');
-
-  new Chart(ctx, {
-    type: 'pie', // Jenis grafik (pie chart)
-    data: {
-      labels: ['Pengeluaran', 'Pendapatan'], // Label untuk setiap bagian
-      datasets: [
-        {
-          data: [reportData.value.total_expenses, reportData.value.total_income], // Data untuk grafik
-          backgroundColor: ['#EF4444', '#10B981'], // Warna untuk setiap bagian
-          hoverBackgroundColor: ['#DC2626', '#059669'], // Warna saat dihover
-        },
-      ],
-    },
-    options: {
-      responsive: true, // Grafik responsif
-      maintainAspectRatio: false, // Tidak mempertahankan rasio aspek
-      plugins: {
-        legend: {
-          position: 'bottom', // Posisi legenda
-        },
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              const label = context.label || '';
-              const value = context.raw || 0;
-              return `${label}: ${new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-              }).format(value)}`;
-            },
-          },
-        },
-      },
-    },
-  });
-});
 
 // Format mata uang
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+  const number = parseFloat(value); // Konversi ke angka
+  if (isNaN(number)) return '0'; // Jika bukan angka, kembalikan '0'
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number).replace('Rp', '').trim();
+};
+
+// Fungsi untuk menentukan class selisih
+const getSelisihClass = (selisih) => {
+  const number = parseFloat(selisih); // Konversi ke angka
+  if (isNaN(number)) return 'text-gray-500'; // Jika bukan angka, kembalikan warna default
+  return number < 0 ? 'text-red-500' : 'text-green-500';
 };
 
 // Format tanggal
@@ -271,11 +280,5 @@ onMounted(() => {
 /* Pastikan container grafik memiliki ukuran yang cukup */
 .h-64 {
   height: 16rem; /* 16 * 0.25rem = 4rem */
-}
-
-/* Pastikan canvas mengisi container-nya */
-canvas {
-  width: 100% !important;
-  height: 100% !important;
 }
 </style>

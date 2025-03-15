@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Financial;
 
 use App\Models\Financial\Bill;
 use App\Http\Controllers\Controller;
+use App\Models\Aktivitas\Expenses;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\SubCategory;
 use Illuminate\Http\Request;
@@ -169,5 +170,12 @@ class BillController extends Controller
         $bill->delete();
 
         return redirect()->back()->with('success', 'Bill berhasil dihapus.');
+    }
+
+    public function pembayaran($id)
+    {
+        $bill = Bill::find($id);
+        $expenses = Expenses::with('category', 'subCategory', 'accountBank')->where('sub_kategori_id', $bill->sub_category_id)->get();
+        return Inertia::render('Financial/Bill/Pembayaran', compact('expenses'));
     }
 }

@@ -210,14 +210,15 @@ class DebtController extends Controller
                 throw new \Exception('Sub kategori tidak ditemukan.');
             }
 
-            // Update sub kategori
-            $debt->subCategory->update([
-                'name' => $request->name,
-                'description' => $request->note,
-                'is_active' => $request->is_active,
-            ]);
+            // Update status sub_category jika ada
+            if ($debt->sub_category) {
+                $debt->sub_category->update([
+                    'is_active' => $request->is_active,
+                ]);
+            }
 
             // Update data Debt
+            // Update data hutang
             $debt->update([
                 'name' => $request->name,
                 'amount' => $request->amount,
@@ -255,5 +256,12 @@ class DebtController extends Controller
         $depts->delete();
 
         return redirect()->back()->with('success', 'Debt berhasil dihapus.');
+    }
+
+    public function pembayaran($id)
+    {
+        $debt = Debt::find($id);
+        $expenses = Expenses::with('category', 'subCategory', 'accountBank')->where('sub_kategori_id', $debt->sub_category_id)->get();
+        return Inertia::render('Financial/Debt/Pembayaran', compact('expenses'));
     }
 }

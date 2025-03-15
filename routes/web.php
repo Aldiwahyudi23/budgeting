@@ -14,6 +14,9 @@ use App\Http\Controllers\MasterData\DebitController;
 use App\Http\Controllers\MasterData\SourceController;
 use App\Http\Controllers\MasterData\SubCategoryController;
 use App\Http\Controllers\MasterData\SubSourceController;
+use App\Http\Controllers\Menu\AsetController;
+use App\Http\Controllers\Menu\HomeContorller;
+use App\Http\Controllers\Menu\LaporanController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\SettingController;
 use App\Models\MasterData\Category;
@@ -80,17 +83,19 @@ Route::middleware([
 
     Route::resource('/savings', SavingController::class);
     Route::resource('/bills', BillController::class);
+    Route::get('/history-pembayaran/bills/{id}', [BillController::class, 'pembayaran'])->name('history_pembayaran_bill');
     Route::resource('/debts', DebtController::class);
+    Route::get('/history-pembayaran/debts/{id}', [DebtController::class, 'pembayaran'])->name('history_pembayaran_debt');
     Route::resource('/loans', LoanController::class);
 
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings/{key}', [SettingController::class, 'update'])->name('settings.update');
     Route::post('/setting/account-bank/saving/{key}', [SettingController::class, 'update_accountBank'])->name('setting_Account.update');
 
-    Route::get('/home', [MenuController::class, 'home'])->name('home');
-    Route::get('/finance-summary', [MenuController::class, 'getFinanceSummary']);
+    Route::get('/home', [HomeContorller::class, 'home'])->name('home');
+    Route::get('/finance-summary', [HomeContorller::class, 'getFinanceSummary']);
 
-    Route::get('/aset', [MenuController::class, 'aset'])->name('aset');
-    Route::get('/laporan', [MenuController::class, 'laporan'])->name('laporan');
+    Route::get('/aset', [AsetController::class, 'aset'])->name('aset');
+    Route::get('/laporan', [LaporanController::class, 'laporan'])->name('laporan');
     Route::get('/master-data', [MenuController::class, 'setupData'])->name('setupData');
 });

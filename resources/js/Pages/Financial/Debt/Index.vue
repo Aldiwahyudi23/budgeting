@@ -1,6 +1,15 @@
 <template>
   <AppLayout title="Kelola Hutang">
     <div class="p-4">
+        <!-- Tampilkan flash message jika ada -->
+    <div v-if="$page.props.flash.success" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+      {{ $page.props.flash.success }}
+    </div>
+
+    <div v-if="$page.props.flash.error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      {{ $page.props.flash.error }}
+    </div>
+
       <div class="container mx-auto p-2">
         <!-- Header & Tombol Tambah -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg shadow-md mb-2">
@@ -40,7 +49,7 @@
               v-for="debt in paidDebts" 
               :key="debt.id" 
               class="flex justify-between items-center py-2 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
-              @click="openModal('detail', debt)"
+              @click="goToDebtStory(debt.id)"
             >
               <span class="text-gray-800">{{ debt.sub_category?.name || 'Tanpa Kategori' }} ({{ debt.type == 'installment' ? 'Kredit/Cicilan' : debt.type }})</span>
               <span class="text-purple-600 font-semibold">Rp {{ formatCurrency(debt.amount) }}</span>
@@ -85,10 +94,18 @@
               Setiap tanggal jatuh tempo, hutang akan otomatis tersimpan ke data.
             </p>
 
-            <!-- Tombol Edit & Hapus -->
-            <div class="mt-4 flex space-x-2">
-              <PrimaryButton @click="openModal('edit', debt)">Edit</PrimaryButton>
-              <PrimaryButton class="bg-red-600 hover:bg-red-700" @click="confirmDelete(debt.id)">Hapus</PrimaryButton>
+              <!-- Tombol Edit, Hapus, dan History Pembayaran -->
+            <div class="mt-4 flex justify-between items-center">
+              <div class="flex space-x-2">
+                <PrimaryButton @click="openModal('edit', debt)">Edit</PrimaryButton>
+                <PrimaryButton class="bg-red-600 hover:bg-red-700" @click="confirmDelete(debt.id)">Hapus</PrimaryButton>
+              </div>
+              <a 
+                :href="route('history_pembayaran_debt', { id: debt.id })" 
+                class="text-sm text-blue-500 hover:text-blue-700 underline"
+              >
+                History Pembayaran
+              </a>
             </div>
           </div>
         </div>
@@ -101,9 +118,31 @@
         <!-- Informasi Tambahan -->
         <div class="mt-4 bg-gray-100 p-2 rounded-lg shadow-md">
           <h2 class="text-lg font-semibold text-gray-800">Informasi Mengenai Hutang</h2>
-          <p class="text-sm text-gray-600 mt-2">
-            Halaman ini digunakan untuk mencatat hutang yang harus dibayar, baik itu hutang pribadi, cicilan, atau hutang bisnis.
-          </p>
+
+            <p class="text-sm text-gray-600 mb-4">
+              Halaman ini digunakan untuk mencatat semua hutang, baik hutang perorangan maupun hutang bertenor seperti kredit atau cicilan. Berikut cara menambahkan hutang:
+            </p>
+            <ul class="text-sm text-gray-600 list-disc list-inside mb-6">
+              <li>Klik tombol di atas kanan untuk menambahkan hutang baru.</li>
+              <li>Pilih nama hutang (misal: "Hutang ke Ahmad" atau "Kredivo").</li>
+              <li>Tambahkan catatan (opsional).</li>
+              <li>Masukkan nominal:
+                <ul class="list-circle list-inside ml-4">
+                  <li><strong>Personal</strong>: Masukkan total hutang.</li>
+                  <li><strong>Cicilan</strong>: Masukkan cicilan per bulannya.</li>
+                </ul>
+              </li>
+              <li>Pilih jenis hutang: <strong>Personal</strong> atau <strong>Cicilan</strong>.</li>
+              <li>Jika memilih <strong>Cicilan</strong>, tentukan tanggal jatuh tempo dan tenor (dalam bulan).</li>
+              <li>Aktifkan hutang untuk memulai pencatatan.</li>
+              <li>Pilih mode pembayaran:
+                <ul class="list-circle list-inside ml-4">
+                  <li><strong>Auto</strong>: Pembayaran dilakukan otomatis.</li>
+                  <li><strong>Reminder</strong>: Dapatkan pengingat sebelum jatuh tempo.</li>
+                </ul>
+              </li>
+            </ul>
+
           <p class="text-sm text-gray-600 mt-2">
             Untuk pembayaran atau transaksi, silakan lakukan melalui halaman 
             <strong>Transaksi Pengeluaran (Expenses)</strong>. 
@@ -247,31 +286,6 @@ const form = useForm({
   auto: false,
 });
 
-// Filter data berdasarkan status
-const activeDebts = computed(() => props.debts.filter(debt => debt.status === 'active'));
-const inactiveDebts = computed(() => props.debts.filter(debt => debt.status !== 'active'));
-const paidDebts = computed(() => props.debts.filter(debt => debt.status === 'paid'));
-
-// Format mata uang
-const formatCurrency = (value) => {
-    if (!value) return '';
-    return new Intl.NumberFormat('id-ID').format(value);
-};
-
-const parseCurrency = (value) => {
-    if (!value) return '';
-    return value.replace(/\./g, '');
-};
-
-const formattedAmount = computed({
-    get: () => formatCurrency(form.amount),
-    set: (value) => { form.amount = parseCurrency(value); }
-});
-
-watchEffect(() => {
-    formattedAmount.value = formatCurrency(form.amount);
-});
-
 // Buka modal
 const openModal = (mode, debt = null) => {
   isEditMode.value = mode === 'edit';
@@ -302,21 +316,67 @@ const closeModal = () => {
 const submitForm = () => {
   if (isEditMode.value) {
     form.put(route('debts.update', form.id), {
-      onSuccess: () => closeModal(),
+      onSuccess: () => {
+        closeModal();
+      },
+      onError: (errors) => {
+        // Tangani error validasi
+        console.error('Error saat mengupdate data:', errors);
+      },
+      onFinish: () => {
+        // Pastikan modal tertutup meskipun ada error
+        closeModal();
+      },
     });
   } else {
     form.post(route('debts.store'), {
-      onSuccess: () => closeModal(),
+      onSuccess: () => {
+        closeModal();
+      },
+      onError: (errors) => {
+        // Tangani error validasi
+        console.error('Error saat menyimpan data:', errors);
+      },
+      onFinish: () => {
+        // Pastikan modal tertutup meskipun ada error
+        closeModal();
+      },
     });
   }
 };
-
 // Konfirmasi hapus
 const confirmDelete = (id) => {
-  if (confirm('Apakah Anda yakin ingin menghapus hutang ini?')) {
+  if (confirm('Apakah Anda yakin ingin menghapus bill ini?')) {
     router.delete(route('debts.destroy', id));
   }
 };
+
+
+// Filter data berdasarkan status
+const activeDebts = computed(() => props.debts.filter(debt => debt.status === 'active'));
+const inactiveDebts = computed(() => props.debts.filter(debt => debt.status !== 'active'));
+const paidDebts = computed(() => props.debts.filter(debt => debt.status === 'paid'));
+
+// Format mata uang
+const formatCurrency = (value) => {
+    if (!value) return '';
+    return new Intl.NumberFormat('id-ID').format(value);
+};
+
+const parseCurrency = (value) => {
+    if (!value) return '';
+    return value.replace(/\./g, '');
+};
+
+const formattedAmount = computed({
+    get: () => formatCurrency(form.amount),
+    set: (value) => { form.amount = parseCurrency(value); }
+});
+
+watchEffect(() => {
+    formattedAmount.value = formatCurrency(form.amount);
+});
+
 
 // Format tanggal
 const formatDate = (date) => {
@@ -337,5 +397,10 @@ const getTenor = (debt) => {
 // Toggle tampilan data tidak aktif
 const toggleInactiveDebts = () => {
   showInactiveDebts.value = !showInactiveDebts.value;
+};
+
+
+const goToDebtStory = (debtId) => {
+  router.visit(route('history_pembayaran_debt', { id: debtId }));
 };
 </script>
