@@ -26,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
 
     ->withSchedule(function (Schedule $schedule) {
-        $schedule->command('app:bills-auto')->dailyAt('09:00'); // Jalankan setiap hari pukul 00:00
+        $schedule->command('app:bills-auto')->dailyAt('09:10'); // Jalankan setiap hari pukul 00:00
         $schedule->command('app:billsremender')->dailyAt('07:00'); // Jalankan setiap hari pukul 00:00
         $schedule->command('app:debts-remender')->dailyAt('07:00'); // Jalankan setiap hari pukul 00:00
     })
