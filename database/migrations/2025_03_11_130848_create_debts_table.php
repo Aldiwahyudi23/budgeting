@@ -25,7 +25,6 @@ return new class extends Migration
             $table->integer('tenor_months')->nullable();
             $table->date('last_payment_month')->nullable();
             $table->boolean('reminder')->default(false);
-            $table->boolean('auto')->default(false);
             $table->timestamps();
         });
     }

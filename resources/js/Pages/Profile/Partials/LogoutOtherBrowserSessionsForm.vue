@@ -45,19 +45,19 @@ const closeModal = () => {
 <template>
     <ActionSection>
         <template #title>
-            Browser Sessions
+            Sesi Browser
         </template>
 
         <template #description>
-            Manage and log out your active sessions on other browsers and devices.
+            Kelola dan keluar dari sesi aktif Anda di browser dan perangkat lain.
         </template>
 
         <template #content>
             <div class="max-w-xl text-sm text-gray-600">
-                If necessary, you may log out of all of your other browser sessions across all of your devices. Some of your recent sessions are listed below; however, this list may not be exhaustive. If you feel your account has been compromised, you should also update your password.
+                Jika diperlukan, Anda dapat keluar dari semua sesi browser Anda di semua perangkat. Beberapa sesi terbaru Anda tercantum di bawah ini; namun, daftar ini mungkin tidak lengkap. Jika Anda merasa akun Anda telah disusupi, Anda juga harus memperbarui password Anda.
             </div>
 
-            <!-- Other Browser Sessions -->
+            <!-- Daftar Sesi Browser Lain -->
             <div v-if="sessions.length > 0" class="mt-5 space-y-6">
                 <div v-for="(session, i) in sessions" :key="i" class="flex items-center">
                     <div>
@@ -72,15 +72,15 @@ const closeModal = () => {
 
                     <div class="ms-3">
                         <div class="text-sm text-gray-600">
-                            {{ session.agent.platform ? session.agent.platform : 'Unknown' }} - {{ session.agent.browser ? session.agent.browser : 'Unknown' }}
+                            {{ session.agent.platform ? session.agent.platform : 'Tidak Diketahui' }} - {{ session.agent.browser ? session.agent.browser : 'Tidak Diketahui' }}
                         </div>
 
                         <div>
                             <div class="text-xs text-gray-500">
                                 {{ session.ip_address }},
 
-                                <span v-if="session.is_current_device" class="text-green-500 font-semibold">This device</span>
-                                <span v-else>Last active {{ session.last_active }}</span>
+                                <span v-if="session.is_current_device" class="text-green-500 font-semibold">Perangkat ini</span>
+                                <span v-else>Aktif terakhir {{ session.last_active }}</span>
                             </div>
                         </div>
                     </div>
@@ -89,29 +89,29 @@ const closeModal = () => {
 
             <div class="flex items-center mt-5">
                 <PrimaryButton @click="confirmLogout">
-                    Log Out Other Browser Sessions
+                    Keluar dari Sesi Browser Lain
                 </PrimaryButton>
 
                 <ActionMessage :on="form.recentlySuccessful" class="ms-3">
-                    Done.
+                    Selesai.
                 </ActionMessage>
             </div>
 
-            <!-- Log Out Other Devices Confirmation Modal -->
+            <!-- Modal Konfirmasi Keluar dari Sesi Lain -->
             <DialogModal :show="confirmingLogout" @close="closeModal">
                 <template #title>
-                    Log Out Other Browser Sessions
+                    Keluar dari Sesi Browser Lain
                 </template>
 
                 <template #content>
-                    Please enter your password to confirm you would like to log out of your other browser sessions across all of your devices.
+                    Harap masukkan password Anda untuk mengonfirmasi bahwa Anda ingin keluar dari sesi browser lain di semua perangkat Anda.
 
                     <div class="mt-4">
                         <TextInput
                             ref="passwordInput"
                             v-model="form.password"
                             type="password"
-                            class="mt-1 block w-3/4"
+                            class="mt-1 block w-full md:w-3/4"
                             placeholder="Password"
                             autocomplete="current-password"
                             @keyup.enter="logoutOtherBrowserSessions"
@@ -123,7 +123,7 @@ const closeModal = () => {
 
                 <template #footer>
                     <SecondaryButton @click="closeModal">
-                        Cancel
+                        Batal
                     </SecondaryButton>
 
                     <PrimaryButton
@@ -131,11 +131,34 @@ const closeModal = () => {
                         :class="{ 'opacity-25': form.processing }"
                         :disabled="form.processing"
                         @click="logoutOtherBrowserSessions"
+                        
                     >
-                        Log Out Other Browser Sessions
+                        Keluar dari Sesi Browser Lain
                     </PrimaryButton>
                 </template>
             </DialogModal>
         </template>
     </ActionSection>
 </template>
+
+<style scoped>
+/* Animasi untuk modal */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+/* Responsif untuk tombol dan input */
+@media (max-width: 640px) {
+
+
+    .ms-3 {
+        margin-left: 0.5rem;
+    }
+}
+</style>

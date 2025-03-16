@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Financial;
 use App\Models\Financial\Bill;
 use App\Http\Controllers\Controller;
 use App\Models\Aktivitas\Expenses;
+use App\Models\MasterData\AccountBank;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\SubCategory;
 use Illuminate\Http\Request;
@@ -21,10 +22,14 @@ class BillController extends Controller
     public function index()
     {
         // Di controller
-        $bills = Bill::with('subCategory')->where('user_id', Auth::id())->get();
+        $bills = Bill::with('subCategory', 'accountBank')->where('user_id', Auth::id())->get();
+        $accountBanks = AccountBank::where('user_id', Auth::id())
+            ->where('is_active', true)
+            ->get();
 
         return Inertia::render('Financial/Bill/Index', [
             'bills' => $bills,
+            'accountBanks' => $accountBanks,
         ]);
     }
 
@@ -87,6 +92,7 @@ class BillController extends Controller
                 'sub_category_id' => $subCategory->id,
                 'reminder' => $request->reminder ?? false,
                 'auto' => $request->auto ?? false,
+                'account_id' => $request->account_id ?? Null,
             ]);
 
             // Commit transaction jika semua proses berhasil
@@ -146,6 +152,7 @@ class BillController extends Controller
                 'note' => $request->note,
                 'reminder' => $request->reminder ?? false,
                 'auto' => $request->auto ?? false,
+                'account_id' => $request->account_id ?? Null,
             ]);
 
             // Commit transaction jika semua proses berhasil

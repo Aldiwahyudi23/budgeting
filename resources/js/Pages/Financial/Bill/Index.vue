@@ -35,7 +35,7 @@
           Tagihan ini di set Pengingat dan akan diingatkan selalu.
         </p>
         <p v-if="bill.auto" class="text-sm text-blue-500">
-          Setiap tanggal jatuh tempo, tagihan akan otomatis tersimpan ke data.
+          Setiap tanggal jatuh tempo, tagihan akan otomatis tersimpan ke data dan mengurangi saldo {{ bill.account_bank.name }}.
         </p>
 
         <!-- Tombol Edit, Hapus, dan History Pembayaran -->
@@ -127,28 +127,51 @@
               <InputError :message="form.errors.date" />
             </div>
 
-            <div class="mb-4">
-              <label class="flex items-center">
-                <input type="checkbox" v-model="form.is_active" class="mr-2" />
-                <span>Status</span>  
-              </label>
-              <p class="text-sm text-gray-500">Jika Aktif akan bisa Transaksi</p>
-            </div>
+ <div class="mb-4">
+      <label class="flex items-center">
+        <input type="checkbox" v-model="form.is_active" class="mr-2" />
+        <span>Status</span>
+      </label>
+      <p class="text-sm text-gray-500">Jika Aktif akan bisa Transaksi</p>
+    </div>
 
-            <div class="mb-4">
-              <label class="flex items-center">
-                <input type="checkbox" v-model="form.reminder" class="mr-2" />
-                <span>Pengingat</span>  
-              </label>
-              <p class="text-sm text-gray-500">Akan diingatkan H-1 dari Tanggal</p>
-            </div>
+    <div class="mb-4">
+      <label class="flex items-center">
+        <input
+          type="checkbox"
+          v-model="form.reminder"
+          class="mr-2"
+          :disabled="!form.is_active"
+        />
+        <span>Pengingat</span>
+      </label>
+      <p class="text-sm text-gray-500">Akan diingatkan H-1 dari Tanggal</p>
+    </div>
 
-            <div class="mb-4">
-              <label class="flex items-center">
-                <input type="checkbox" v-model="form.auto" class="mr-2" />
-                <span>Otomatis</span>
-              </label>
-              <p class="text-sm text-gray-500">Secara Otomatis Masuk data sesuai tanggal</p>
+    <div class="mb-4">
+      <label class="flex items-center">
+        <input
+          type="checkbox"
+          v-model="form.auto"
+          class="mr-2"
+          :disabled="!form.is_active"
+        />
+        <span>Otomatis</span>
+      </label>
+      <p class="text-sm text-gray-500">Secara Otomatis Masuk data sesuai tanggal</p>
+    </div>
+            <div class="mb-4" v-if="form.auto === true">
+              <InputLabel for="account_id">
+                Sumber Rekening
+                <span class="text-red-500 text-sm">*</span>
+              </InputLabel>
+              <select id="account_id" v-model="form.account_id" class="block w-full border rounded-md p-2" required>
+                <option disabled value="">Pilih Rekening</option>
+                  <option v-for="account in accountBanks" :key="account.id" :value="account.id" :disabled="!account.is_active">
+                    {{ account.name }} <span v-if="!account.is_active">(Tidak Aktif)</span>
+                  </option>
+              </select>
+              <InputError :message="form.errors.account_id" />
             </div>
 
             <div class="flex justify-end mt-4">
@@ -163,110 +186,127 @@
 </template>
 
 <script setup>
-  import AppLayout from '@/Layouts/AppLayout.vue';
-  import { ref, reactive, computed, watch, watchEffect } from 'vue';
-  import { useForm, usePage, router } from '@inertiajs/vue3';
-  import CustomModal from '@/Components/CustomModal.vue';
-  import PrimaryButton from '@/Components/PrimaryButton.vue';
-  import SecondaryButton from '@/Components/SecondaryButton.vue';
-  import InputLabel from '@/Components/InputLabel.vue';
-  import TextInput from '@/Components/TextInput.vue';
-  import InputError from '@/Components/InputError.vue';
+import AppLayout from '@/Layouts/AppLayout.vue';
+import { ref, computed, watch, watchEffect } from 'vue';
+import { useForm, router } from '@inertiajs/vue3';
+import CustomModal from '@/Components/CustomModal.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
+import InputLabel from '@/Components/InputLabel.vue';
+import TextInput from '@/Components/TextInput.vue';
+import InputError from '@/Components/InputError.vue';
 
-  // Ambil props dari controller
-  const props = defineProps({
-    bills: Array,
-  });
+// Ambil props dari controller
+const props = defineProps({
+  bills: Array,
+  accountBanks: Array,
+});
 
-  // State untuk modal
-  const modalOpen = ref(false);
-  const isEditMode = ref(false);
+// State untuk modal
+const modalOpen = ref(false);
+const isEditMode = ref(false);
 
-  // Form untuk tambah/edit Bill
-  const form = useForm({
-    id: null,
-    name: '',
-    note: '',
-    amount: '',
-    balance: '',
-    date: '',
-    reminder: false,
-    auto: false,
-    is_active: false,
-  });
+// Form untuk tambah/edit Bill
+const form = useForm({
+  id: null,
+  name: '',
+  note: '',
+  amount: '',
+  balance: '',
+  date: '',
+  reminder: false,
+  auto: false,
+  is_active: false,
+  account_id: null,
+});
 
+// Format mata uang
+const formatCurrency = (value) => {
+  if (!value) return '';
+  return new Intl.NumberFormat('id-ID').format(value);
+};
 
-  const formatCurrency = (value) => {
-      if (!value) return '';
-      return new Intl.NumberFormat('id-ID').format(value);
-  };
+// Parse mata uang (hapus tanda pemisah ribuan)
+const parseCurrency = (value) => {
+  if (!value) return '';
+  return value.replace(/\./g, '');
+};
 
-  const parseCurrency = (value) => {
-      if (!value) return '';
-      return value.replace(/\./g, '');
-  };
+// Computed property untuk format amount
+const formattedAmount = computed({
+  get: () => formatCurrency(form.amount),
+  set: (value) => { form.amount = parseCurrency(value); }
+});
 
-  const formattedAmount = computed({
-      get: () => formatCurrency(form.amount),
-      set: (value) => { form.amount = parseCurrency(value); }
-  });
+// Watch perubahan pada form.amount
+watchEffect(() => {
+  formattedAmount.value = formatCurrency(form.amount);
+});
 
-  watchEffect(() => {
-      formattedAmount.value = formatCurrency(form.amount);
-  });
-
-  // Buka modal
-  const openModal = (mode, bill = null) => {
-    isEditMode.value = mode === 'edit';
-    if (isEditMode.value && bill) {
-      form.id = bill.id;
-      form.name = bill.sub_category?.name || '';
-      form.note = bill.note;
-      form.amount = bill.amount; // Format sebelum ditampilkan
-      form.balance = bill.balance; // Format sebelum ditampilkan
-      form.date = bill.date;
-      form.reminder = Boolean(bill.reminder);
-      form.auto = Boolean(bill.auto);
-      form.is_active = Boolean(bill.sub_category?.is_active || false);
-    } else {
-      form.reset();
+// Watch perubahan pada is_active
+watch(
+  () => form.is_active, // Gunakan form.is_active langsung karena form adalah reactive object dari useForm
+  (newValue) => {
+    if (!newValue) {
+      // Jika is_active dinonaktifkan, reset reminder dan auto
+      form.reminder = false;
+      form.auto = false;
     }
-    modalOpen.value = true;
-  };
+  }
+);
 
-  // Tutup modal
-  const closeModal = () => {
+// Buka modal
+const openModal = (mode, bill = null) => {
+  isEditMode.value = mode === 'edit';
+  if (isEditMode.value && bill) {
+    form.id = bill.id;
+    form.name = bill.sub_category?.name || '';
+    form.note = bill.note;
+    form.amount = bill.amount; // Format sebelum ditampilkan
+    form.balance = bill.balance; // Format sebelum ditampilkan
+    form.date = bill.date;
+    form.reminder = Boolean(bill.reminder);
+    form.auto = Boolean(bill.auto);
+    form.is_active = Boolean(bill.sub_category?.is_active || false);
+    form.account_id = bill.account_id;
+  } else {
     form.reset();
-    modalOpen.value = false;
-  };
+  }
+  modalOpen.value = true;
+};
 
-  // Submit form
-  const submitForm = () => {
+// Tutup modal
+const closeModal = () => {
+  form.reset();
+  modalOpen.value = false;
+};
 
-    if (isEditMode.value) {
-      form.put(route('bills.update', form.id), {
-        onSuccess: () => closeModal(),
-      });
-    } else {
-      form.post(route('bills.store'), {
-        onSuccess: () => closeModal(),
-      });
-    }
-  };
+// Submit form
+const submitForm = () => {
+  if (isEditMode.value) {
+    form.put(route('bills.update', form.id), {
+      onSuccess: () => closeModal(),
+    });
+  } else {
+    form.post(route('bills.store'), {
+      onSuccess: () => closeModal(),
+    });
+  }
+};
 
-  // Konfirmasi hapus
-  const confirmDelete = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus bill ini?')) {
-      router.delete(route('bills.destroy', id));
-    }
-  };
+// Konfirmasi hapus
+const confirmDelete = (id) => {
+  if (confirm('Apakah Anda yakin ingin menghapus bill ini?')) {
+    router.delete(route('bills.destroy', id));
+  }
+};
 
-  // Format tanggal
-  const formatDate = (date) => {
-    if (!date) return "";
-    const parsedDate = new Date(date);
-    return parsedDate.getDate();
-  };
+// Format tanggal
+const formatDate = (date) => {
+  if (!date) return "";
+  const parsedDate = new Date(date);
+  return parsedDate.getDate();
+};
 </script>
 
 

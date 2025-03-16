@@ -2,6 +2,7 @@
 
 namespace App\Models\MasterData;
 
+use App\Models\Financial\Bill;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -49,5 +50,10 @@ class AccountBank extends Model
             ])
             ->logOnlyDirty() // Hanya catat kolom yang berubah
             ->setDescriptionForEvent(fn(string $eventName) => "User has been {$eventName}");
+    }
+
+    public function bills()
+    {
+        return $this->hasMany(Bill::class);
     }
 }

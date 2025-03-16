@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('sub_category_id')->constrained('sub_categories')->onDelete('cascade'); // Foreign key ke tabel sub_kategoris
             $table->boolean('reminder')->default(false); // Kolom reminder (boolean, default false)
             $table->boolean('auto')->default(false); // Kolom auto (boolean, default false)
+            $table->foreignId('account_id')->nullable()->constrained('account_banks')->onDelete('cascade'); // Relasi ke tabel account_banks
             $table->timestamps(); // Kolom created_at dan updated_at
         });
     }

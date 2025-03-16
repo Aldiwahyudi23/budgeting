@@ -90,9 +90,6 @@
             <p v-if="debt.reminder" class="text-sm text-green-500">
               Hutang ini di set Pengingat dan akan diingatkan selalu.
             </p>
-            <p v-if="debt.auto" class="text-sm text-blue-500">
-              Setiap tanggal jatuh tempo, hutang akan otomatis tersimpan ke data.
-            </p>
 
               <!-- Tombol Edit, Hapus, dan History Pembayaran -->
             <div class="mt-4 flex justify-between items-center">
@@ -137,7 +134,6 @@
               <li>Aktifkan hutang untuk memulai pencatatan.</li>
               <li>Pilih mode pembayaran:
                 <ul class="list-circle list-inside ml-4">
-                  <li><strong>Auto</strong>: Pembayaran dilakukan otomatis.</li>
                   <li><strong>Reminder</strong>: Dapatkan pengingat sebelum jatuh tempo.</li>
                 </ul>
               </li>
@@ -232,13 +228,7 @@
               <p class="text-sm text-gray-500">Akan diingatkan H-1 dari Tanggal</p>
             </div>
 
-            <div class="mb-4">
-              <label class="flex items-center">
-                <input type="checkbox" v-model="form.auto" class="mr-2" />
-                <span>Otomatis</span>
-              </label>
-              <p class="text-sm text-gray-500">Secara Otomatis Masuk data sesuai tanggal</p>
-            </div>
+           
 
             <div class="flex justify-end mt-4">
               <SecondaryButton type="button" @click="closeModal">Batal</SecondaryButton>
@@ -283,7 +273,6 @@ const form = useForm({
   tenor_months: null,
   is_active: false,
   reminder: false,
-  auto: false,
 });
 
 // Buka modal
@@ -298,7 +287,6 @@ const openModal = (mode, debt = null) => {
     form.due_date = debt.due_date;
     form.tenor_months = debt.tenor_months;
     form.reminder = Boolean(debt.reminder);
-    form.auto = Boolean(debt.auto);
     form.is_active = Boolean(debt.sub_category?.is_active || false);
   } else {
     form.reset();

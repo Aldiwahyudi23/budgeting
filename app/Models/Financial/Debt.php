@@ -24,7 +24,6 @@ class Debt extends Model
         'tenor_months',
         'last_payment_month',
         'reminder',
-        'auto',
     ];
 
     protected $casts = [
@@ -34,7 +33,6 @@ class Debt extends Model
         'tenor_months' => 'integer',
         'last_payment_month' => 'date',
         'reminder' => 'boolean',
-        'auto' => 'boolean',
     ];
 
     /**

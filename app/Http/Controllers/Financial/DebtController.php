@@ -59,7 +59,6 @@ class DebtController extends Controller
             'tenor_months' => 'nullable|integer',
             'is_active' => 'boolean',
             'reminder' => 'boolean',
-            'auto' => 'boolean',
         ], [
             'name.required' => 'Nama harus diisi.',
             'name.string' => 'Nama harus berupa teks.',
@@ -80,7 +79,6 @@ class DebtController extends Controller
 
             'is_active.boolean' => 'Status aktif harus berupa benar atau salah.',
             'reminder.boolean' => 'Pengingat harus berupa benar atau salah.',
-            'auto.boolean' => 'Otomatis harus berupa benar atau salah.',
         ]);
 
         $user = Auth::user();
@@ -119,7 +117,6 @@ class DebtController extends Controller
                 'tenor_months' => $request->tenor_months ?? $request->due_date,
                 'last_payment_month' => $request->last_payment_month,
                 'reminder' => $request->reminder ?? false,
-                'auto' => $request->auto ?? false,
             ]);
 
             // Commit transaction jika semua proses berhasil
@@ -170,7 +167,6 @@ class DebtController extends Controller
             'tenor_months' => 'nullable|integer',
             'is_active' => 'boolean',
             'reminder' => 'boolean',
-            'auto' => 'boolean',
         ], [
             'name.required' => 'Nama harus diisi.',
             'name.string' => 'Nama harus berupa teks.',
@@ -195,7 +191,6 @@ class DebtController extends Controller
 
             'is_active.boolean' => 'Status aktif harus berupa benar atau salah.',
             'reminder.boolean' => 'Pengingat harus berupa benar atau salah.',
-            'auto.boolean' => 'Otomatis harus berupa benar atau salah.',
         ]);
 
         // Mulai database transaction
@@ -227,7 +222,6 @@ class DebtController extends Controller
                 'due_date' => $request->due_date,
                 'tenor_months' => $request->tenor_months,
                 'reminder' => $request->reminder,
-                'auto' => $request->auto,
             ]);
 
             // Commit transaction jika semua proses berhasil

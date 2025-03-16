@@ -107,29 +107,29 @@ const disableTwoFactorAuthentication = () => {
 <template>
     <ActionSection>
         <template #title>
-            Two Factor Authentication
+            Autentikasi Dua Faktor
         </template>
 
         <template #description>
-            Add additional security to your account using two factor authentication.
+            Tambahkan keamanan ekstra ke akun Anda menggunakan autentikasi dua faktor.
         </template>
 
         <template #content>
-            <h3 v-if="twoFactorEnabled && ! confirming" class="text-lg font-medium text-gray-900">
-                You have enabled two factor authentication.
+            <h3 v-if="twoFactorEnabled && !confirming" class="text-lg font-medium text-gray-900">
+                Anda telah mengaktifkan autentikasi dua faktor.
             </h3>
 
             <h3 v-else-if="twoFactorEnabled && confirming" class="text-lg font-medium text-gray-900">
-                Finish enabling two factor authentication.
+                Selesaikan pengaktifan autentikasi dua faktor.
             </h3>
 
             <h3 v-else class="text-lg font-medium text-gray-900">
-                You have not enabled two factor authentication.
+                Anda belum mengaktifkan autentikasi dua faktor.
             </h3>
 
             <div class="mt-3 max-w-xl text-sm text-gray-600">
                 <p>
-                    When two factor authentication is enabled, you will be prompted for a secure, random token during authentication. You may retrieve this token from your phone's Google Authenticator application.
+                    Saat autentikasi dua faktor diaktifkan, Anda akan diminta untuk memasukkan token acak yang aman selama proses autentikasi. Anda dapat mengambil token ini dari aplikasi Google Authenticator di ponsel Anda.
                 </p>
             </div>
 
@@ -137,11 +137,11 @@ const disableTwoFactorAuthentication = () => {
                 <div v-if="qrCode">
                     <div class="mt-4 max-w-xl text-sm text-gray-600">
                         <p v-if="confirming" class="font-semibold">
-                            To finish enabling two factor authentication, scan the following QR code using your phone's authenticator application or enter the setup key and provide the generated OTP code.
+                            Untuk menyelesaikan pengaktifan autentikasi dua faktor, pindai kode QR berikut menggunakan aplikasi autentikator di ponsel Anda atau masukkan kunci setup dan berikan kode OTP yang dihasilkan.
                         </p>
 
                         <p v-else>
-                            Two factor authentication is now enabled. Scan the following QR code using your phone's authenticator application or enter the setup key.
+                            Autentikasi dua faktor sekarang diaktifkan. Pindai kode QR berikut menggunakan aplikasi autentikator di ponsel Anda atau masukkan kunci setup.
                         </p>
                     </div>
 
@@ -149,19 +149,19 @@ const disableTwoFactorAuthentication = () => {
 
                     <div v-if="setupKey" class="mt-4 max-w-xl text-sm text-gray-600">
                         <p class="font-semibold">
-                            Setup Key: <span v-html="setupKey"></span>
+                            Kunci Setup: <span v-html="setupKey"></span>
                         </p>
                     </div>
 
                     <div v-if="confirming" class="mt-4">
-                        <InputLabel for="code" value="Code" />
+                        <InputLabel for="code" value="Kode" />
 
                         <TextInput
                             id="code"
                             v-model="confirmationForm.code"
                             type="text"
                             name="code"
-                            class="block mt-1 w-1/2"
+                            class="block mt-1 w-full md:w-1/2"
                             inputmode="numeric"
                             autofocus
                             autocomplete="one-time-code"
@@ -172,10 +172,10 @@ const disableTwoFactorAuthentication = () => {
                     </div>
                 </div>
 
-                <div v-if="recoveryCodes.length > 0 && ! confirming">
+                <div v-if="recoveryCodes.length > 0 && !confirming">
                     <div class="mt-4 max-w-xl text-sm text-gray-600">
                         <p class="font-semibold">
-                            Store these recovery codes in a secure password manager. They can be used to recover access to your account if your two factor authentication device is lost.
+                            Simpan kode pemulihan ini di manajer kata sandi yang aman. Mereka dapat digunakan untuk memulihkan akses ke akun Anda jika perangkat autentikasi dua faktor Anda hilang.
                         </p>
                     </div>
 
@@ -188,10 +188,10 @@ const disableTwoFactorAuthentication = () => {
             </div>
 
             <div class="mt-5">
-                <div v-if="! twoFactorEnabled">
+                <div v-if="!twoFactorEnabled">
                     <ConfirmsPassword @confirmed="enableTwoFactorAuthentication">
-                        <PrimaryButton type="button" :class="{ 'opacity-25': enabling }" :disabled="enabling">
-                            Enable
+                        <PrimaryButton type="button" :class="{ 'opacity-25': enabling }" :disabled="enabling" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                            Aktifkan
                         </PrimaryButton>
                     </ConfirmsPassword>
                 </div>
@@ -205,25 +205,25 @@ const disableTwoFactorAuthentication = () => {
                             :class="{ 'opacity-25': enabling }"
                             :disabled="enabling"
                         >
-                            Confirm
+                            Konfirmasi
                         </PrimaryButton>
                     </ConfirmsPassword>
 
                     <ConfirmsPassword @confirmed="regenerateRecoveryCodes">
                         <SecondaryButton
-                            v-if="recoveryCodes.length > 0 && ! confirming"
+                            v-if="recoveryCodes.length > 0 && !confirming"
                             class="me-3"
                         >
-                            Regenerate Recovery Codes
+                            Buat Ulang Kode Pemulihan
                         </SecondaryButton>
                     </ConfirmsPassword>
 
                     <ConfirmsPassword @confirmed="showRecoveryCodes">
                         <SecondaryButton
-                            v-if="recoveryCodes.length === 0 && ! confirming"
+                            v-if="recoveryCodes.length === 0 && !confirming"
                             class="me-3"
                         >
-                            Show Recovery Codes
+                            Tampilkan Kode Pemulihan
                         </SecondaryButton>
                     </ConfirmsPassword>
 
@@ -233,17 +233,18 @@ const disableTwoFactorAuthentication = () => {
                             :class="{ 'opacity-25': disabling }"
                             :disabled="disabling"
                         >
-                            Cancel
+                            Batal
                         </SecondaryButton>
                     </ConfirmsPassword>
 
                     <ConfirmsPassword @confirmed="disableTwoFactorAuthentication">
                         <DangerButton
-                            v-if="! confirming"
+                            v-if="!confirming"
                             :class="{ 'opacity-25': disabling }"
                             :disabled="disabling"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
                         >
-                            Disable
+                            Nonaktifkan
                         </DangerButton>
                     </ConfirmsPassword>
                 </div>
@@ -251,3 +252,25 @@ const disableTwoFactorAuthentication = () => {
         </template>
     </ActionSection>
 </template>
+
+<style scoped>
+/* Animasi untuk transisi */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+/* Responsif untuk input dan tombol */
+@media (max-width: 640px) {
+
+
+    .me-3 {
+        margin-right: 0.5rem;
+    }
+}
+</style>

@@ -2,6 +2,7 @@
 
 namespace App\Models\Financial;
 
+use App\Models\MasterData\AccountBank;
 use App\Models\MasterData\SubCategory;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +20,7 @@ class Bill extends Model
         'sub_category_id',
         'reminder',
         'auto',
+        'account_id'
     ];
 
     public function user()
@@ -30,5 +32,9 @@ class Bill extends Model
     public function subCategory()
     {
         return $this->belongsTo(SubCategory::class, 'sub_category_id');
+    }
+    public function accountBank()
+    {
+        return $this->belongsTo(AccountBank::class, 'account_id');
     }
 }
