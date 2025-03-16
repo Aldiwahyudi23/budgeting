@@ -12,6 +12,12 @@
                     <option v-for="month in months" :key="month.value" :value="month.value">{{ month.label }}</option>
                 </select>
             </div>
+
+            <!-- Total Jumlah
+            <div class="mb-4 p-4 bg-gray-100 rounded-lg">
+                <span class="font-semibold">Total Jumlah:</span>
+                <span class="ml-2">{{ formatCurrency(totalAmount) }}</span>
+            </div> -->
     
             <!-- Tabel Data -->
             <div class="mt-4 overflow-x-auto">
@@ -88,17 +94,19 @@ const selectedMonth = ref(props.filters.month || (new Date().getMonth() + 1).toS
 const amountInputs = ref({});
 const savedInputs = ref({});
 
-// Daftar tahun dari 2025 sampai 2030
-const years = computed(() => {
-    const startYear = 2025;
-    const endYear = 2030;
-    const years = [];
-    for (let year = startYear; year <= endYear; year++) {
-        years.push(year.toString());
-    }
-    return years;
-});
+// // Daftar tahun dari 2025 sampai 2030
+// const years = computed(() => {
+//     const startYear = 2025;
+//     const endYear = 2030;
+//     const years = [];
+//     for (let year = startYear; year <= endYear; year++) {
+//         years.push(year.toString());
+//     }
+//     return years;
+// });
 
+// Filter Tahun dan Bulan
+const years = ref(Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i));
 // Daftar bulan dari Januari sampai Desember
 const months = computed(() => {
     return [
@@ -131,8 +139,14 @@ const initializeInputs = () => {
     });
 };
 
+
 // Panggil fungsi inisialisasi saat komponen dimuat
 onMounted(initializeInputs);
+
+// Panggil fungsi inisialisasi setiap kali filter berubah
+watch([selectedYear, selectedMonth], () => {
+    initializeInputs();
+});
 
 // Filter kategori yang aktif
 const filteredCategories = computed(() => {
@@ -143,6 +157,13 @@ const filteredCategories = computed(() => {
 const filteredTransactions = computed(() => {
     const date = `${selectedYear.value}-${selectedMonth.value}`; // Format YYYY-MM
     return props.transactions.filter(transaction => transaction.date === date);
+});
+
+const totalAmount = computed(() => {
+    const date = `${selectedYear.value}-${selectedMonth.value}`; // Format YYYY-MM
+    return props.transactions
+        .filter(transaction => transaction.date === date)
+        .reduce((total, transaction) => total + parseFloat(transaction.amount), 0);
 });
 
 // Cek apakah input sudah disimpan
@@ -208,21 +229,6 @@ const updateCategoryStatus = (category) => {
     }).put(route('category_active', category.id));
 };
 
-// // Format mata uang
-// const formatCurrency = (amount) => {
-//     return new Intl.NumberFormat('id-ID', {
-//         style: 'currency',
-//         currency: 'IDR',
-//     }).format(amount);
-// };
-
-// // Handle input amount
-// const handleAmountInput = (categoryId, event) => {
-//     const value = event.target.value;
-//     const numericValue = value.replace(/[^0-9.]/g, ''); // Hapus karakter non-numerik
-//     amountInputs.value[categoryId] = numericValue; // Simpan nilai numerik
-//     event.target.value = formatCurrency(numericValue); // Tampilkan nilai yang diformat
-// };
 
 // Watch perubahan tahun dan bulan
 watch([selectedYear, selectedMonth], ([year, month]) => {

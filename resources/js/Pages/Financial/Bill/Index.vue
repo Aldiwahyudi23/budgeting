@@ -42,7 +42,7 @@
         <div class="mt-4 flex justify-between items-center">
           <div class="flex space-x-2">
             <PrimaryButton @click="openModal('edit', bill)">Edit</PrimaryButton>
-            <PrimaryButton class="bg-red-600 hover:bg-red-700" @click="confirmDelete(bill.id)">Hapus</PrimaryButton>
+            <!-- <PrimaryButton class="bg-red-600 hover:bg-red-700" @click="confirmDelete(bill.id)">Hapus</PrimaryButton> -->
           </div>
           <a 
             :href="route('history_pembayaran_bill', { id: bill.id })" 

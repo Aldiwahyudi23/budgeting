@@ -150,18 +150,25 @@
             </div>
 
             <div class="mb-4">
-              <InputLabel for="sub_kategori_id">
-                Keterangan
-                <span class="text-red-500 text-sm">*</span>
-              </InputLabel>
-              <select id="sub_kategori_id" v-model="form.sub_kategori_id" class="block w-full border rounded-md p-2" :disabled="!form.category_id" @change="onSubCategoryChange">
-                <option disabled value="">Pilih Keterangan</option>
-                <option v-for="subCategory in filteredSubCategories" :key="subCategory.id" :value="subCategory.id" :disabled="!subCategory.is_active">
-                  {{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span>
-                </option>
-              </select>
-              <InputError :message="form.errors.sub_kategori_id" />
-            </div>
+          <InputLabel for="sub_kategori_id">
+            Keterangan
+            <span class="text-red-500 text-sm">*</span>
+          </InputLabel>
+          <!-- Tampilkan input text jika kategori adalah "Loan (Pinjaman)" -->
+          <template v-if="isLoanCategory">
+            <TextInput id="sub_kategori_id" type="text" v-model="form.sub_kategori_name" class="block w-full" />
+          </template>
+          <!-- Tampilkan dropdown sub kategori jika bukan "Loan (Pinjaman)" -->
+          <template v-else>
+            <select id="sub_kategori_id" v-model="form.sub_kategori_id" class="block w-full border rounded-md p-2" :disabled="!form.category_id" @change="onSubCategoryChange">
+              <option disabled value="">Pilih Keterangan</option>
+              <option v-for="subCategory in filteredSubCategories" :key="subCategory.id" :value="subCategory.id" :disabled="!subCategory.is_active">
+                {{ subCategory.name }} <span v-if="!subCategory.is_active">(Tidak Aktif)</span>
+              </option>
+            </select>
+          </template>
+          <InputError :message="form.errors.sub_kategori_id" />
+        </div>
 
             <div class="mb-4">
               <InputLabel for="amount">
@@ -354,6 +361,12 @@ const isDebtCategory = computed(() => {
   return selectedCategory && selectedCategory.name === 'Debt (Hutang)';
 });
 
+// Computed Properties
+const isLoanCategory = computed(() => {
+  const selectedCategory = props.categories.find(cat => cat.id === form.category_id);
+  return selectedCategory && selectedCategory.name === 'Loan (Pinjaman)';
+});
+
 const onSubCategoryChange = () => {
   if (isBillsCategory.value && form.sub_kategori_id) {
     const selectedBill = props.bills.find(bill => bill.sub_category_id === form.sub_kategori_id);
@@ -365,6 +378,12 @@ const onSubCategoryChange = () => {
     const selectedDebt = props.debts.find(debt => debt.sub_category_id === form.sub_kategori_id);
     console.log('Selected Debt:', selectedDebt); // Debugging
     form.amount = selectedDebt ? selectedDebt.amount : '';
+  }
+};
+
+const onCategoryChange = () => {
+  if (isLoanCategory.value) {
+    form.sub_kategori_id = null; // Reset sub kategori ID jika kategori adalah "Loan (Pinjaman)"
   }
 };
 
@@ -396,6 +415,11 @@ const closeModal = () => {
 };
 
 const submitForm = () => {
+    if (isLoanCategory.value) {
+    // Jika kategori adalah "Loan (Pinjaman)", simpan nama sub kategori yang diinput
+    form.sub_kategori_id = form.sub_kategori_name;
+    }
+
     if (isEditMode.value) {
         form.put(route('expense.update', form.id), { onSuccess: () => closeModal() });
     } else {

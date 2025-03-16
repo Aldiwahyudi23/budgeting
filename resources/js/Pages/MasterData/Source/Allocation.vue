@@ -87,16 +87,19 @@ const selectedMonth = ref(props.filters.month || (new Date().getMonth() + 1).toS
 const amountInputs = ref({});
 const savedInputs = ref({});
 
-// Daftar tahun dari 2025 sampai 2030
-const years = computed(() => {
-    const startYear = 2025;
-    const endYear = 2030;
-    const years = [];
-    for (let year = startYear; year <= endYear; year++) {
-        years.push(year.toString());
-    }
-    return years;
-});
+// // Daftar tahun dari 2025 sampai 2030
+// const years = computed(() => {
+//     const startYear = 2025;
+//     const endYear = 2030;
+//     const years = [];
+//     for (let year = startYear; year <= endYear; year++) {
+//         years.push(year.toString());
+//     }
+//     return years;
+// });
+
+// Filter Tahun dan Bulan
+const years = ref(Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i));
 
 // Daftar bulan dari Januari sampai Desember
 const months = computed(() => {

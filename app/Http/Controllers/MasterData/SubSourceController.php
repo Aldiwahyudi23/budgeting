@@ -71,7 +71,7 @@ class SubSourceController extends Controller
 
         SubSource::create($request->all());
 
-        return redirect()->back()->with('success', 'Data Berhasil di simpan');
+        return redirect()->route('sub-sources.index')->with('success', 'Data Berhasil di simpan');
     }
 
     /**

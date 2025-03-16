@@ -25,7 +25,7 @@
                             <th class="px-4 py-2 text-left">Nama</th>
                             <th class="px-4 py-2 text-left">Deskripsi</th>
                             <th class="px-4 py-2 text-center">Status</th>
-                            <th v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">Aksi</th>
+                            <th class="px-4 py-2 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,16 +37,17 @@
                                 <span v-if="source.is_active" class="px-2 py-1 text-green-700 bg-green-200 rounded-full text-sm">Aktif</span>
                                 <span v-else class="px-2 py-1 text-red-700 bg-red-200 rounded-full text-sm">Tidak Aktif</span>
                             </td>
-                            <td v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">
+                            <td class="px-4 py-2 text-center">
                                 <SecondaryButton v-if="settings.btn_edit" @click="openModal('edit', source)">Edit</SecondaryButton>
                                 <PrimaryButton v-if="settings.btn_delete" class="ml-2 bg-red-600 hover:bg-red-700" @click="confirmDelete(source.id)">Hapus</PrimaryButton>
+                                <PrimaryButton  class="ml-2 bg-blue-600 hover:bg-blue-700" @click="openSubSourceModal(source)">+ Sub</PrimaryButton>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
     
-            <!-- Modal Create / Edit -->
+            <!-- Modal Create / Edit Source -->
             <CustomModal :show="modalOpen" :title="isEditMode ? 'Edit Sumber (Source)' : 'Tambah Sumber (Source)'" @close="closeModal">
                 <template #content>
                     <form @submit.prevent="submitForm">
@@ -77,6 +78,55 @@
                     </form>
                 </template>
             </CustomModal>
+
+            <!-- Modal Tambah Sub Source -->
+            <CustomModal :show="subSourceModalOpen" title="Tambah Sub Sumber (Source)" @close="closeSubSourceModal">
+                <template #content>
+                    <form @submit.prevent="submitSubSourceForm">
+                        <div class="mb-4">
+                            <InputLabel for="source_id">
+                                Sumber (Source)
+                                <span class="text-red-500 text-sm">*</span>
+                            </InputLabel>
+                            <select id="source_id" v-model="subSourceForm.source_id" class="block w-full border rounded-md p-2">
+                                <option v-for="source in sources" 
+                                    :key="source.id" 
+                                    :value="source.id"
+                                    :disabled="!source.is_active"
+                                >
+                                    {{ source.name }} <span v-if="!source.is_active">(Tidak Aktif)</span>
+                                </option>
+                            </select>
+                            <InputError :message="subSourceForm.errors.source_id" />
+                        </div>
+    
+                        <div class="mb-4">
+                            <InputLabel for="name">
+                                Nama Sub Sumber (Source)
+                                <span class="text-red-500 text-sm">*</span>
+                            </InputLabel>
+                            <TextInput id="name" v-model="subSourceForm.name" class="block w-full" />
+                            <InputError :message="subSourceForm.errors.name" />
+                        </div>
+    
+                        <div class="mb-4">
+                            <InputLabel for="description" value="Deskripsi" />
+                            <TextInput id="description" v-model="subSourceForm.description" class="block w-full" />
+                            <InputError :message="subSourceForm.errors.description" />
+                        </div>
+    
+                        <div class="flex items-center">
+                            <input type="checkbox" id="is_active" v-model="subSourceForm.is_active" class="mr-2" />
+                            <label for="is_active">Aktif</label>
+                        </div>
+    
+                        <div class="flex justify-end mt-4">
+                            <SecondaryButton type="button" @click="closeSubSourceModal">Batal</SecondaryButton>
+                            <PrimaryButton class="ml-3" type="submit">Simpan</PrimaryButton>
+                        </div>
+                    </form>
+                </template>
+            </CustomModal>
         </div>
     </AppLayout>
 </template>
@@ -95,6 +145,7 @@ import InputError from '@/Components/InputError.vue';
 // State untuk daftar sumber
 const sources = reactive([...usePage().props.sources]);
 const modalOpen = ref(false);
+const subSourceModalOpen = ref(false);
 const isEditMode = ref(false);
 const searchQuery = ref('');
 
@@ -108,7 +159,7 @@ const filteredSources = computed(() => {
     );
 });
 
-// Form default
+// Form default untuk Source
 const defaultForm = {
     id: '',
     name: '',
@@ -118,6 +169,17 @@ const defaultForm = {
 
 const form = useForm({ ...defaultForm });
 
+// Form default untuk Sub Source
+const defaultSubSourceForm = {
+    source_id: '',
+    name: '',
+    description: '',
+    is_active: false,
+};
+
+const subSourceForm = useForm({ ...defaultSubSourceForm });
+
+// Buka modal Source
 const openModal = (mode, source = null) => {
     isEditMode.value = mode === 'edit';
     
@@ -133,11 +195,25 @@ const openModal = (mode, source = null) => {
     modalOpen.value = true;
 };
 
+// Buka modal Sub Source
+const openSubSourceModal = (source) => {
+    subSourceForm.source_id = source.id; // Set source_id dari data yang dipilih
+    subSourceModalOpen.value = true;
+};
+
+// Tutup modal Source
 const closeModal = () => {
     form.reset();
     modalOpen.value = false;
 };
 
+// Tutup modal Sub Source
+const closeSubSourceModal = () => {
+    subSourceForm.reset();
+    subSourceModalOpen.value = false;
+};
+
+// Submit form Source
 const submitForm = () => {
     if (isEditMode.value) {
         form.put(route('source.update', form.id), {
@@ -159,6 +235,16 @@ const submitForm = () => {
     }
 };
 
+// Submit form Sub Source
+const submitSubSourceForm = () => {
+    subSourceForm.post(route('sub-sources.store'), {
+        onSuccess: () => {
+            closeSubSourceModal();
+        }
+    });
+};
+
+// Hapus Source
 const confirmDelete = (id) => {
     if (confirm('Apakah Anda yakin ingin menghapus sumber ini?')) {
         form.delete(route('source.destroy', id), {
