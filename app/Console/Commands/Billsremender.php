@@ -67,13 +67,19 @@ class Billsremender extends Command
 
             // Buat pesan email
             $message = "*Halo {$recipientName},*\n\n";
-            $message .= "Berikut adalah Pengingat 2 Hari Sebelum Jatuh Tempo untuk {$subCategoryName}:\n\n";
-            $message .= "Kategori: {$categoryName}\n";
-            $message .= "Sub Kategori: {$subCategoryName}\n";
-            $message .= "Nominal: Rp " . number_format($amount, 0, ',', '.') . "\n";
-            $message .= "Tanggal Jatuh Tempo: {$bill->date}\n\n";
-            $message .= "Status: *{$status}*\n\n";
-            $message .= "Terima kasih telah menggunakan layanan kami.";
+            $message .= "📅 **Pengingat 2 Hari Sebelum Jatuh Tempo**\n\n";
+            $message .= "Kami ingin mengingatkan Anda bahwa tagihan {$subCategoryName} akan jatuh tempo dalam **2 hari**:\n\n";
+            $message .= "🔹 **Kategori:** {$categoryName}\n";
+            $message .= "🔹 **Sub Kategori:** {$subCategoryName}\n";
+            $message .= "🔹 **Nominal Tagihan:** Rp " . number_format($amount, 0, ',', '.') . "\n";
+            $message .= "🔹 **Tanggal Jatuh Tempo:** {$bill->date}\n";
+            $message .= "🔹 **Status Pembayaran:** *{$status}*\n\n";
+            $message .= "💡 **Tips:**\n";
+            $message .= "- Pastikan untuk membayar tagihan sebelum jatuh tempo untuk menghindari denda.\n";
+            $message .= "- Jika Anda sudah membayar, abaikan pesan ini.\n\n";
+            $message .= "Terima kasih telah menggunakan layanan kami. 🙏\n\n";
+            $message .= "Salam hangat,\n";
+            $message .= "Kel Ma HAYA";
 
             $bodyMessage = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $message);
 

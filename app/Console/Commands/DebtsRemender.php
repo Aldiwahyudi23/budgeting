@@ -36,39 +36,39 @@ class DebtsRemender extends Command
         $today = Carbon::today();
         $todayDay = $today->day + 2; // Ambil hari (day) dari tanggal hari ini
 
-        // Cari semua bills yang aktif dan auto
-        $bills = Debt::where('reminder', true)
+        // Cari semua debts yang aktif dan auto
+        $debts = Debt::where('reminder', true)
             ->where('status', 'active')
             ->where('type', 'installment')
-            ->where('due_date', $todayDay) // Cek hari (day) dari tanggal bill sama dengan hari ini
+            ->where('due_date', $todayDay) // Cek hari (day) dari tanggal debt sama dengan hari ini
             ->get();
 
-        if ($bills->isEmpty()) {
-            $this->info("No bills due in 2 days to process. {$todayDay}");
+        if ($debts->isEmpty()) {
+            $this->info("No debts due in 2 days to process. {$todayDay}");
             return;
         }
 
-        // Proses setiap bill
-        foreach ($bills as $bill) {
+        // Proses setiap debt
+        foreach ($debts as $debt) {
             // Cek apakah subcategory aktif
-            $subCategory = SubCategory::find($bill->sub_category_id);
+            $subCategory = SubCategory::find($debt->sub_category_id);
 
             if (!$subCategory || !$subCategory->is_active) {
-                $this->info("SubCategory ID {$bill->sub_category_id} is not active. Skipping Bill ID {$bill->id}.");
+                $this->info("SubCategory ID {$debt->sub_category_id} is not active. Skipping debt ID {$debt->id}.");
                 continue;
             }
 
-            $expenses = Expenses::where('sub_kategori_id', $bill->sub_category_id)
-                ->where('user_id', $bill->user_id)
+            $expenses = Expenses::where('sub_kategori_id', $debt->sub_category_id)
+                ->where('user_id', $debt->user_id)
                 ->count();
 
-            $user = User::find($bill->user_id);
+            $user = User::find($debt->user_id);
 
             $recipientEmail = $user->email;
             $recipientName = $user->name;
             $subCategoryName = $subCategory->name;
             $categoryName = $subCategory->category->name;
-            $amount = $bill->amount;
+            $amount = $debt->amount;
             $status = "Belum dibayar";
 
             // Buat pesan email
@@ -78,11 +78,11 @@ class DebtsRemender extends Command
             $message .= "🔹 **Kategori:** {$categoryName}\n";
             $message .= "🔹 **Sub Kategori:** {$subCategoryName}\n";
             $message .= "🔹 **Nominal Tagihan:** Rp " . number_format($amount, 0, ',', '.') . "\n";
-            $message .= "🔹 **Pembayaran ke:** {$bill->due_date}\n";
-            $message .= "🔹 **Tanggal Jatuh Tempo:** {$bill->date}\n";
+            $message .= "🔹 **Pembayaran ke:** {$debt->due_date}\n";
+            $message .= "🔹 **Tanggal Jatuh Tempo:** {$debt->date}\n";
             $message .= "🔹 **Status Pembayaran:** *{$status}*\n\n";
             $message .= "📊 **Detail Hutang:**\n";
-            $message .= "Anda telah melakukan pembayaran sebanyak **{$expenses} kali** dari total **{$bill->teno_months} bulan**.\n\n";
+            $message .= "Anda telah melakukan pembayaran sebanyak **{$expenses} kali** dari total **{$debt->teno_months} bulan**.\n\n";
             $message .= "💡 **Tips:**\n";
             $message .= "- Pastikan untuk membayar tagihan sebelum jatuh tempo untuk menghindari denda.\n";
             $message .= "- Jika Anda sudah membayar, abaikan pesan ini.\n\n";
@@ -95,9 +95,9 @@ class DebtsRemender extends Command
             // Kirim email
             Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status));
 
-            $this->info("Bill ID {$bill->id} processed successfully.");
+            $this->info("debt ID {$debt->id} processed successfully.");
         }
 
-        $this->info('All bills due in 2 days processed.');
+        $this->info('All debts due in 2 days processed.');
     }
 }
