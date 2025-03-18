@@ -15,11 +15,11 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700">Nama Kategori</label>
-            <p class="mt-1 text-sm text-gray-900">{{ detail.category?.name || '-'}}</p>
+            <p class="mt-1 text-sm text-gray-900">{{ detail.category?.name || detail.source.name}}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700">Nama Sub Kategori</label>
-            <p class="mt-1 text-sm text-gray-900">{{ detail.sub_category?.name || '-' }}</p>
+            <p class="mt-1 text-sm text-gray-900">{{ detail.sub_category?.name || detail.sub_source.name }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700">Nominal</label>

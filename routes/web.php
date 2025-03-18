@@ -87,6 +87,7 @@ Route::middleware([
     Route::resource('/debts', DebtController::class);
     Route::get('/history-pembayaran/debts/{id}', [DebtController::class, 'pembayaran'])->name('history_pembayaran_debt');
     Route::resource('/loans', LoanController::class);
+    Route::get('/history-pembayaran/loans/{id}', [LoanController::class, 'pembayaran'])->name('history_pembayaran_loan');
 
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings/{key}', [SettingController::class, 'update'])->name('settings.update');

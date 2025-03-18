@@ -198,7 +198,7 @@ class DebtController extends Controller
 
         try {
             // Temukan debt berdasarkan ID
-            $debt = Debt::findOrFail($id);
+            $debt = Debt::find($id);
 
             // Pastikan subCategory ada
             if (!$debt->subCategory) {

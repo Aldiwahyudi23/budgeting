@@ -31,10 +31,10 @@
               v-for="loan in paidDebts" 
               :key="loan.id" 
               class="flex justify-between items-center py-2 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
-              @click="goToDebtStory(loan.id)"
+              @click="goToLoanStory(loan.id)"
             >
-              <span class="text-gray-800">{{ loan.sub_category?.name || 'Tanpa Kategori' }} </span>
-              <span class="text-purple-600 font-semibold">Rp {{ formatCurrency(loan.amount) }}</span>
+              <span class="text-gray-800">{{ loan.name || 'Tanpa Kategori' }} </span>
+              <span class="text-purple-600 font-semibold">Rp {{ formatCurrency(loan.paid_amount) }}</span>
 
             </div>
           </div>
@@ -64,13 +64,12 @@
               <p class="text-sm text-gray-500">{{ loan.note || '-' }}</p>
               <p class="text-xl font-bold text-purple-600">Rp {{ formatCurrency(loan.amount) }}</p>
               <p class="text-sm text-gray-500">Jumlah Dibayar: Rp {{ formatCurrency(loan.paid_amount) }}</p>
-              <p class="text-sm text-gray-500">Sisa: Rp {{ formatCurrency(loan.amount - loan.paid_amount) }}</p>
 
               <!-- Tombol Edit dan Lihat Detail -->
               <div class="mt-4 flex justify-between items-center">
                 <PrimaryButton @click="openModal('edit', loan)">Edit</PrimaryButton>
                 <a 
-                  :href="route('loans.show', { id: loan.id })" 
+                  :href="route('history_pembayaran_loan', { id: loan.id })" 
                   class="text-sm text-blue-500 hover:text-blue-700 underline"
                 >
                   Lihat Detail
@@ -80,7 +79,7 @@
           </div>
 
           <!-- Pesan Jika Tidak Ada Data -->
-          <div v-else class="text-center bg-white p-2 rounded-lg shadow-md">
+          <div v-else class="text-center bg-white p-2 rounded-lg shadow-md mt-4">
             <p class="text-gray-500 text-sm">Belum ada data pinjaman aktif yang tercatat.</p>
           </div>
           </div>
@@ -337,5 +336,9 @@ const activateLoanCategory = () => {
     .catch((errors) => {
       console.error('Gagal menyimpan data:', errors); // Debugging
     });
+};
+
+const goToLoanStory = (debtId) => {
+  router.visit(route('history_pembayaran_loan', { id: debtId }));
 };
 </script>
