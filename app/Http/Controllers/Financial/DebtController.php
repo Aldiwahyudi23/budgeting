@@ -159,12 +159,12 @@ class DebtController extends Controller
         // Validasi data yang diterima dari frontend
         $request->validate([
             'name' => 'required|string|max:255',
-            'kategori' => 'required|string|max:255',
+            // 'kategori' => 'required|string|max:255',
             'amount' => 'required|numeric',
             'note' => 'nullable|string',
             'type' => 'required|in:personal,installment,business',
             'due_date' => 'nullable|integer|between:1,31',
-            'tenor_months' => 'nullable|integer',
+            'tenor_months' => 'nullable|integer|between:1,12',
             'is_active' => 'boolean',
             'reminder' => 'boolean',
         ], [
@@ -172,9 +172,9 @@ class DebtController extends Controller
             'name.string' => 'Nama harus berupa teks.',
             'name.max' => 'Nama tidak boleh lebih dari 255 karakter.',
 
-            'kategori.required' => 'Kategori harus diisi.',
-            'kategori.string' => 'Kategori harus berupa teks.',
-            'kategori.max' => 'Kategori tidak boleh lebih dari 255 karakter.',
+            // 'kategori.required' => 'Kategori harus diisi.',
+            // 'kategori.string' => 'Kategori harus berupa teks.',
+            // 'kategori.max' => 'Kategori tidak boleh lebih dari 255 karakter.',
 
             'amount.required' => 'Nominal harus diisi.',
             'amount.numeric' => 'Nominal harus berupa angka.',

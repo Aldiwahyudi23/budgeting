@@ -84,7 +84,7 @@
               Tenor = {{ getTenor(debt) }}
             </p>
 
-            <p v-if="debt.type === 'installment'" class="text-sm text-gray-500">Tanggal Jatuh Tempo: {{ debt.due_date}}</p>
+            <p v-if="debt.type === 'installment'" class="text-sm text-gray-500">Tanggal Jatuh Tempo: {{ formatDate(debt.due_date) }}</p>
 
             <!-- Pesan Reminder -->
             <p v-if="debt.reminder" class="text-sm text-green-500">
@@ -365,6 +365,13 @@ watchEffect(() => {
     formattedAmount.value = formatCurrency(form.amount);
 });
 
+
+// Format tanggal
+const formatDate = (date) => {
+  if (!date) return "";
+  const parsedDate = new Date(date);
+  return parsedDate.getDate();
+};
 
 // Fungsi untuk mendapatkan Tenor (hanya untuk tipe installment)
 const getTenor = (debt) => {

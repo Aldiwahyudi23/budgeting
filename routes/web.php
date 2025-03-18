@@ -3,6 +3,7 @@
 use App\Http\Controllers\Alokasi\AllocationExController;
 use App\Http\Controllers\Alokasi\AllocationInController;
 use App\Http\Controllers\Assets\SavingController;
+use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\Financial\BillController;
 use App\Http\Controllers\Financial\DebtController;
@@ -33,6 +34,12 @@ use Inertia\Inertia;
 //     ]);
 // });
 
+Route::get('/login-otp', [OtpController::class, 'showLoginForm'])->name('login-otp');
+Route::post('/check-phone', [OtpController::class, 'checkPhone'])->name('check-phone');
+Route::post('/verify-otp', [OtpController::class, 'verifyOtp'])->name('verify-otp');
+Route::post('/resend-otp', [OtpController::class, 'resendOtp'])->name('resend-otp');
+
+
 Route::get('/', function () {
     return redirect()->route('login'); // Redirect langsung ke login
 });
@@ -46,20 +53,6 @@ Route::middleware([
     //     return Inertia::render('Menu/Home');
     // })->name('dashboard');
     Route::get('/dashboard', [HomeContorller::class, 'home'])->name('home');
-
-
-
-
-    // Middleware untuk halaman setelah login
-    // Route::middleware([
-    //     'auth:sanctum',
-    //     config('jetstream.auth_session'),
-    //     'verified',
-    // ])->group(function () {
-    //     Route::get('/home', function () {
-    //         return Inertia::render('Home'); // Ganti dengan halaman Home yang diinginkan
-    //     })->name('home');
-
 
     Route::resource('/master-data/source', SourceController::class);
     Route::resource('/master-data/sub-sources', SubSourceController::class);
