@@ -17,6 +17,7 @@ const form = useForm({
     _method: 'PUT',
     name: props.user.name,
     email: props.user.email,
+    numberPhone: props.user.numberPhone, // Tambahkan numberPhone ke form
     photo: null,
 });
 
@@ -175,6 +176,19 @@ const clearPhotoFileInput = () => {
                         Tautan verifikasi baru telah dikirim ke alamat email Anda.
                     </div>
                 </div>
+            </div>
+
+            <!-- Nomor Telepon -->
+            <div class="col-span-6 sm:col-span-4">
+                <InputLabel for="numberPhone" value="Nomor Telepon" />
+                <TextInput
+                    id="numberPhone"
+                    v-model="form.numberPhone"
+                    type="text"
+                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-300"
+                    autocomplete="tel"
+                />
+                <InputError :message="form.errors.numberPhone" class="mt-2 text-sm text-red-600" />
             </div>
         </template>
 

@@ -40,17 +40,14 @@ class Debt extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * Relasi ke SubCategory (kategori hutang)
-     */
+    // Model Bill
     public function subCategory()
     {
         return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }
-
     /**
      * Cek apakah hutang sudah lunas
      */

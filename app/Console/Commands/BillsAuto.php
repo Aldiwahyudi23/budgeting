@@ -9,6 +9,7 @@ use App\Models\MasterData\AccountBank;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\SubCategory;
 use App\Models\User;
+use App\Services\FonnteService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -32,6 +33,14 @@ class BillsAuto extends Command
     /**
      * Execute the console command.
      */
+
+    protected $fonnteService;
+
+    public function __construct(FonnteService $fonnteService)
+    {
+        parent::__construct();
+        $this->fonnteService = $fonnteService;
+    }
     public function handle()
     {
         // Ambil tanggal hari ini
@@ -91,6 +100,7 @@ class BillsAuto extends Command
 
             $user = User::find($bill->user_id);
 
+            $recipientNo = $user->numberPhone;
             $recipientEmail = $user->email;
             $recipientName = $user->name;
             $subCategoryName = $subCategory->name;
@@ -102,21 +112,27 @@ class BillsAuto extends Command
             $status = "Selesai";
 
             // Buat pesan email
-            $message = "*Halo {$recipientName},*\n\n";
-            $message .= "Berikut adalah laporan transaksi Pembayaran {$subCategoryName} yang di-setting otomatis:\n\n";
-            $message .= "Kategori: {$categoryName}\n";
-            $message .= "Sub Kategori: {$subCategoryName}\n";
-            $message .= "Nominal: Rp " . number_format($amount, 0, ',', '.') . "\n";
-            $message .= "Account Bank: {$accountBankName}\n";
-            $message .= "Saldo Tersisa: Rp " . number_format($remainingBalance, 0, ',', '.') . "\n";
-            $message .= "Tanggal/Waktu Proses: {$processDate}\n\n";
-            $message .= "Status: *{$status}*\n\n";
-            $message .= "Terima kasih telah menggunakan layanan kami.";
+            $message = "✨ *Halo {$recipientName},* ✨\n\n";
+            $message .= "📋 Berikut adalah laporan transaksi Pembayaran *{$subCategoryName}* yang di-setting otomatis:\n\n";
+            $message .= "🏷️ *Kategori:* {$categoryName}\n";
+            $message .= "📂 *Sub Kategori:* {$subCategoryName}\n";
+            $message .= "💰 *Nominal:* Rp " . number_format($amount, 0, ',', '.') . "\n";
+            $message .= "🏦 *Account Bank:* {$accountBankName}\n";
+            $message .= "💳 *Saldo Tersisa:* Rp " . number_format($remainingBalance, 0, ',', '.') . "\n";
+            $message .= "📅 *Tanggal/Waktu Proses:* {$processDate}\n\n";
+            $message .= "🔄 *Status:* *{$status}*\n\n";
+            $message .= "🙏 Terima kasih telah menggunakan layanan kami. Jika ada pertanyaan atau kendala, jangan ragu untuk menghubungi kami.\n\n";
+            $message .= "Best regards,\n";
+            $message .= "Budgeting Kel. Ma HAYA 🚀";
 
             $bodyMessage = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $message);
 
             $status = "Selesai";
             Mail::to($recipientEmail)->send(new Notification($recipientName, $bodyMessage, $status));
+
+            if ($recipientNo) {
+                $this->fonnteService->sendWhatsAppMessage($recipientNo, $message);
+            }
 
             $this->info("Bill ID {$bill->id} processed successfully. Expense ID {$expense->id} created.");
         }
