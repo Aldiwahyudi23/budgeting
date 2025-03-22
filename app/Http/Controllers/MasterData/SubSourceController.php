@@ -133,4 +133,19 @@ class SubSourceController extends Controller
         $sub_source->delete();
         return redirect()->back()->with('success', 'Sub Source berhasil dihapus.');
     }
+    public function updatePublic(SubSource $sub_source, Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'public' => 'required|boolean',
+        ]);
+
+        // Update status public
+        $sub_source->update([
+            'public' => $request->public,
+        ]);
+
+        // Kembalikan respons sukses
+        return response()->json(['message' => 'Status berhasil diupdate!'], 200);
+    }
 }

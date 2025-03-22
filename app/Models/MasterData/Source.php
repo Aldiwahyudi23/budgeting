@@ -12,7 +12,7 @@ class Source extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'name', 'description', 'is_active'];
+    protected $fillable = ['user_id', 'name', 'description', 'is_active', 'public'];
 
 
     public function user()

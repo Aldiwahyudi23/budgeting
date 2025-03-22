@@ -55,13 +55,21 @@ Route::middleware([
     Route::get('/dashboard', [HomeContorller::class, 'home'])->name('home');
 
     Route::resource('/master-data/source', SourceController::class);
+    Route::get('/master-data/manage-sources', [SourceController::class, 'manage'])->name('sources.manage');
+    Route::post('/master-data/manage-sources/save', [SourceController::class, 'saveSelected'])->name('sources.save');
+    Route::patch('/sources/{source}/update-public', [SourceController::class, 'updatePublic'])->name('sources.update-public');
+
     Route::resource('/master-data/sub-sources', SubSourceController::class);
+    Route::patch('/sub-sources/{sub_source}/update-public', [SubSourceController::class, 'updatePublic'])->name('sub-sources.update-public');
 
     Route::resource('/master-data/category', CategoryController::class);
-    Route::get('/manage-categories', [CategoryController::class, 'manage'])->name('categories.manage');
-    // Route untuk menyimpan data (POST)
-    Route::post('/manage-categories/save', [CategoryController::class, 'saveSelected'])->name('categories.save');
+    Route::get('/master-data/manage-categories', [CategoryController::class, 'manage'])->name('categories.manage');
+    Route::post('/master-data/manage-categories/save', [CategoryController::class, 'saveSelected'])->name('categories.save');
+    Route::patch('/categories/{category}/update-public', [CategoryController::class, 'updatePublic'])->name('categories.update-public');
+    Route::patch('/categories/{category}/update-public', [CategoryController::class, 'updatePublic'])->name('categories.update-public');
+
     Route::resource('/master-data/sub-category', SubCategoryController::class);
+    Route::patch('/sub-categories/{subCategory}/update-public', [SubCategoryController::class, 'updatePublic'])->name('sub-categories.update-public');
 
     Route::resource('/master-data/allocation-ex', AllocationExController::class);
     Route::put('/master-data/category/is-active/{id}', [AllocationExController::class, 'updateCategoryStatus'])->name('category_active');

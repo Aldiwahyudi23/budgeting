@@ -152,6 +152,7 @@ class AccountBankController extends Controller
         // Simpan rekening bank dengan user_id dari pengguna yang login
         $accountBank->update([
             'user_id' => Auth::id(),
+            'type' => $request->type,
             'name' => $request->name,
             'description' => $request->description,
             'amount' => $request->amount ?? 0,

@@ -9,7 +9,7 @@ class SubSource extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['source_id', 'name', 'description', 'is_active'];
+    protected $fillable = ['source_id', 'name', 'description', 'is_active', 'public'];
 
     public function source()
     {

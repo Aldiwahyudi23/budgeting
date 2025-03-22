@@ -25,37 +25,55 @@
                 </div>
             </div>
     
-            <!-- Tabel Sub Kategori -->
-            <div class="mt-4 overflow-x-auto">
-                <table class="min-w-full border bg-white rounded-lg shadow-md">
-                    <thead class="bg-gray-200">
-                        <tr>
-                            <th class="px-4 py-2 text-left">No</th>
-                            <th class="px-4 py-2 text-left">Kategori</th>
-                            <th class="px-4 py-2 text-left">Nama</th>
-                            <!-- <th class="px-4 py-2 text-left">Deskripsi</th> -->
-                            <th class="px-4 py-2 text-center">Status</th>
-                            <th v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(subCategory, index) in filteredSubCategory" :key="subCategory.id" class="border-b hover:bg-gray-100">
-                            <td class="px-4 py-2">{{ index + 1 }}</td>
-                            <td class="px-4 py-2">{{ subCategory.category.name }}</td>
-                            <td class="px-4 py-2">{{ subCategory.name }}</td>
-                            <!-- <td class="px-4 py-2">{{ subCategory.description || '-' }}</td> -->
-                            <td class="px-4 py-2 text-center">
-                                <span v-if="subCategory.is_active" class="px-2 py-1 text-green-700 bg-green-200 rounded-full text-sm">Aktif</span>
-                                <span v-else class="px-2 py-1 text-red-700 bg-red-200 rounded-full text-sm">Tidak Aktif</span>
-                            </td>
-                            <td v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">
-                                <SecondaryButton v-if="settings.btn_edit" @click="openModal('edit', subCategory)">Edit</SecondaryButton>
-                                <PrimaryButton v-if="settings.btn_delete" class="ml-2 bg-red-600 hover:bg-red-700" @click="confirmDelete(subCategory.id)">Hapus</PrimaryButton>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+<!-- Tabel Sub Kategori -->
+<div class="mt-4 overflow-x-auto">
+    <table class="min-w-full border bg-white rounded-lg shadow-md">
+        <thead class="bg-gray-200">
+            <tr>
+                <th class="px-4 py-2 text-left">No</th>
+                <th class="px-4 py-2 text-left">Public</th> <!-- Kolom checkbox -->
+                <th class="px-4 py-2 text-left">Kategori</th>
+                <th class="px-4 py-2 text-left">Nama</th>
+                <th class="px-4 py-2 text-center">Status</th>
+                <th v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="(subCategory, index) in filteredSubCategory" :key="subCategory.id" class="border-b hover:bg-gray-100">
+                
+                <!-- Nomor Urut -->
+                <td class="px-4 py-2">{{ index + 1 }}</td>
+                
+                <!-- Kolom checkbox -->
+                <td class="px-4 py-2">
+                    <input
+                        type="checkbox"
+                        :checked="subCategory.public"
+                        @change="updateSubCategoryPublicStatus(subCategory)"
+                        class="form-checkbox h-5 w-5 text-blue-600"
+                    />
+                </td>
+                <!-- Nama Kategori -->
+                <td class="px-4 py-2">{{ subCategory.category.name }}</td>
+
+                <!-- Nama Sub Kategori -->
+                <td class="px-4 py-2">{{ subCategory.name }}</td>
+
+                <!-- Status -->
+                <td class="px-4 py-2 text-center">
+                    <span v-if="subCategory.is_active" class="px-2 py-1 text-green-700 bg-green-200 rounded-full text-sm">Aktif</span>
+                    <span v-else class="px-2 py-1 text-red-700 bg-red-200 rounded-full text-sm">Tidak Aktif</span>
+                </td>
+
+                <!-- Aksi -->
+                <td v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">
+                    <SecondaryButton v-if="settings.btn_edit" @click="openModal('edit', subCategory)">Edit</SecondaryButton>
+                    <PrimaryButton v-if="settings.btn_delete" class="ml-2 bg-red-600 hover:bg-red-700" @click="confirmDelete(subCategory.id)">Hapus</PrimaryButton>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
     
             <!-- Modal Create / Edit -->
             <CustomModal :show="modalOpen" :title="isEditMode ? 'Edit Sub Kategori' : 'Tambah Sub Kategori'" @close="closeModal">
@@ -119,6 +137,10 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
+
+import axios from 'axios';
+
+
 
 const props = defineProps({
     subCategory: Array,
@@ -187,6 +209,26 @@ const submitForm = () => {
 const confirmDelete = (id) => {
     if (confirm('Apakah Anda yakin ingin menghapus sub kategori ini?')) {
         form.delete(route('sub-category.destroy', id));
+    }
+};
+
+// Fungsi untuk mengupdate status public
+const updateSubCategoryPublicStatus = async (subCategory) => {
+    try {
+        // Toggle status public
+        subCategory.public = !subCategory.public;
+
+        // Kirim permintaan ke backend untuk mengupdate status
+        await axios.patch(`/sub-categories/${subCategory.id}/update-public`, {
+            public: subCategory.public,
+        });
+
+        // Tampilkan pesan sukses
+        // alert('Status berhasil diupdate!');
+    } catch (error) {
+        // Jika gagal, kembalikan status ke semula
+        category.public = !category.public;
+        // alert('Gagal mengupdate status. Silakan coba lagi.');
     }
 };
 </script>

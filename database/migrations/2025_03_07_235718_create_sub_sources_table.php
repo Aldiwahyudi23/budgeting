@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->longText('description')->nullable(); //Keterangan 
             $table->boolean('is_active')->default(true); // Kategori aktif atau tidak
+            $table->boolean('public')->default(false); // Kategori aktif atau tidak
             $table->timestamps();
         });
     }

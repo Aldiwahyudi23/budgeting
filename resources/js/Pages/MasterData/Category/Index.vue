@@ -1,27 +1,41 @@
 <template>
     <AppLayout title="Category">
         <div class="p-4">
-            <!-- Bagian Header: Tombol Tambah & Pencarian -->
-            <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-4 md:space-y-0">
+
+                  <!-- Catatan -->
+      <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
+        <p class="text-sm">
+          Centang 'Publik' di bawah jika ingin data ini dapat digunakan oleh pengguna lain.
+        </p>
+      </div>
+
+           <!-- Bagian Header: Tombol Tambah, Pencarian & Link ke Categories Manage -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-4 md:space-y-0">
+            <div class="flex space-x-2">
                 <PrimaryButton @click="openModal('create')">Tambah Kategori</PrimaryButton>
-                <div class="relative">
-                    <TextInput 
-                        v-model="searchQuery" 
-                        placeholder="Cari Kategori..." 
-                        class="pl-10 pr-4 py-2 border rounded-md w-64"
-                    />
-                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A8.5 8.5 0 1010.5 19a8.5 8.5 0 006.15-2.85z" />
-                    </svg>
-                </div>
+                <Link :href="route('categories.manage')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+                    Kelola Kategori
+                </Link>
             </div>
+            <div class="relative">
+                <TextInput 
+                    v-model="searchQuery" 
+                    placeholder="Cari Kategori..." 
+                    class="pl-10 pr-4 py-2 border rounded-md w-64"
+                />
+                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A8.5 8.5 0 1010.5 19a8.5 8.5 0 006.15-2.85z" />
+                </svg>
+            </div>
+        </div>
+
     
-            <!-- Tabel Data -->
             <div class="mt-4 overflow-x-auto">
                 <table class="min-w-full border bg-white rounded-lg shadow-md">
                     <thead class="bg-gray-200">
                         <tr>
                             <th class="px-4 py-2 text-left">No</th>
+                            <th class="px-4 py-2 text-left">Public</th> <!-- Kolom checkbox -->
                             <th class="px-4 py-2 text-left">Nama</th>
                             <th class="px-4 py-2 text-left">Deskripsi</th>
                             <th class="px-4 py-2 text-center">Status</th>
@@ -31,6 +45,15 @@
                     <tbody>
                         <tr v-for="(item, index) in filteredCategories" :key="item.id" class="border-b hover:bg-gray-100">
                             <td class="px-4 py-2">{{ index + 1 }}</td>
+                            <!-- Kolom checkbox -->
+                            <td class="px-4 py-2">
+                                <input
+                                    type="checkbox"
+                                    :checked="item.public"
+                                    @change="updatePublicStatus(item)"
+                                    class="form-checkbox h-5 w-5 text-blue-600"
+                                />
+                            </td>
                             <td class="px-4 py-2">{{ item.name }}</td>
                             <td class="px-4 py-2">{{ item.description || '-' }}</td>
                             <td class="px-4 py-2 text-center">
@@ -46,7 +69,7 @@
                     </tbody>
                 </table>
             </div>
-    
+                
             <!-- Modal Create / Edit Kategori -->
             <CustomModal :show="modalOpen" :title="isEditMode ? 'Edit Kategori' : 'Tambah Kategori'" @close="closeModal">
                 <template #content>
@@ -132,7 +155,7 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm, usePage, Link } from '@inertiajs/vue3';
 import CustomModal from '@/Components/CustomModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -140,6 +163,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import axios from 'axios';
 
 // State untuk kategori
 const categories = reactive([...usePage().props.categories]);
@@ -253,6 +277,32 @@ const confirmDelete = (id) => {
                 }
             }
         });
+    }
+};
+
+const hasPublicDuplicate = (source) => {
+    return subCategories.value.some(
+        (item) => item.name === source.name && item.public === true && item.id !== source.id
+    );
+};
+
+// Fungsi untuk mengupdate status public
+const updatePublicStatus = async (category) => {
+    try {
+        // Toggle status public
+        category.public = !category.public;
+
+        // Kirim permintaan ke backend untuk mengupdate status
+        await axios.patch(`/categories/${category.id}/update-public`, {
+            public: category.public,
+        });
+
+        // Tampilkan pesan sukses
+        // alert('Status berhasil diupdate!');
+    } catch (error) {
+        // Jika gagal, kembalikan status ke semula
+        category.public = !category.public;
+        // alert('Gagal mengupdate status. Silakan coba lagi.');
     }
 };
 </script>

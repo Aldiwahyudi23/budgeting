@@ -131,4 +131,20 @@ class SubCategoryController extends Controller
         $sub_category->delete();
         return redirect()->back()->with('success', 'Data Berhasil Dihapus');
     }
+
+    public function updatePublic(SubCategory $subCategory, Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'public' => 'required|boolean',
+        ]);
+
+        // Update status public
+        $subCategory->update([
+            'public' => $request->public,
+        ]);
+
+        // Kembalikan respons sukses
+        return response()->json(['message' => 'Status berhasil diupdate!'], 200);
+    }
 }

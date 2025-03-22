@@ -126,4 +126,71 @@ class SourceController extends Controller
         $source->delete();
         return redirect()->back()->with('success', 'Source berhasil dihapus.');
     }
+
+    // Menampilkan halaman kelola kategori
+    public function manage()
+    {
+
+        $excludedNames = ['Fund Transfer', 'Saving (Tabungan)', 'Bills (Tagihan)', 'Debt (Hutang)', 'Loan (Pinjaman)']; // Tambahkan nama-nama yang ingin dikecualikan
+        $categories = Source::whereNotIn('name', $excludedNames)
+            ->where('public', true)
+            ->get();
+        $subCategories = SubSource::where('public', true)->get();
+        $userCategories = Source::where('user_id', Auth::id())->get();
+        $userSubCategories = SubSource::whereHas('source', function ($query) {
+            $query->where('user_id', Auth::id());
+        })->get();
+
+        // dd($userCategories); 6y
+        return inertia('MasterData/Source/ManageSources', [
+            'categories' => $categories,
+            'subCategories' => $subCategories,
+            'userCategories' => $userCategories,
+            'userSubCategories' => $userSubCategories,
+        ]);
+    }
+    // Menyimpan kategori dan sub kategori yang dipilih
+    public function saveSelected(Request $request)
+    {
+        $user = Auth::user();
+
+        // Simpan kategori yang dipilih
+        foreach ($request->categories as $categoryId) {
+            $category = Source::find($categoryId);
+            $cateId = Source::firstOrCreate([
+                'user_id' => $user->id,
+                'name' => $category->name,
+                'description' => $category->description,
+            ]);
+        }
+
+        // Simpan sub kategori yang dipilih
+        foreach ($request->subCategories as $subCategoryId) {
+            $subCategory = SubSource::find($subCategoryId);
+            SubSource::Create([
+                'source_id' => $cateId->id,
+                'name' => $subCategory->name,
+                'description' => $subCategory->description,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Data berhasil disimpan!');
+    }
+
+
+    public function updatePublic(Source $source, Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'public' => 'required|boolean',
+        ]);
+
+        // Update status public
+        $source->update([
+            'public' => $request->public,
+        ]);
+
+        // Kembalikan respons sukses
+        return response()->json(['message' => 'Status berhasil diupdate!'], 200);
+    }
 }

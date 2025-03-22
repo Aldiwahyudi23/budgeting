@@ -1,9 +1,23 @@
 <template>
     <AppLayout title="Source">
         <div class="p-4">
+
+                              <!-- Catatan -->
+      <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
+        <p class="text-sm">
+          Centang 'Publik' di bawah jika ingin data ini dapat digunakan oleh pengguna lain.
+        </p>
+      </div>
+
             <!-- Bagian Header: Tombol Tambah & Pencarian -->
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-4 md:space-y-0">
-                <PrimaryButton @click="openModal('create')">Tambah Sumber (Source)</PrimaryButton>
+                
+                 <div class="flex space-x-2">
+               <PrimaryButton @click="openModal('create')">Tambah Sumber (Source)</PrimaryButton>
+                <Link :href="route('sources.manage')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+                    Kelola Sumber
+                </Link>
+            </div>
                 <div class="relative">
                     <TextInput 
                         v-model="searchQuery" 
@@ -22,6 +36,7 @@
                     <thead class="bg-gray-200">
                         <tr>
                             <th class="px-4 py-2 text-left">No</th>
+                            <th class="px-4 py-2 text-center">public</th>
                             <th class="px-4 py-2 text-left">Nama</th>
                             <th class="px-4 py-2 text-left">Deskripsi</th>
                             <th class="px-4 py-2 text-center">Status</th>
@@ -31,6 +46,15 @@
                     <tbody>
                         <tr v-for="(source, index) in filteredSources" :key="source.id" class="border-b hover:bg-gray-100">
                             <td class="px-4 py-2">{{ index + 1 }}</td>
+                            <!-- Kolom checkbox -->
+                            <td class="px-4 py-2">
+                                <input
+                                    type="checkbox"
+                                    :checked="source.public"
+                                    @change="updatePublicStatus(source)"
+                                    class="form-checkbox h-5 w-5 text-blue-600"
+                                />
+                            </td>
                             <td class="px-4 py-2">{{ source.name }}</td>
                             <td class="px-4 py-2">{{ source.description || '-' }}</td>
                             <td class="px-4 py-2 text-center">
@@ -134,7 +158,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { ref, computed, reactive } from 'vue';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm, usePage, Link } from '@inertiajs/vue3';
 import CustomModal from '@/Components/CustomModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -255,6 +279,26 @@ const confirmDelete = (id) => {
                 }
             }
         });
+    }
+};
+
+// Fungsi untuk mengupdate status public
+const updatePublicStatus = async (source) => {
+    try {
+        // Toggle status public
+        source.public = !source.public;
+
+        // Kirim permintaan ke backend untuk mengupdate status
+        await axios.patch(`/sources/${source.id}/update-public`, {
+            public: source.public,
+        });
+
+        // Tampilkan pesan sukses
+        // alert('Status berhasil diupdate!');
+    } catch (error) {
+        // Jika gagal, kembalikan status ke semula
+        category.public = !category.public;
+        // alert('Gagal mengupdate status. Silakan coba lagi.');
     }
 };
 </script>

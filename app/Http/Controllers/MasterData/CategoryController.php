@@ -140,9 +140,9 @@ class CategoryController extends Controller
 
         $excludedNames = ['Fund Transfer', 'Saving (Tabungan)', 'Bills (Tagihan)', 'Debt (Hutang)', 'Loan (Pinjaman)']; // Tambahkan nama-nama yang ingin dikecualikan
         $categories = Category::whereNotIn('name', $excludedNames)
-            ->latest()
+            ->where('public', true)
             ->get();
-        $subCategories = SubCategory::all();
+        $subCategories = SubCategory::where('public', true)->get();
         $userCategories = Category::where('user_id', Auth::id())->get();
         $userSubCategories = SubCategory::whereHas('category', function ($query) {
             $query->where('user_id', Auth::id());
@@ -164,7 +164,7 @@ class CategoryController extends Controller
         // Simpan kategori yang dipilih
         foreach ($request->categories as $categoryId) {
             $category = Category::find($categoryId);
-            Category::firstOrCreate([
+            $cateId = Category::firstOrCreate([
                 'user_id' => $user->id,
                 'name' => $category->name,
                 'description' => $category->description,
@@ -174,13 +174,29 @@ class CategoryController extends Controller
         // Simpan sub kategori yang dipilih
         foreach ($request->subCategories as $subCategoryId) {
             $subCategory = SubCategory::find($subCategoryId);
-            SubCategory::firstOrCreate([
-                'category_id' => $subCategory->category_id,
+            SubCategory::Create([
+                'category_id' => $cateId->id,
                 'name' => $subCategory->name,
                 'description' => $subCategory->description,
             ]);
         }
 
         return redirect()->back()->with('success', 'Data berhasil disimpan!');
+    }
+
+    public function updatePublic(Category $category, Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'public' => 'required|boolean',
+        ]);
+
+        // Update status public
+        $category->update([
+            'public' => $request->public,
+        ]);
+
+        // Kembalikan respons sukses
+        return response()->json(['message' => 'Status berhasil diupdate!'], 200);
     }
 }
