@@ -4,6 +4,7 @@ namespace App\Http\Controllers\MasterData;
 
 use App\Models\MasterData\Category;
 use App\Http\Controllers\Controller;
+use App\Models\MasterData\SubCategory;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,11 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::where('user_id', Auth::id())->latest()->get();
+        $excludedNames = ['Fund Transfer', 'Saving (Tabungan)', 'Bills (Tagihan)', 'Debt (Hutang)', 'Loan (Pinjaman)']; // Tambahkan nama-nama yang ingin dikecualikan
+        $categories = Category::where('user_id', Auth::id())
+            ->whereNotIn('name', $excludedNames)
+            ->latest()
+            ->get();
         $settings = Setting::where('user_id', Auth::id())->first();
         return Inertia::render('MasterData/Category/Index', compact('categories', 'settings'));
     }
@@ -127,5 +132,55 @@ class CategoryController extends Controller
     {
         $category->delete();
         return redirect()->back()->with('success', 'Kategori berhasil dihapus.');
+    }
+
+    // Menampilkan halaman kelola kategori
+    public function manage()
+    {
+
+        $excludedNames = ['Fund Transfer', 'Saving (Tabungan)', 'Bills (Tagihan)', 'Debt (Hutang)', 'Loan (Pinjaman)']; // Tambahkan nama-nama yang ingin dikecualikan
+        $categories = Category::whereNotIn('name', $excludedNames)
+            ->latest()
+            ->get();
+        $subCategories = SubCategory::all();
+        $userCategories = Category::where('user_id', Auth::id())->get();
+        $userSubCategories = SubCategory::whereHas('category', function ($query) {
+            $query->where('user_id', Auth::id());
+        })->get();
+
+        // dd($userCategories);
+        return inertia('MasterData/Category/ManageCategories', [
+            'categories' => $categories,
+            'subCategories' => $subCategories,
+            'userCategories' => $userCategories,
+            'userSubCategories' => $userSubCategories,
+        ]);
+    }
+    // Menyimpan kategori dan sub kategori yang dipilih
+    public function saveSelected(Request $request)
+    {
+        $user = Auth::user();
+
+        // Simpan kategori yang dipilih
+        foreach ($request->categories as $categoryId) {
+            $category = Category::find($categoryId);
+            Category::firstOrCreate([
+                'user_id' => $user->id,
+                'name' => $category->name,
+                'description' => $category->description,
+            ]);
+        }
+
+        // Simpan sub kategori yang dipilih
+        foreach ($request->subCategories as $subCategoryId) {
+            $subCategory = SubCategory::find($subCategoryId);
+            SubCategory::firstOrCreate([
+                'category_id' => $subCategory->category_id,
+                'name' => $subCategory->name,
+                'description' => $subCategory->description,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Data berhasil disimpan!');
     }
 }

@@ -67,6 +67,7 @@
               <th class="px-4 py-2 text-left">Tanggal</th>
               <th class="px-4 py-2 text-left">Nominal</th>
               <th class="px-4 py-2 text-left">Sumber</th>
+              <th class="px-4 py-2 text-left">Poin</th>
               <th class="px-4 py-2 text-left">Keterangan</th>
               <th class="px-4 py-2 text-left">Pembayaran</th>
               <th class="px-4 py-2 text-left">Rekening</th>
@@ -80,6 +81,7 @@
               <td class="px-4 py-2">{{ formatCurrency(item.amount) }}</td>
               <td class="px-4 py-2">{{ item.source.name }}</td>
               <td class="px-4 py-2">{{ item.sub_source?.name || '-' }}</td>
+              <td class="px-4 py-2">{{ item.description || '-' }}</td>
               <td class="px-4 py-2">{{ item.payment }}</td>
               <td class="px-4 py-2">{{ item.account_bank?.name || '-' }}</td>
               <td v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">
@@ -126,12 +128,12 @@
         <template #content>
           <form @submit.prevent="submitForm">
             <!-- Form fields -->
-            <div class="mb-4">
-              <InputLabel for="date">
+            <div class="mb-4" v-if="settings.date_in">
+              <InputLabel for="date" >
                 Tanggal
                 <span class="text-red-500 text-sm">*</span>
               </InputLabel>
-              <TextInput id="date" type="date" v-model="form.date" class="block w-full" />
+              <TextInput id="date" type="date" v-model="form.date" class="block w-full" required />
               <InputError :message="form.errors.date" />
             </div>
 
@@ -160,7 +162,7 @@
 
             <div class="mb-4">
               <InputLabel for="sub_source_id">
-                Keterangan
+                Poin
                 <span class="text-red-500 text-sm">*</span>
               </InputLabel>
               <select id="sub_source_id" v-model="form.sub_source_id" class="block w-full border rounded-md p-2" :disabled="!form.source_id">
@@ -170,6 +172,14 @@
                 </option>
               </select>
               <InputError :message="form.errors.sub_source_id" />
+            </div>
+
+            <div class="mb-4">
+              <InputLabel for="description">
+                Keterangan 
+              </InputLabel>
+              <TextInput id="description" type="text" v-model="form.description" class="block w-full" />
+              <InputError :message="form.errors.description" />
             </div>
 
             <div class="mb-4">
@@ -304,6 +314,7 @@ const form = useForm({
     sub_source_id: null,
     payment: '',
     account_id: null,
+    description: null,
 });
 
 const filteredSubSources = computed(() => {
@@ -339,6 +350,7 @@ const openModal = (mode, item = null) => {
         form.sub_source_id = item.sub_source_id;
         form.payment = item.payment;
         form.account_id = item.account_id;
+        form.description = item.description;
     } else {
         form.reset();
     }

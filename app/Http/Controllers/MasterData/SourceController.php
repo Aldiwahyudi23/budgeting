@@ -19,7 +19,12 @@ class SourceController extends Controller
     public function index()
     {
         $settings = Setting::where('user_id', Auth::id())->first();
-        $sources = Source::where('user_id', Auth::id())->latest()->get();
+
+        $excludedNames = ['Fund Transfer', 'Loan (Pinjaman)']; // Tambahkan nama-nama yang ingin dikecualikan
+        $sources = Source::where('user_id', Auth::id())
+            ->whereNotIn('name', $excludedNames)
+            ->latest()
+            ->get();
 
         return Inertia::render('MasterData/Source/Index', [
             'sources' => $sources,

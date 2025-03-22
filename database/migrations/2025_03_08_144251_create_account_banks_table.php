@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('account_banks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Relasi ke tabel users
+            $table->enum('type', ['bank', 'e-wallet', 'e-money']); // Nama kategori
             $table->string('name'); // Nama kategori
             $table->longText('description')->nullable(); //Keterangan 
             $table->boolean('is_active')->default(true); // Kategori aktif atau tidak

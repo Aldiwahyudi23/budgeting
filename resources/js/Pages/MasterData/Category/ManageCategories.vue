@@ -1,0 +1,185 @@
+<template>
+  <AppLayout title="Kelola Kategori">
+    <div class="p-4">
+      <div class="container mx-auto p-2">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-2xl font-semibold text-gray-800">Kelola Kategori</h1>
+          <PrimaryButton @click="saveSelected">Simpan Kategori Dipilih</PrimaryButton>
+        </div>
+
+        <!-- Tabel Category dan SubCategory -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <table class="min-w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pilih</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Kategori</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <template v-if="uniqueCategories.length > 0">
+                <template v-for="category in uniqueCategories" :key="category.id">
+                  <!-- Baris untuk Category -->
+                  <tr :class="{ 'disabled-row': isCategoryDisabled(category) }">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <input 
+                        type="checkbox" 
+                        v-model="selectedCategories" 
+                        :value="category.id" 
+                        :disabled="isCategoryDisabled(category)"
+                        @change="onCategorySelect(category)"
+                      />
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="category-name">
+                        {{ category.name }}
+                        <span v-if="isCategoryDisabled(category)" class="already-exists">(Sudah Ada)</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Loop melalui subkategori -->
+                  <tr 
+                    v-for="subCategory in getAllSubCategories(category.id)" 
+                    :key="subCategory.id" 
+                    :class="{ 'disabled-row': isSubCategoryDisabled(subCategory) }"
+                  >
+                    <td class="px-6 py-4 whitespace-nowrap subcategory-indent">
+                      <input 
+                        type="checkbox" 
+                        v-model="selectedSubCategories" 
+                        :value="subCategory.id" 
+                        :disabled="isSubCategoryDisabled(subCategory)"
+                        @change="onSubCategorySelect(subCategory)"
+                      />
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap subcategory-indent">
+                      <div class="subcategory-name">
+                        {{ subCategory.name }}
+                        <span v-if="isSubCategoryDisabled(subCategory)" class="already-exists">(Sudah Ada)</span>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </template>
+              <template v-else>
+                <tr>
+                  <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data kategori.</td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </AppLayout>
+</template>
+
+<script setup>
+import AppLayout from '@/Layouts/AppLayout.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import { ref, computed } from 'vue';
+import { router } from '@inertiajs/vue3';
+
+const props = defineProps({
+  categories: Array,
+  subCategories: Array,
+  userCategories: Array,
+  userSubCategories: Array,
+});
+
+const selectedCategories = ref([]);
+const selectedSubCategories = ref([]);
+
+const uniqueCategories = computed(() => {
+  const uniqueNames = new Set();
+  return props.categories.filter(category => {
+    if (!uniqueNames.has(category.name)) {
+      uniqueNames.add(category.name);
+      return true;
+    }
+    return false;
+  });
+});
+
+const getAllSubCategories = (categoryId) => {
+  return props.subCategories.filter(sub => sub.category_id === categoryId);
+};
+
+const isCategoryDisabled = (category) => {
+  return props.userCategories.some(userCat => userCat.name === category.name);
+};
+
+const isSubCategoryDisabled = (subCategory) => {
+  return props.userSubCategories.some(userSubCat => userSubCat.name === subCategory.name);
+};
+
+const onSubCategorySelect = (subCategory) => {
+  if (selectedSubCategories.value.includes(subCategory.id)) {
+    if (!selectedCategories.value.includes(subCategory.category_id)) {
+      selectedCategories.value.push(subCategory.category_id);
+    }
+  } else {
+    const hasOtherSelectedSubCategories = props.subCategories.some(
+      sub => sub.category_id === subCategory.category_id && selectedSubCategories.value.includes(sub.id)
+    );
+    if (!hasOtherSelectedSubCategories) {
+      selectedCategories.value = selectedCategories.value.filter(id => id !== subCategory.category_id);
+    }
+  }
+};
+
+const onCategorySelect = (category) => {
+  if (!selectedCategories.value.includes(category.id)) {
+    selectedSubCategories.value = selectedSubCategories.value.filter(
+      subId => !getAllSubCategories(category.id).some(sub => sub.id === subId)
+    );
+  }
+};
+
+const saveSelected = () => {
+  router.post(route('categories.save'), {
+    categories: selectedCategories.value,
+    subCategories: selectedSubCategories.value,
+  }, {
+    onSuccess: () => {
+      alert('Data berhasil disimpan!');
+      selectedCategories.value = [];
+      selectedSubCategories.value = [];
+    },
+    onError: () => {
+      alert('Gagal menyimpan data. Silakan coba lagi.');
+    },
+  });
+};
+</script>
+
+<style scoped>
+.subcategory-indent {
+  padding-left: 2rem;
+}
+
+.disabled-row {
+  opacity: 0.5;
+}
+
+input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.already-exists {
+  font-size: 0.875rem;
+  color: #ef4444;
+  margin-left: 0.5rem;
+}
+
+.category-name {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+.subcategory-name {
+  font-size: 0.875rem;
+}
+</style>

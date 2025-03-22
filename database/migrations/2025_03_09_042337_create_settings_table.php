@@ -21,6 +21,8 @@ return new class extends Migration
             $table->boolean('income_saving')->default(false)->nullable(); // Switch untuk Income to Savings
             $table->boolean('bank')->default(false)->nullable(); // Switch untuk Income to Savings
             $table->boolean('cash')->default(false)->nullable(); // Switch untuk Income to Savings
+            $table->boolean('date_ex')->default(false)->nullable(); // Switch untuk Income to Savings
+            $table->boolean('date_in')->default(false)->nullable(); // Switch untuk Income to Savings
             $table->foreignId('account_id')->nullable()->constrained('account_banks')->onDelete('cascade'); // Relasi ke tabel account_banks
             $table->timestamps();
         });

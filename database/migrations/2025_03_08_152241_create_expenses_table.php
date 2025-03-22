@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 0); // Jumlah pengeluaran
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // Relasi ke tabel categories
             $table->foreignId('sub_kategori_id')->nullable()->constrained('sub_categories')->onDelete('cascade'); // Relasi ke tabel sub_categories (opsional)
+            $table->longText('description')->nullable(); //Keterangan 
             $table->string('payment'); // Metode pembayaran
             $table->foreignId('account_id')->nullable()->constrained('account_banks')->onDelete('cascade'); // Relasi ke tabel account_banks
             $table->timestamps();

@@ -33,4 +33,9 @@ class Category extends Model
     {
         return $this->hasMany(Expenses::class);
     }
+
+    public function subCategories()
+    {
+        return $this->hasMany(SubCategory::class);
+    }
 }

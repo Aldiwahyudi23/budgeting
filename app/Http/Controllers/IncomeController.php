@@ -32,7 +32,9 @@ class IncomeController extends Controller
             ->latest()
             ->get();
 
-        $sources = Source::where('user_id', Auth::id())->get();
+        $sources = Source::where('user_id', Auth::id())
+            ->where('name', '!=', 'Fund Transfer')
+            ->get();
         $subSources = SubSource::all();
         $accountBanks = AccountBank::where('user_id', Auth::id())->get();
 
@@ -132,14 +134,15 @@ class IncomeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'date' => 'required|date',
+            'date' => 'nullable|date',
             'amount' => 'required|numeric|min:0',
             'source_id' => 'required|exists:sources,id',
             'sub_source_id' => 'nullable|exists:sub_sources,id',
             'payment' => 'required|in:Transfer,Tunai',
             'account_id' => 'nullable|exists:account_banks,id',
+            'description' => 'nullable',
         ], [
-            'date.required' => 'Tanggal harus diisi.',
+            // 'date.required' => 'Tanggal harus diisi.',
             'date.date' => 'Format tanggal tidak valid.',
 
             'amount.required' => 'Jumlah harus diisi.',
@@ -160,13 +163,17 @@ class IncomeController extends Controller
         // Jika payment adalah "Tunai", set account_id ke null
         $accountId = $request->payment === 'Tunai' ? null : $request->account_id;
 
+        $data = $request->date ?? now()->toDateString();
+
+
         // Simpan data Income
         Income::create([
             'user_id' => Auth::id(),
-            'date' => $request->date,
+            'date' => $data,
             'amount' => $request->amount,
             'source_id' => $request->source_id,
             'sub_source_id' => $request->sub_source_id,
+            'description' => $request->description,
             'payment' => $request->payment,
             'account_id' => $accountId,
         ]);
@@ -260,12 +267,13 @@ class IncomeController extends Controller
         }
 
         $request->validate([
-            'date' => 'required|date',
+            'date' => 'nullable|date',
             'amount' => 'required|numeric|min:0',
             'source_id' => 'required|exists:sources,id',
             'sub_source_id' => 'nullable|exists:sub_sources,id',
             'payment' => 'required|in:Transfer,Tunai',
             'account_id' => 'nullable|exists:account_banks,id',
+            'description' => 'nullable',
         ], [
             'date.required' => 'Tanggal harus diisi.',
             'date.date' => 'Format tanggal tidak valid.',
@@ -289,11 +297,14 @@ class IncomeController extends Controller
         // Jika payment adalah "Tunai", set account_id ke null
         $accountId = $request->payment === 'Tunai' ? null : $request->account_id;
 
+        $data = $request->date ?? now()->toDateString();
+
         $income->update([
-            'date' => $request->date,
+            'date' => $data,
             'amount' => $request->amount,
             'source_id' => $request->source_id,
             'sub_source_id' => $request->sub_source_id,
+            'description' => $request->description,
             'payment' => $request->payment,
             'account_id' => $accountId,
         ]);

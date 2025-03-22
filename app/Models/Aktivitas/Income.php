@@ -19,6 +19,7 @@ class Income extends Model
         'amount',
         'source_id',
         'sub_source_id',
+        'description',
         'payment',
         'account_id',
     ];

@@ -19,6 +19,7 @@ class Expenses extends Model
         'amount',
         'category_id',
         'sub_kategori_id',
+        'description',
         'payment',
         'account_id',
     ];

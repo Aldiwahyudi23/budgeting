@@ -67,6 +67,7 @@
               <th class="px-4 py-2 text-left">Tanggal</th>
               <th class="px-4 py-2 text-left">Nominal</th>
               <th class="px-4 py-2 text-left">Kategori</th>
+              <th class="px-4 py-2 text-left">Poin</th>
               <th class="px-4 py-2 text-left">Keterangan</th>
               <th class="px-4 py-2 text-left">Pembayaran</th>
               <th class="px-4 py-2 text-left">Rekening</th>
@@ -80,6 +81,7 @@
               <td class="px-4 py-2">{{ formatCurrency(item.amount) }}</td>
               <td class="px-4 py-2">{{ item.category.name }}</td>
               <td class="px-4 py-2">{{ item.sub_category?.name || '-' }}</td>
+              <td class="px-4 py-2">{{ item.description || '-' }}</td>
               <td class="px-4 py-2">{{ item.payment }}</td>
               <td class="px-4 py-2">{{ item.account_bank?.name || '-' }}</td>
               <td v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">
@@ -126,12 +128,12 @@
         <template #content>
           <form @submit.prevent="submitForm">
             <!-- Form fields -->
-            <div class="mb-4">
-              <InputLabel for="date">
+            <div class="mb-4" v-if="settings.date_ex">
+              <InputLabel for="date" >
                 Tanggal
                 <span class="text-red-500 text-sm">*</span>
               </InputLabel>
-              <TextInput id="date" type="date" v-model="form.date" class="block w-full" />
+              <TextInput id="date" type="date" v-model="form.date" class="block w-full" required />
               <InputError :message="form.errors.date" />
             </div>
 
@@ -151,7 +153,7 @@
 
             <div class="mb-4">
           <InputLabel for="sub_kategori_id">
-            Keterangan
+            Point
             <span class="text-red-500 text-sm">*</span>
           </InputLabel>
           <!-- Tampilkan input text jika kategori adalah "Loan (Pinjaman)" -->
@@ -169,6 +171,14 @@
           </template>
           <InputError :message="form.errors.sub_kategori_id" />
         </div>
+
+            <div class="mb-4">
+              <InputLabel for="description">
+                Keterangan 
+              </InputLabel>
+              <TextInput id="description" type="text" v-model="form.description" class="block w-full" />
+              <InputError :message="form.errors.description" />
+            </div>
 
             <div class="mb-4">
               <InputLabel for="amount">
@@ -319,6 +329,7 @@ const form = useForm({
     amount: '',
     category_id: '',
     sub_kategori_id: null,
+    description: null,
     payment: '',
     account_id: null,
 });
@@ -401,6 +412,7 @@ const openModal = (mode, item = null) => {
     form.amount = item.amount;
     form.category_id = item.category_id;
     form.sub_kategori_id = item.sub_kategori_id;
+    form.description = item.description;
     form.payment = item.payment;
     form.account_id = item.account_id;
   } else {

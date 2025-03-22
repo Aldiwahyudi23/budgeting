@@ -56,7 +56,11 @@ Route::middleware([
 
     Route::resource('/master-data/source', SourceController::class);
     Route::resource('/master-data/sub-sources', SubSourceController::class);
+
     Route::resource('/master-data/category', CategoryController::class);
+    Route::get('/manage-categories', [CategoryController::class, 'manage'])->name('categories.manage');
+    // Route untuk menyimpan data (POST)
+    Route::post('/manage-categories/save', [CategoryController::class, 'saveSelected'])->name('categories.save');
     Route::resource('/master-data/sub-category', SubCategoryController::class);
 
     Route::resource('/master-data/allocation-ex', AllocationExController::class);
@@ -69,6 +73,7 @@ Route::middleware([
     Route::get('/account-bank/{id}/mutation', [AccountBankController::class, 'mutation'])->name('account-bank.mutation'); // Route untuk mutasi
     Route::post('/account-bank/withdraw', [AccountBankController::class, 'withdraw'])->name('account-bank.withdraw');
     Route::post('/account-bank/deposit', [AccountBankController::class, 'deposit'])->name('account-bank.deposit');
+    Route::post('/account-bank/topUp', [AccountBankController::class, 'topUp'])->name('account-bank.topUp');
     Route::resource('/master-data/debits', DebitController::class);
 
     Route::resource('/expense', ExpensesController::class);

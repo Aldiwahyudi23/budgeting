@@ -16,6 +16,7 @@ class AccountBank extends Model
 
     protected $fillable = [
         'user_id',
+        'type',
         'name',
         'description',
         'is_active',
@@ -31,6 +32,7 @@ class AccountBank extends Model
     // Kolom yang akan dicatat perubahannya
     protected static $logAttributes = [
         'user_id',
+        'type',
         'name',
         'description',
         'is_active',
@@ -43,6 +45,7 @@ class AccountBank extends Model
         return LogOptions::defaults()
             ->logOnly([
                 'user_id',
+                'type',
                 'name',
                 'description',
                 'is_active',

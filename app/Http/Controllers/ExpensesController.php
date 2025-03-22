@@ -38,7 +38,9 @@ class ExpensesController extends Controller
             ->latest()
             ->get();
 
-        $categories = Category::where('user_id', Auth::id())->get();
+        $categories = Category::where('user_id', Auth::id())
+            ->where('name', '!=', 'Fund Transfer')
+            ->get();
         $subCategories = SubCategory::all();
         $accountBanks = AccountBank::where('user_id', Auth::id())->get();
 
@@ -319,12 +321,13 @@ class ExpensesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'date' => 'required|date',
+            'date' => 'nullable|date',
             'amount' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
             'sub_kategori_id' => 'required', // Sub kategori bisa berupa ID atau nama (jika kategori adalah "Loan (Pinjaman)")
             'payment' => 'required|in:Transfer,Tunai',
             'account_id' => 'nullable',
+            'description' => 'nullable',
         ], [
             'date.required' => 'Tanggal wajib diisi.',
             'date.date' => 'Format tanggal tidak valid.',
@@ -552,13 +555,15 @@ class ExpensesController extends Controller
                 }
             }
 
+            $date = $request->date ?? now()->toDateString();
             // Simpan data ke expenses
             Expenses::create([
                 'user_id' => Auth::id(),
-                'date' => $request->date,
+                'date' => $date,
                 'amount' => $request->amount,
                 'category_id' => $request->category_id,
                 'sub_kategori_id' => $request->sub_kategori_id,
+                'description' => $request->description,
                 'payment' => $request->payment,
                 'account_id' => $accountId,
             ]);
@@ -632,18 +637,37 @@ class ExpensesController extends Controller
             'category_id' => 'required|exists:categories,id',
             'sub_kategori_id' => 'nullable|exists:sub_categories,id',
             'payment' => 'required|in:Transfer,Tunai', // Hanya menerima "Transfer" atau "Tunai"
-            'account_id' => 'nullable|exists:account_banks,id', // Bisa null jika payment adalah "Tunai"
+            'account_id' => 'nullable', // Bisa null jika payment adalah "Tunai"
+            'description' => 'nullable',
         ]);
 
         // Jika payment adalah "Tunai", set account_id ke null
+        $settings = Setting::where('user_id', Auth::id())->first();
         $accountId = $request->payment === 'Tunai' ? null : $request->account_id;
+
+        // Lanjutkan proses seperti biasa
+        if (str_starts_with($request->account_id, 'subcategory_')) {
+            if (!$settings || !$settings->account_id) {
+                throw new \Exception('Bank untuk tabungan belum dipilih. Silakan pilih bank terlebih dahulu di pengaturan.');
+            }
+
+            $subCategoryId = (int) str_replace('subcategory_', '', $request->account_id);
+            $neoBankId = $settings->account_id;
+
+            $accountId = $neoBankId;
+        } elseif (str_starts_with($request->account_id, 'account_')) {
+            $accountId = (int) str_replace('account_', '', $request->account_id);
+        }
+
+        $date = $request->date ?? now()->toDateString();
 
         $expense->update([
             'user_id' => Auth::id(),
-            'date' => $request->date,
+            'date' => $date,
             'amount' => $request->amount,
             'category_id' => $request->category_id,
             'sub_kategori_id' => $request->sub_kategori_id,
+            'description' => $request->description,
             'payment' => $request->payment,
             'account_id' => $accountId, // Gunakan nilai yang sudah diproses
         ]);

@@ -9,7 +9,9 @@ use App\Models\Aktivitas\Income;
 use App\Models\Assets\Saving;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\Debit;
+use App\Models\MasterData\Source;
 use App\Models\MasterData\SubCategory;
+use App\Models\MasterData\SubSource;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -60,10 +62,12 @@ class AccountBankController extends Controller
                     return $query->where('user_id', Auth::id());
                 })
             ],
+            'type' => 'required',
             'description' => 'nullable|string',
             'amount' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
         ], [
+            'type.required' => 'Type harus diisi.',
             'name.required' => 'Bank harus diisi.',
             'name.string' => 'Bank harus berupa teks.',
             'name.max' => 'Bank tidak boleh lebih dari 50 karakter.',
@@ -80,6 +84,7 @@ class AccountBankController extends Controller
         // Simpan rekening bank dengan user_id dari pengguna yang login
         $accountBank = AccountBank::create([
             'user_id' => Auth::id(),
+            'type' => $request->type,
             'name' => $request->name,
             'description' => $request->description,
             'amount' => $request->amount ?? 0,
@@ -125,10 +130,12 @@ class AccountBankController extends Controller
                     return $query->where('user_id', Auth::id());
                 })->ignore($accountBank->id), // Abaikan record dengan ID yang sedang diperbarui
             ],
+            'type' => 'required',
             'description' => 'nullable|string',
             'amount' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
         ], [
+            'type' => 'Type harus di isi',
             'name.required' => 'Bank harus diisi.',
             'name.string' => 'Bank harus berupa teks.',
             'name.max' => 'Bank tidak boleh lebih dari 50 karakter.',
@@ -392,6 +399,139 @@ class AccountBankController extends Controller
             return redirect()->back()->with('success', 'Setor tunai berhasil.');
         } catch (\Exception $e) {
             // Rollback jika ada kesalahan
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function topUp(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'amount' => ['required', 'numeric', 'gt:0'],
+            'admin' => ['nullable', 'numeric'],
+            'note' => ['nullable', 'string'],
+            'bank_ex' => ['required', 'exists:account_banks,id'],
+            'bank_in' => ['required', 'exists:account_banks,id'],
+        ], [
+            'amount.required' => 'Nominal harus diisi.',
+            'amount.numeric' => 'Nominal harus berupa angka.',
+            'amount.gt' => 'Nominal harus lebih dari 0.',
+            'admin.numeric' => 'Nominal harus berupa angka.',
+            'note.string' => 'Catatan harus berupa teks.',
+            'bank_ex.required' => 'Bank sumber harus dipilih.',
+            'bank_ex.exists' => 'Bank sumber tidak valid.',
+            'bank_in.required' => 'Bank tujuan harus dipilih.',
+            'bank_in.exists' => 'Bank tujuan tidak valid.',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Validasi jika bank_ex dan bank_in sama
+            if ($request->bank_ex == $request->bank_in) {
+                throw new \Exception('Bank sumber dan tujuan tidak boleh sama.');
+            }
+
+            // Ambil saldo sumber
+            $sourceBalance = AccountBank::where('id', $request->bank_ex)->value('amount');
+            // Ambil saldo sumber
+            $bankawal = AccountBank::Find($request->bank_in);
+
+            // Hitung total yang harus dikeluarkan (amount + admin)
+            $totalAmount = $request->amount + ($request->admin ?? 0);
+
+            // Validasi saldo sumber
+            if ($sourceBalance < $totalAmount) {
+                throw new \Exception('Saldo tidak mencukupi untuk melakukan transfer.');
+            }
+
+            // Cek atau buat Category untuk Fund Transfer
+            $category = Category::firstOrCreate(
+                ['name' => 'Fund Transfer', 'user_id' => Auth::id()],
+                ['type' => 'source', 'is_active' => false]
+            );
+
+            // Cek atau buat Source untuk Fund Transfer
+            $source = Source::firstOrCreate(
+                ['name' => 'Fund Transfer', 'user_id' => Auth::id()],
+                ['is_active' => false]
+            );
+
+            // Cek atau buat SubCategory dan SubSource untuk Top Up dan Admin Transaksi
+            $subCategoryAdmin = SubCategory::firstOrCreate(['name' => 'Admin Transaksi', 'category_id' => $category->id]);
+
+            // Cek atau buat SubCategory dan SubSource berdasarkan tipe bank
+            if ($bankawal->type === 'bank') {
+                // Jika tipe bank adalah "bank", buat SubCategory dan SubSource untuk "Pemindahan Dana"
+                $subCategoryTopUp = SubCategory::firstOrCreate([
+                    'name' => "Pemindahan Dana to {$bankawal->name}",
+                    'category_id' => $category->id,
+                ]);
+
+                $subSourceTopUp = SubSource::firstOrCreate([
+                    'name' => 'Pemindahan Dana',
+                    'source_id' => $source->id,
+                ]);
+            } else {
+                // Jika tipe bank adalah "e-wallet" atau "e-money", buat SubCategory dan SubSource untuk "Top Up" dan "Admin Transaksi"
+                $subCategoryTopUp = SubCategory::firstOrCreate([
+                    'name' => "Top Up {$bankawal->name}",
+                    'category_id' => $category->id,
+                ]);
+
+                $subSourceTopUp = SubSource::firstOrCreate([
+                    'name' => 'Top Up',
+                    'source_id' => $source->id,
+                ]);
+            }
+
+            // Simpan data ke Expenses
+            Expenses::create([
+                'date' => now(),
+                'user_id' => Auth::id(),
+                'amount' => $request->amount,
+                'category_id' => $category->id,
+                'sub_kategori_id' => $subCategoryTopUp->id,
+                'payment' => 'Transfer',
+                'account_id' => $request->bank_ex,
+                'description' => $request->note,
+            ]);
+
+            if ($request->admin && $request->admin > 0) {
+                Expenses::create([
+                    'date' => now(),
+                    'user_id' => Auth::id(),
+                    'amount' => $request->admin,
+                    'category_id' => $category->id,
+                    'sub_kategori_id' => $subCategoryAdmin->id,
+                    'payment' => 'Transfer',
+                    'account_id' => $request->bank_ex,
+                    'description' => $request->note,
+                ]);
+            }
+
+            // Simpan data ke Income
+            Income::create([
+                'date' => now(),
+                'user_id' => Auth::id(),
+                'amount' => $request->amount,
+                'source_id' => $source->id,
+                'sub_source_id' => $subSourceTopUp->id,
+                'account_id' => $request->bank_in,
+                'payment' => 'Transfer',
+                'description' => $request->note,
+            ]);
+
+            // **Update saldo di AccountBank**
+            // Kurangi saldo dari account sumber (bank_ex)
+            AccountBank::where('id', $request->bank_ex)->decrement('amount', $totalAmount);
+
+            // Tambah saldo ke account tujuan (bank_in)
+            AccountBank::where('id', $request->bank_in)->increment('amount', $request->amount);
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Setor tunai berhasil.');
+        } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
