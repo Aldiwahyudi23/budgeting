@@ -2,13 +2,12 @@
     <AppLayout title="Source">
         <div class="p-4">
 
-                              <!-- Catatan -->
+                      <!-- Catatan -->
       <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
         <p class="text-sm">
           Centang 'Publik' di bawah jika ingin data ini dapat digunakan oleh pengguna lain.
         </p>
       </div>
-
             <!-- Bagian Header: Tombol Tambah & Pencarian -->
             <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-4 md:space-y-0">
                 
@@ -281,6 +280,36 @@ const confirmDelete = (id) => {
         });
     }
 };
+
+// Ambil user ID yang sedang login
+const userId = usePage().props.auth.user.id;
+
+// Kelompokkan data berdasarkan name
+const groupedSources = computed(() => {
+    const groups = {};
+    sources.forEach(source => {
+        if (!groups[source.name]) {
+            groups[source.name] = [];
+        }
+        groups[source.name].push(source);
+    });
+    return groups;
+});
+
+// Fungsi untuk menentukan apakah checkbox harus muncul
+const shouldShowCheckbox = (source) => {
+    const group = groupedSources.value[source.name]; // Ambil semua item dengan name yang sama
+    const hasPublicTrue = group.some(item => item.public === true); // Cek apakah ada yang public = true
+
+    // Jika ada yang public = true, hanya item public true yang boleh tampil
+    if (hasPublicTrue) {
+        return source.public === true;
+    }
+
+    // Jika tidak ada yang public = true, semua tetap muncul
+    return true;
+};
+
 
 // Fungsi untuk mengupdate status public
 const updatePublicStatus = async (source) => {

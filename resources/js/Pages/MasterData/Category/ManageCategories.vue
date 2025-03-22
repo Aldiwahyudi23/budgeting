@@ -4,74 +4,77 @@
       <div class="container mx-auto p-2">
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
-          <h1 class="text-2xl font-semibold text-gray-800">Kelola Kategori</h1>
+          <h3 class="text-xl font-semibold text-gray-800">Kelola Kategori</h3>
           <PrimaryButton @click="saveSelected">Simpan Kategori Dipilih</PrimaryButton>
         </div>
 
-        <!-- Tabel Category dan SubCategory -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <table class="min-w-full">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pilih</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Kategori</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <!-- Loop melalui kategori yang unik -->
-              <template v-if="uniqueCategories.length > 0">
-                <template v-for="category in uniqueCategories" :key="category.id">
-                  <!-- Baris untuk Category -->
-                  <tr :class="{ 'disabled-row': isCategoryDisabled(category) }">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <input 
-                        type="checkbox" 
-                        v-model="selectedCategories" 
-                        :value="category.id" 
-                        :disabled="isCategoryDisabled(category)"
-                        @change="onCategorySelect(category)"
-                      />
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="category-name">
-                        {{ category.name }}
-                        <span v-if="isCategoryDisabled(category)" class="already-exists">(Sudah Ada)</span>
-                      </div>
-                    </td>
-                  </tr>
+<!-- Tabel Category dan SubCategory -->
+<div class="bg-white rounded-lg shadow-md overflow-x-auto">
+  <table class="min-w-full table-auto">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pilih</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Kategori</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      <!-- Loop melalui kategori yang unik -->
+      <template v-if="uniqueCategories.length > 0">
+        <template v-for="category in uniqueCategories" :key="category.id">
+          <!-- Baris untuk Category -->
+          <tr :class="{ 'disabled-row': isCategoryDisabled(category) }">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <input 
+                type="checkbox" 
+                v-model="selectedCategories" 
+                :value="category.id" 
+                :disabled="isCategoryDisabled(category)"
+                @change="onCategorySelect(category)"
+              />
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="category-name font-medium">
+                {{ category.name }}
+                <span v-if="isCategoryDisabled(category)" class="text-xs text-red-500 ml-2">(Sudah Ada)</span>
+              </div>
+              <div class="text-xs text-gray-500">{{ category.description }}</div> <!-- Deskripsi kategori -->
+            </td>
+          </tr>
 
-                  <!-- Loop melalui subkategori yang sesuai dengan kategori -->
-                  <tr 
-                    v-for="subCategory in getAllSubCategories(category.id)" 
-                    :key="subCategory.id" 
-                    :class="{ 'disabled-row': isSubCategoryDisabled(subCategory) }"
-                  >
-                    <td class="px-6 py-4 whitespace-nowrap subcategory-indent">
-                      <input 
-                        type="checkbox" 
-                        v-model="selectedSubCategories" 
-                        :value="subCategory.id" 
-                        :disabled="isSubCategoryDisabled(subCategory)"
-                        @change="onSubCategorySelect(subCategory)"
-                      />
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap subcategory-indent">
-                      <div class="subcategory-name">
-                        {{ subCategory.name }}
-                        <span v-if="isSubCategoryDisabled(subCategory)" class="already-exists">(Sudah Ada)</span>
-                      </div>
-                    </td>
-                  </tr>
-                </template>
-              </template>
-              <template v-else>
-                <tr>
-                  <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data kategori.</td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-        </div>
+          <!-- Loop melalui subkategori yang sesuai dengan kategori -->
+          <tr 
+            v-for="subCategory in getAllSubCategories(category.id)" 
+            :key="subCategory.id" 
+            :class="{ 'disabled-row': isSubCategoryDisabled(subCategory) }"
+          >
+            <td class="px-6 py-4 whitespace-nowrap subcategory-indent">
+              <input 
+                type="checkbox" 
+                v-model="selectedSubCategories" 
+                :value="subCategory.id" 
+                :disabled="isSubCategoryDisabled(subCategory)"
+                @change="onSubCategorySelect(subCategory)"
+              />
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap subcategory-indent">
+              <div class="subcategory-name font-medium">
+                {{ subCategory.name }}
+                <span v-if="isSubCategoryDisabled(subCategory)" class="text-xs text-red-500 ml-2">(Sudah Ada)</span>
+              </div>
+              <div class="text-xs text-gray-500">{{ subCategory.description }}</div> <!-- Deskripsi subkategori -->
+            </td>
+          </tr>
+        </template>
+      </template>
+      <template v-else>
+        <tr>
+          <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data kategori.</td>
+        </tr>
+      </template>
+    </tbody>
+  </table>
+</div>
+
       </div>
     </div>
   </AppLayout>
