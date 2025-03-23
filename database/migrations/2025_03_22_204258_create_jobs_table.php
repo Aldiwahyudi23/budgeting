@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('jobs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Relasi ke tabel users
+            $table->string('company_name'); // Nama perusahaan
+            $table->string('job_title'); // Jabatan pekerjaan
+            $table->text('job_description')->nullable(); // Deskripsi pekerjaan
+            $table->decimal('salary', 12, 2)->nullable(); // Gaji (maks 999,999,999.99)
+            $table->boolean('bpjs')->default(false); // Apakah ada BPJS?
+            $table->decimal('bpjs_company_percentage', 5, 2)->nullable(); // Potongan BPJS perusahaan (%)
+            $table->decimal('bpjs_employee_percentage', 5, 2)->nullable(); // Potongan BPJS karyawan (%)
+            $table->text('benefits')->nullable(); // Keuntungan tambahan
             $table->timestamps();
         });
     }

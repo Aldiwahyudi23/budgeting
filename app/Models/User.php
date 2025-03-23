@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Auth\Job;
 use App\Models\MasterData\Category;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -70,5 +71,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function category()
     {
         return $this->hasMany(Category::class);
+    }
+
+    public function job()
+    {
+        return $this->hasOne(Job::class);
     }
 }

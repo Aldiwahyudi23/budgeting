@@ -131,7 +131,7 @@ class SourceController extends Controller
     public function manage()
     {
 
-        $excludedNames = ['Fund Transfer', 'Saving (Tabungan)', 'Bills (Tagihan)', 'Debt (Hutang)', 'Loan (Pinjaman)']; // Tambahkan nama-nama yang ingin dikecualikan
+        $excludedNames = ['Fund Transfer', 'Saving (Tabungan)', 'Bills (Tagihan)', 'Debt (Hutang)', 'Loan (Pinjaman)', 'Salary (Gajih)']; // Tambahkan nama-nama yang ingin dikecualikan
         $categories = Source::whereNotIn('name', $excludedNames)
             ->where('public', true)
             ->get();

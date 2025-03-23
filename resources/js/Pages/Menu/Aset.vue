@@ -31,7 +31,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <!-- Card Saham -->
         <Link
-          :href="route('savings.index')"
+          :href="route('bpjs.index')"
           class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
         >
           <div class="flex items-center">
@@ -41,7 +41,7 @@
               </svg>
             </div>
             <div class="ml-4">
-              <h2 class="text-lg font-semibold">Saham</h2>
+              <h2 class="text-lg font-semibold">JHT</h2>
               <p class="text-sm text-gray-600">Kelola portofolio saham Anda</p>
             </div>
           </div>

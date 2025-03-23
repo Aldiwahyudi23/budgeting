@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Alokasi\AllocationExController;
 use App\Http\Controllers\Alokasi\AllocationInController;
+use App\Http\Controllers\Assets\BpjsJhtController;
 use App\Http\Controllers\Assets\SavingController;
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\ExpensesController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Financial\BillController;
 use App\Http\Controllers\Financial\DebtController;
 use App\Http\Controllers\Financial\LoanController;
 use App\Http\Controllers\IncomeController;
+use App\Http\Controllers\JobController;
 use App\Http\Controllers\MasterData\AccountBankController;
 use App\Http\Controllers\MasterData\CategoryController;
 use App\Http\Controllers\MasterData\DebitController;
@@ -105,4 +107,10 @@ Route::middleware([
     Route::get('/aset', [AsetController::class, 'aset'])->name('aset');
     Route::get('/laporan', [LaporanController::class, 'laporan'])->name('laporan');
     Route::get('/master-data', [MenuController::class, 'setupData'])->name('setupData');
+
+    Route::get('/jobs', [JobController::class, 'index']);
+    Route::post('/job', [JobController::class, 'store'])->name('job.store');
+    Route::put('/job/{job}', [JobController::class, 'update'])->name('job.update');
+
+    Route::resource('/aset/bpjs', BpjsJhtController::class);
 });

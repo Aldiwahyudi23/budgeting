@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Setting;
 use App\Http\Controllers\Controller;
 use App\Models\Assets\Saving;
+use App\Models\Auth\Job;
 use App\Models\MasterData\AccountBank;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\SubCategory;
@@ -37,9 +38,16 @@ class SettingController extends Controller
         );
         $accounts = AccountBank::where('user_id', Auth::id())->get();
 
+        // Ambil ID user yang login
+        $userId = Auth::id();
+        // Cek apakah user sudah memiliki job
+        $job = Job::where('user_id', $userId)->first();
+
         return inertia('Settings', [
             'settings' => $settings,
             'accounts' => $accounts,
+            'job' => $job,
+            'userId' => $userId,
         ]);
     }
 

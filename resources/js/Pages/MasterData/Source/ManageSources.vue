@@ -11,7 +11,7 @@
 <!-- Tabel Category dan SubCategory -->
 <div class="bg-white rounded-lg shadow-md overflow-x-auto">
   <table class="min-w-full table-auto">
-    <thead class="bg-gray-50">
+    <thead class="bg-gray-200">
       <tr>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pilih</th>
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Source</th>
@@ -22,7 +22,7 @@
       <template v-if="uniqueCategories.length > 0">
         <template v-for="category in uniqueCategories" :key="category.id">
           <!-- Baris untuk Category -->
-          <tr :class="{ 'disabled-row': isCategoryDisabled(category) }">
+          <tr :class="{ 'disabled-row bg-blue-100': isCategoryDisabled(category) }">
             <td class="px-6 py-4 whitespace-nowrap">
               <input 
                 type="checkbox" 
@@ -32,7 +32,7 @@
                 @change="onCategorySelect(category)"
               />
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-6 py-4 whitespace-nowrap ">
               <div class="category-name font-medium">
                 {{ category.name }}
                 <span v-if="isCategoryDisabled(category)" class="text-xs text-red-500 ml-2">(Sudah Ada)</span>
