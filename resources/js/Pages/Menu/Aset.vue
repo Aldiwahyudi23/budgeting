@@ -42,7 +42,7 @@
             </div>
             <div class="ml-4">
               <h2 class="text-lg font-semibold">JHT</h2>
-              <p class="text-sm text-gray-600">Kelola portofolio saham Anda</p>
+              <p class="text-sm text-gray-600">Kelola Perhitungan BPJS JHT</p>
             </div>
           </div>
         </Link>

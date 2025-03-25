@@ -87,7 +87,7 @@ class SettingController extends Controller
         $settings->update([$key => $request->value]);
 
         // Jika key yang diupdate adalah expense_saving, saving_expense, atau income_saving
-        if (in_array($key, ['expense_saving', 'saving_expense', 'income_saving'])) {
+        if (in_array($key, ['expense_saving', 'saving_expense'])) {
             // Cek apakah kategori dengan nama "Saving" sudah ada
             $category = Category::where('name', 'Saving (Tabungan)')
                 ->where('user_id', Auth::id())
@@ -105,6 +105,9 @@ class SettingController extends Controller
                 // Jika kategori "Saving" sudah ada, perbarui is_active sesuai dengan value
                 $category->update(['is_active' => $request->value]);
             }
+        }
+        // Jika key yang diupdate adalah expense_saving, saving_expense, atau income_saving
+        if (in_array($key, ['income_saving'])) {
             // Cek apakah kategori dengan nama "Saving" sudah ada
             $source = Source::where('name', 'Saving (Tabungan)')
                 ->where('user_id', Auth::id())

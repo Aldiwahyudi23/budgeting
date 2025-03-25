@@ -13,27 +13,75 @@ class BpjsJhtController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // public function index(Request $request)
+    // {
+    //     // Ambil saldo terbaru
+    //     $latestBalance = BpjsJht::where('user_id', Auth::id())
+    //         ->latest()
+    //         ->first();
+
+    //     // Ambil semua data BPJS JHT dengan pencarian
+    //     $query = BpjsJht::where('user_id', Auth::id())->latest();
+
+    //     if ($request->has('search')) {
+    //         $query->where('company_name', 'like', '%' . $request->search . '%')
+    //             ->orWhere('description', 'like', '%' . $request->search . '%');
+    //     }
+
+    //     $bpjsJhtRecords = $query->orderBy('transaction_date', 'desc')->paginate(10);
+
+    //     return Inertia::render('Assets/Bpjs/Index', [
+    //         'latestBalance' => $latestBalance,
+    //         'bpjsJhtRecords' => $bpjsJhtRecords,
+    //         'filters' => $request->only('search'),
+    //     ]);
+    // }
+
     public function index(Request $request)
     {
-        // Ambil saldo terbaru
-        $latestBalance = BpjsJht::where('user_id', Auth::id())
-            ->latest()
-            ->first();
+        $request->validate([
+            'year' => 'nullable|integer|min:2000|max:' . (date('Y') + 1),
+            'search' => 'nullable|string|max:255',
+        ]);
 
-        // Ambil semua data BPJS JHT dengan pencarian
-        $query = BpjsJht::where('user_id', Auth::id())->latest();
+        // Query dasar
+        $query = BpjsJht::where('user_id', Auth::id())
+            ->orderBy('transaction_date', 'desc');
 
-        if ($request->has('search')) {
-            $query->where('company_name', 'like', '%' . $request->search . '%')
-                ->orWhere('description', 'like', '%' . $request->search . '%');
+        // Filter tahun
+        if ($request->has('year')) {
+            $query->whereYear('transaction_date', $request->year);
         }
 
-        $bpjsJhtRecords = $query->orderBy('transaction_date', 'desc')->paginate(10);
+        // Pencarian
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Ambil semua data tanpa pagination
+        $bpjsJhtRecords = $query->get();
+
+        // Ambil saldo terbaru (untuk card ringkasan)
+        $latestBalance = BpjsJht::where('user_id', Auth::id())
+            ->orderBy('transaction_date', 'desc')
+            ->first();
+
+        // Daftar tahun yang tersedia
+        $availableYears = BpjsJht::where('user_id', Auth::id())
+            ->selectRaw('YEAR(transaction_date) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
 
         return Inertia::render('Assets/Bpjs/Index', [
             'latestBalance' => $latestBalance,
             'bpjsJhtRecords' => $bpjsJhtRecords,
-            'filters' => $request->only('search'),
+            'availableYears' => $availableYears,
+            'filters' => $request->only(['search', 'year']),
         ]);
     }
 
