@@ -4,10 +4,13 @@ namespace App\Http\Controllers\MasterData;
 
 use App\Models\MasterData\SubSource;
 use App\Http\Controllers\Controller;
+use App\Models\MasterData\Category;
 use App\Models\MasterData\Source;
+use App\Models\MasterData\SubCategory;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -69,9 +72,35 @@ class SubSourceController extends Controller
             'source_id.exists' => "Nama Sumber (Source) sudah ada, silakan gunakan nama yang lain.",
         ]);
 
-        SubSource::create($request->all());
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('sub-sources.index')->with('success', 'Data Berhasil di simpan');
+            SubSource::create($request->all());
+
+            // 2. Cek apakah category name adalah 'Saving (Tabungan)'
+            $source = Source::find($request['source_id']);
+
+            if ($source && $source->name === 'Saving (Tabungan)') {
+                // 3. Cari source dengan name yang sama dengan source
+                $category = Category::where('name', $source->name)->first();
+
+                if ($category) {
+                    // 4. Simpan ke sub category
+                    SubCategory::create([
+                        'name' => $request->name,
+                        'category_id' => $category->id,
+                        'description' => $request->description,
+                        'is_active' => $request->is_active ?? false,
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Data Berhasil di simpan');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
     /**
@@ -119,10 +148,55 @@ class SubSourceController extends Controller
             'source_id.exists' => "Sumber (Source) yang dipilih tidak valid.",
         ]);
 
-        // Update data
-        $sub_source->update($request->only(['source_id', 'name', 'description', 'is_active']));
 
-        return redirect()->back()->with('success', 'Data Berhasil diperbaharui');
+        try {
+            DB::beginTransaction();
+
+            // Cek apakah source name adalah 'Saving (Tabungan)'
+            $source = Source::find($request['source_id']);
+
+            if ($source && ($source->name === 'Saving (Tabungan)' || $source->name === 'Loan (Pinjaman)')) {
+                // Cari source dengan name yang sama dengan source
+                $category = Category::where('name', $source->name)->first();
+
+                if ($category) {
+                    // Gunakan getOriginal() untuk mendapatkan nama sebelum diupdate
+                    $originalName = $sub_source->getOriginal('name');
+
+                    // Cari sub source berdcategoryarkan nama sebelum diubah
+                    $subCategory = SubCategory::where('name', $originalName)
+                        ->where('category_id', $category->id)
+                        ->first();
+
+
+                    if ($subCategory) {
+                        // Update sub source
+                        $subCategory->update([
+                            'name' => $request->name,
+                            'category_id' => $category->id,
+                            'description' => $request->description,
+                            'is_active' => $request->is_active,
+                        ]);
+                    } else {
+                        SubCategory::create([
+                            'name' => $request->name,
+                            'category_id' => $category->id,
+                            'description' => $request->description,
+                            'is_active' => $request->is_active,
+                        ]);
+                    }
+                }
+            }
+
+            $sub_source->update($request->all());
+
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Data Berhasil di simpan');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
     /**
@@ -130,8 +204,42 @@ class SubSourceController extends Controller
      */
     public function destroy(SubSource $sub_source)
     {
-        $sub_source->delete();
-        return redirect()->back()->with('success', 'Sub Source berhasil dihapus.');
+
+        try {
+            DB::beginTransaction();
+
+            // Cek apakah source name adalah 'Saving (Tabungan)'
+            $source = Source::find($sub_source['source_id']);
+
+            if ($source && ($source->name === 'Saving (Tabungan)' || $source->name === 'Loan (Pinjaman)')) {
+                // Cari source dengan name yang sama dengan source
+                $category = Category::where('name', $source->name)->first();
+
+                if ($category) {
+                    // Gunakan getOriginal() untuk mendapatkan nama sebelum diupdate
+                    $originalName = $sub_source->getOriginal('name');
+
+                    // Cari sub source berdcategoryarkan nama sebelum diubah
+                    $SubCategory = SubCategory::where('name', $originalName)
+                        ->where('category_id', $category->id)
+                        ->first();
+
+
+                    if ($SubCategory) {
+                        // Update sub source
+                        $SubCategory->delete();
+                    }
+                }
+            }
+
+            $sub_source->delete();
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Data Berhasil di Hapus');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
     public function updatePublic(SubSource $sub_source, Request $request)
     {

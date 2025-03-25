@@ -83,7 +83,7 @@
               <td class="px-4 py-2">{{ item.sub_source?.name || '-' }}</td>
               <td class="px-4 py-2">{{ item.description || '-' }}</td>
               <td class="px-4 py-2">{{ item.payment }}</td>
-              <td class="px-4 py-2">{{ item.account_bank?.name || '-' }}</td>
+              <td class="px-4 py-2">{{ item.account_bank?.name || 'Tunai' }}</td>
               <td v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">
                 <SecondaryButton v-if="settings.btn_edit" @click="openModal('edit', item)">Edit</SecondaryButton>
                 <PrimaryButton v-if="settings.btn_delete" class="ml-2 bg-red-600 hover:bg-red-700" @click="confirmDelete(item.id)">Hapus</PrimaryButton>
@@ -181,7 +181,15 @@
               <TextInput id="description" type="text" v-model="form.description" class="block w-full" />
               <InputError :message="form.errors.description" />
             </div>
+      <!-- Bagian yang diubah -->
+            <div v-if="isSavingSource" class="mb-4 p-3 bg-blue-50 rounded-md">
+              <p class="text-sm text-blue-800">
+                <i class="fas fa-info-circle mr-1"></i>
+                Nabung secara langsung: uang akan langsung tercatat di Account Bank sesuai pengaturan.
+              </p>
+            </div>
 
+            <div v-else>
             <div class="mb-4">
               <InputLabel for="payment">
                 Pembayaran
@@ -212,6 +220,7 @@
                 </option>
               </select>
               <InputError :message="form.errors.account_id" />
+            </div>
             </div>
 
             <div class="flex justify-end mt-4">
@@ -290,6 +299,11 @@ const filteredIncomes = computed(() => {
     });
 });
 
+const isSavingSource = computed(() => {
+  const selectedSource = props.sources.find(sou => sou.id === form.source_id);
+  return selectedSource && selectedSource.name === 'Saving (Tabungan)';
+});
+
 const paginatedIncomes = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage.value;
     const end = start + itemsPerPage.value;
@@ -363,6 +377,11 @@ const closeModal = () => {
 };
 
 const submitForm = () => {
+    // Jika source adalah Saving, set nilai default
+  if (isSavingSource.value) {
+    form.payment = 'Transfer';
+  }
+
     if (isEditMode.value) {
         form.put(route('income.update', form.id), { onSuccess: () => closeModal() });
     } else {

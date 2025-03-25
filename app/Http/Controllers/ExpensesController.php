@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Aktivitas\Expenses;
 use App\Http\Controllers\Controller;
+use App\Models\Aktivitas\Income;
 use App\Models\Assets\Saving;
 use App\Models\Financial\Bill;
 use App\Models\Financial\Debt;
@@ -31,10 +32,14 @@ class ExpensesController extends Controller
         $year = $request->input('year', date('Y')); // Default: Tahun saat ini
         $month = $request->input('month', date('m')); // Default: Bulan saat ini
 
+        $excludedNames = ['Fund Transfer']; // Nama-nama kategori yang ingin dikecualikan
         $expenses = Expenses::where('user_id', Auth::id())
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->with(['category', 'subCategory', 'accountBank'])
+            ->whereHas('category', function ($query) use ($excludedNames) {
+                $query->whereNotIn('name', $excludedNames);
+            })
             ->latest()
             ->get();
 
@@ -374,6 +379,7 @@ class ExpensesController extends Controller
             //     // Set sub_kategori_id untuk expenses
             //     $request->merge(['sub_kategori_id' => $subCategory->id]);
             // }
+            $date = $request->date ?? now()->toDateString();
 
             if ($category->name == "Loan (Pinjaman)") {
                 // Cari atau buat Source dengan nama "Loan (Pinjaman)"
@@ -437,7 +443,7 @@ class ExpensesController extends Controller
 
                 Saving::create([
                     'user_id' => Auth::id(),
-                    'date' => $request->date,
+                    'date' => $date,
                     'amount' => -$request->amount,
                     'note' => 'Pengeluaran dari Saving',
                     'category_id' => $request->category_id,
@@ -466,13 +472,46 @@ class ExpensesController extends Controller
 
                 Saving::create([
                     'user_id' => Auth::id(),
-                    'date' => $request->date,
+                    'date' => $date,
                     'amount' => $request->amount,
                     'note' => 'Pemasukan dari Expenses',
                     'category_id' => $request->category_id,
                     'sub_category_id' => $request->sub_kategori_id,
                     'balance' => $balance,
                 ]);
+
+
+                if ($category && $category->name === 'Saving (Tabungan)') {
+                    // 3. Cari source dengan name yang sama dengan category
+                    $source = Source::where('name', $category->name)->first();
+
+                    if ($source) {
+                        $sub_category = SubCategory::Find($request->sub_kategori_id);
+                        // Gunakan getOriginal() untuk mendapatkan nama sebelum diupdate
+                        $originalName = $sub_category->name;
+                        // Cari sub source berdasarkan nama sebelum diubah
+                        $subSource = SubSource::where('name', $originalName)
+                            ->where('source_id', $source->id)
+                            ->first();
+
+                        // Jika sub source tidak ditemukan, buat baru
+                        if (!$subSource) {
+                            throw new \Exception("Sub Source Belum Ada di data , Tambahkan dulu data nya .");
+                        }
+
+                        // Simpan data Income
+                        Income::create([
+                            'user_id' => Auth::id(),
+                            'date' => $date,
+                            'amount' => $request->amount,
+                            'source_id' => $source->id,
+                            'sub_source_id' => $subSource->id,
+                            'description' => $request->description,
+                            'payment' => $request->payment,
+                            'account_id' =>  $settings->account_id,
+                        ]);
+                    }
+                }
             }
 
             // Cek apakah sub_category_id ada di Debt
@@ -555,7 +594,7 @@ class ExpensesController extends Controller
                 }
             }
 
-            $date = $request->date ?? now()->toDateString();
+
             // Simpan data ke expenses
             Expenses::create([
                 'user_id' => Auth::id(),

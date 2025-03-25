@@ -8,6 +8,7 @@ use App\Models\Assets\Saving;
 use App\Models\Auth\Job;
 use App\Models\MasterData\AccountBank;
 use App\Models\MasterData\Category;
+use App\Models\MasterData\Source;
 use App\Models\MasterData\SubCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +35,10 @@ class SettingController extends Controller
                 'expense_saving' => false,
                 'saving_expense' => false,
                 'income_saving' => false,
+                'bank' => false,
+                'cash' => false,
+                'date_in' => false,
+                'date_ex' => false,
             ]
         );
         $accounts = AccountBank::where('user_id', Auth::id())->get();
@@ -71,6 +76,10 @@ class SettingController extends Controller
                 'expense_saving' => false,
                 'saving_expense' => false,
                 'income_saving' => false,
+                'bank' => false,
+                'cash' => false,
+                'date_in' => false,
+                'date_ex' => false,
             ]
         );
 
@@ -95,6 +104,23 @@ class SettingController extends Controller
             } elseif ($category) {
                 // Jika kategori "Saving" sudah ada, perbarui is_active sesuai dengan value
                 $category->update(['is_active' => $request->value]);
+            }
+            // Cek apakah kategori dengan nama "Saving" sudah ada
+            $source = Source::where('name', 'Saving (Tabungan)')
+                ->where('user_id', Auth::id())
+                ->first();
+
+            // Jika kategori "Saving" belum ada, buat baru
+            if (!$source) {
+                Source::create([
+                    'user_id' => Auth::id(),
+                    'name' => 'Saving (Tabungan)',
+                    'description' => 'Kategori Untuk Tabungan.',
+                    'is_active' => true,
+                ]);
+            } elseif ($source) {
+                // Jika kategori "Saving" sudah ada, perbarui is_active sesuai dengan value
+                $source->update(['is_active' => $request->value]);
             }
         }
 

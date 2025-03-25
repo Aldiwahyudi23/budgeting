@@ -140,6 +140,79 @@
         </div>
       </div>
 
+      <!-- Tambahkan bagian ini setelah BAGIAN TABUNGAN dan sebelum BAGIAN PEKERJAAN -->
+<div class="mb-6 p-4 bg-white rounded-lg shadow-md">
+  <div @click="toggleSection('transaction')" class="flex justify-between items-center cursor-pointer">
+    <h2 class="text-lg font-bold">Pengaturan Transaksi</h2>
+    <span class="text-gray-500">{{ isTransactionOpen ? '▲' : '▼' }}</span>
+  </div>
+  <span class="text-gray-500">Pengaturan tampilan dan fitur transaksi</span>
+  <div v-if="isTransactionOpen">
+    
+    <!-- Date Input Settings -->
+    <div class="mt-2 mb-6 p-4 bg-blue-100 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
+      <h3 class="font-bold mb-2">Pengaturan Tanggal</h3>
+      
+      <!-- Date in Income -->
+      <div class="mb-4">
+        <label class="flex items-center">
+          <input
+            type="checkbox"
+            :checked="settings.date_in"
+            @change="updateSetting('date_in', $event.target.checked)"
+            class="form-checkbox h-5 w-5 text-blue-600"
+          />
+          <span class="ml-2 text-gray-700">Tampilkan Input Tanggal di Pemasukan</span>
+        </label>
+      </div>
+      
+      <!-- Date in Expense -->
+      <div class="mb-4">
+        <label class="flex items-center">
+          <input
+            type="checkbox"
+            :checked="settings.date_ex"
+            @change="updateSetting('date_ex', $event.target.checked)"
+            class="form-checkbox h-5 w-5 text-blue-600"
+          />
+          <span class="ml-2 text-gray-700">Tampilkan Input Tanggal di Pengeluaran</span>
+        </label>
+      </div>
+    </div>
+    
+    <!-- Payment Method Settings -->
+    <div class="mb-6 p-4 bg-blue-100 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
+      <h3 class="font-bold mb-2">Pengaturan Metode Pembayaran</h3>
+      
+      <!-- Bank Payment -->
+      <div class="mb-4">
+        <label class="flex items-center">
+          <input
+            type="checkbox"
+            :checked="settings.bank"
+            @change="updateSetting('bank', $event.target.checked)"
+            class="form-checkbox h-5 w-5 text-blue-600"
+          />
+          <span class="ml-2 text-gray-700">Aktifkan Pembayaran via Bank/Transfer</span>
+        </label>
+      </div>
+      
+      <!-- Cash Payment -->
+      <div class="mb-4">
+        <label class="flex items-center">
+          <input
+            type="checkbox"
+            :checked="settings.cash"
+            @change="updateSetting('cash', $event.target.checked)"
+            class="form-checkbox h-5 w-5 text-blue-600"
+          />
+          <span class="ml-2 text-gray-700">Aktifkan Pembayaran Tunai</span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
             <!-- BAGIAN TABEL -->
       <div class="mb-6 p-4 bg-white rounded-lg shadow-md">
         <div @click="toggleSection('job')" class="flex justify-between items-center cursor-pointer">
@@ -282,15 +355,31 @@ const isSavingsOpen = ref(false);
 const isJobOpen = ref(false);
 
 // Fungsi toggle untuk menampilkan/menghilangkan isi section
+// const toggleSection = (section) => {
+//   if (section === 'table') {
+//     isTableOpen.value = !isTableOpen.value;
+//   }
+//   if (section === 'job') {
+//     isJobOpen.value = !isJobOpen.value;
+//   }
+//    else if (section === 'savings') {
+//     isSavingsOpen.value = !isSavingsOpen.value;
+//   }
+// };
+
+// Tambahkan ini bersama state lainnya
+const isTransactionOpen = ref(false);
+
+// Modifikasi fungsi toggleSection
 const toggleSection = (section) => {
   if (section === 'table') {
     isTableOpen.value = !isTableOpen.value;
-  }
-  if (section === 'job') {
+  } else if (section === 'job') {
     isJobOpen.value = !isJobOpen.value;
-  }
-   else if (section === 'savings') {
+  } else if (section === 'savings') {
     isSavingsOpen.value = !isSavingsOpen.value;
+  } else if (section === 'transaction') {
+    isTransactionOpen.value = !isTransactionOpen.value;
   }
 };
 

@@ -29,6 +29,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('app:bills-auto')->dailyAt('07:00'); // Jalankan setiap hari pukul 00:00
         $schedule->command('app:billsremender')->dailyAt('07:00'); // Jalankan setiap hari pukul 00:00
         $schedule->command('app:debts-remender')->dailyAt('07:00'); // Jalankan setiap hari pukul 00:00
-        $schedule->command('bpjs:generate')->monthlyOn(15, '05:00');
+        $schedule->command('app:bpjs')->monthlyOn(13, '05:00');
     })
     ->create();

@@ -46,11 +46,16 @@ class HomeContorller extends Controller
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
 
-        // Hitung total pemasukan berdasarkan user_id, bulan, dan tahun saat ini
+        $excludedNames = ['Fund Transfer', 'Saving (Tabungan)']; // Nama-nama kategori yang ingin dikecualikan
+
         $totalIncome = Income::where('user_id', Auth::id())
             ->whereMonth('date', $currentMonth)
             ->whereYear('date', $currentYear)
+            ->whereHas('source', function ($query) use ($excludedNames) {
+                $query->whereNotIn('name', $excludedNames);
+            })
             ->sum('amount');
+
 
         if ($savingCategory) {
             // Hitung total pengeluaran berdasarkan user_id, bulan, dan tahun saat ini
@@ -58,12 +63,18 @@ class HomeContorller extends Controller
                 ->whereMonth('date', $currentMonth)
                 ->whereYear('date', $currentYear)
                 ->where('category_id', '!=', $savingCategory->id)
+                ->whereHas('category', function ($query) use ($excludedNames) {
+                    $query->whereNotIn('name', $excludedNames);
+                })
                 ->sum('amount');
         } else {
             // Hitung total pengeluaran berdasarkan user_id, bulan, dan tahun saat ini
             $totalExpenses = Expenses::where('user_id', Auth::id())
                 ->whereMonth('date', $currentMonth)
                 ->whereYear('date', $currentYear)
+                ->whereHas('category', function ($query) use ($excludedNames) {
+                    $query->whereNotIn('name', $excludedNames);
+                })
                 ->sum('amount');
         }
         // --------------------------------Transaksi baru- Belum berfungsi---------------------

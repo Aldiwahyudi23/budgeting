@@ -31,10 +31,15 @@ class LaporanController extends Controller
             ->where('name', 'Saving (Tabungan)')
             ->first();
 
+        $excludedNames = ['Fund Transfer', 'Saving (Tabungan)']; // Nama-nama kategori yang ingin dikecualikan
+
         // Ambil data pengeluaran
         $expensesQuery = Expenses::where('user_id', $user->id)
             ->whereYear('date', $year)
-            ->whereMonth('date', $month);
+            ->whereMonth('date', $month)
+            ->whereHas('category', function ($query) use ($excludedNames) {
+                $query->whereNotIn('name', $excludedNames);
+            });
 
         if ($savingCategory) {
             $expensesQuery->where('category_id', '!=', $savingCategory->id);
@@ -46,6 +51,9 @@ class LaporanController extends Controller
         $incomes = Income::where('user_id', $user->id)
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
+            ->whereHas('source', function ($query) use ($excludedNames) {
+                $query->whereNotIn('name', $excludedNames);
+            })
             ->get();
 
         // Ambil data tabungan

@@ -83,7 +83,7 @@
               <td class="px-4 py-2">{{ item.sub_category?.name || '-' }}</td>
               <td class="px-4 py-2">{{ item.description || '-' }}</td>
               <td class="px-4 py-2">{{ item.payment }}</td>
-              <td class="px-4 py-2">{{ item.account_bank?.name || '-' }}</td>
+              <td class="px-4 py-2">{{ item.account_bank?.name || 'Tunai' }}</td>
               <td v-if="settings.btn_edit || settings.btn_delete" class="px-4 py-2 text-center">
                 <SecondaryButton v-if="settings.btn_edit" @click="openModal('edit', item)">Edit</SecondaryButton>
                 <PrimaryButton v-if="settings.btn_delete" class="ml-2 bg-red-600 hover:bg-red-700" @click="confirmDelete(item.id)">Hapus</PrimaryButton>
