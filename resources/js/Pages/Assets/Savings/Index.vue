@@ -1,6 +1,7 @@
 <template>
   <AppLayout title="Saving (Tabungan)">
     <div class="p-4 space-y-4">
+
       <!-- Flash Messages -->
       <div v-if="$page.props.flash.success" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg">
         <div class="flex items-center">
@@ -168,42 +169,57 @@
         </div>
       </div>
 
-      <!-- Modal Tambah Sub Kategori -->
-      <CustomModal :show="subCategoryModalOpen" title="Tambah Kategori Tabungan" @close="closeSubCategoryModal">
-        <template #content>
-          <form @submit.prevent="submitSubCategoryForm" class="space-y-4">
-            <div>
-              <InputLabel for="name" value="Nama Kategori" required />
-              <TextInput id="name" v-model="subCategoryForm.name" class="mt-1 block w-full" required />
-              <InputError :message="subCategoryForm.errors.name" class="mt-1" />
-            </div>
+<CustomModal :show="subCategoryModalOpen" title="Tambah Kategori Tabungan" @close="closeSubCategoryModal">
+  <template #content>
+    <form @submit.prevent="submitSubCategoryForm">
+      <div class="mb-4">
+        <InputLabel for="name">
+          Nama Kategori Tabungan
+          <span class="text-red-500 text-sm">*</span>
+        </InputLabel>
+        <TextInput id="name" v-model="subCategoryForm.name" class="block w-full" required />
+        <InputError :message="subCategoryForm.errors.name" />
+      </div>
 
-            <div>
-              <InputLabel for="description" value="Deskripsi (Opsional)" />
-              <textarea id="description" v-model="subCategoryForm.description" rows="3" 
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-              <InputError :message="subCategoryForm.errors.description" class="mt-1" />
-            </div>
+      <div class="mb-4">
+        <InputLabel for="description">
+          Deskripsi
+        </InputLabel>
+        <TextInput id="description" v-model="subCategoryForm.description" class="block w-full" />
+        <InputError :message="subCategoryForm.errors.description" />
+      </div>
 
-            <div class="flex items-center">
-              <input id="is_active" v-model="subCategoryForm.is_active" type="checkbox" 
-                     class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-              <label for="is_active" class="ml-2 block text-sm text-gray-700">
-                Aktif
-              </label>
-            </div>
+      <div class="mb-4">
+        <InputLabel>
+          Kategori Induk
+        </InputLabel>
+        <div class="p-2 bg-gray-100 rounded">
+          Saving (Tabungan)
+        </div>
+        <small class="text-gray-500">Kategori tabungan akan otomatis terhubung dengan "Saving (Tabungan)"</small>
+      </div>
 
-            <div class="flex justify-end space-x-3 pt-4">
-              <SecondaryButton type="button" @click="closeSubCategoryModal">
-                Batal
-              </SecondaryButton>
-              <PrimaryButton type="submit" :disabled="subCategoryForm.processing">
-                Simpan
-              </PrimaryButton>
-            </div>
-          </form>
-        </template>
-      </CustomModal>
+      <div class="mb-4">
+        <InputLabel for="is_active">
+          Status
+        </InputLabel>
+        <div class="flex items-center">
+          <input type="checkbox" id="is_active" v-model="subCategoryForm.is_active" class="mr-2" />
+          <label for="is_active">Aktif</label>
+        </div>
+        <InputError :message="subCategoryForm.errors.is_active" />
+      </div>
+
+      <div class="flex justify-end mt-4">
+        <SecondaryButton type="button" @click="closeSubCategoryModal">Batal</SecondaryButton>
+        <PrimaryButton class="ml-3" type="submit" :disabled="subCategoryForm.processing">
+          <span v-if="subCategoryForm.processing">Menyimpan...</span>
+          <span v-else>Simpan</span>
+        </PrimaryButton>
+      </div>
+    </form>
+  </template>
+</CustomModal>
     </div>
   </AppLayout>
 </template>
@@ -231,36 +247,42 @@ const subCategoryModalOpen = ref(false);
 const currentPage = ref(1);
 const perPage = ref(10);
 
+// Form untuk sub kategori
 const subCategoryForm = useForm({
   name: '',
   description: '',
   is_active: true,
-  category_id: '',
+  category_id: '', // Akan diisi otomatis dengan ID kategori "Saving (Tabungan)"
 });
 
+// Cari ID kategori "Saving (Tabungan)"
 const findSavingCategoryId = () => {
   const savingCategory = props.categories.find(category => category.name === 'Saving (Tabungan)');
   return savingCategory ? savingCategory.id : null;
 };
 
+// Buka modal tambah sub kategori
 const openSubCategoryModal = () => {
-  subCategoryForm.category_id = findSavingCategoryId();
+  subCategoryForm.category_id = findSavingCategoryId(); // Setel kategori otomatis
   subCategoryModalOpen.value = true;
 };
 
+// Tutup modal tambah sub kategori
 const closeSubCategoryModal = () => {
   subCategoryForm.reset();
   subCategoryModalOpen.value = false;
 };
 
+// Submit form tambah sub kategori
 const submitSubCategoryForm = () => {
   subCategoryForm.post(route('sub-category.store'), {
     onSuccess: () => {
       closeSubCategoryModal();
-      router.reload();
     },
   });
 };
+
+
 
 const filteredSavings = computed(() => {
   return props.savings.filter(item => 

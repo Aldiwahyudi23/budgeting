@@ -76,31 +76,51 @@ class SubCategoryController extends Controller
         try {
             DB::beginTransaction();
 
-            SubCategory::create($request->all());
+            // 1. Cek apakah category 'Saving (Tabungan)' ada
+            $category = Category::where('name', 'Saving (Tabungan)')->first();
 
-            // 2. Cek apakah category name adalah 'Saving (Tabungan)'
-            $category = Category::find($request['category_id']);
+            if (!$category) {
+                return redirect()->back()
+                    ->with('error', 'Kategori Tabungan belum ada. Silakan aktifkan terlebih dahulu di Setting-Tabungan.')
+                    ->withInput();
+            }
 
-            if ($category && $category->name === 'Saving (Tabungan)') {
-                // 3. Cari source dengan name yang sama dengan category
-                $source = Source::where('name', $category->name)->first();
+            // 2. Cek apakah category 'Saving (Tabungan)' aktif
+            if (!$category->is_active) {
+                return redirect()->back()
+                    ->with('error', 'Kategori Tabungan tidak aktif. Silakan aktifkan terlebih dahulu di Setting-Tabungan.')
+                    ->withInput();
+            }
 
-                if ($source) {
-                    // 4. Simpan ke sub source
-                    SubSource::create([
-                        'name' => $request->name,
-                        'source_id' => $source->id,
-                        'description' => $request->description,
-                        'is_active' => $request->is_active ?? false,
-                    ]);
-                }
+            // 3. Cek apakah category_id yang dikirim sesuai
+            if ($request->category_id != $category->id) {
+                return redirect()->back()
+                    ->with('error', 'Kategori tidak valid.')
+                    ->withInput();
+            }
+
+            // 4. Simpan sub category
+            $subCategory = SubCategory::create($request->all());
+
+            // 5. Simpan ke sub source
+            $source = Source::where('name', 'Saving (Tabungan)')->first();
+
+            if ($source) {
+                SubSource::create([
+                    'name' => $request->name,
+                    'source_id' => $source->id,
+                    'description' => $request->description,
+                    'is_active' => $request->is_active ?? false,
+                ]);
             }
 
             DB::commit();
-            return redirect()->back()->with('success', 'Data Berhasil di simpan');
+            return redirect()->back()->with('success', 'Data berhasil disimpan');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
         }
     }
 

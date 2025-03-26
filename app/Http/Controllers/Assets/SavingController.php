@@ -24,8 +24,7 @@ class SavingController extends Controller
             ->latest()
             ->get();
 
-        $categories = Category::where('is_active', true)
-            ->where('user_id', Auth::id())
+        $categories = Category::where('user_id', Auth::id())
             ->where('name', 'Saving (Tabungan)')
             ->get(); // Hanya ambil kategori tabungan
         $subCategories = SubCategory::whereHas('category', function ($query) {
