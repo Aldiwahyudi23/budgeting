@@ -77,30 +77,30 @@ class SubCategoryController extends Controller
             DB::beginTransaction();
 
             // 1. Cek apakah category 'Saving (Tabungan)' ada
-            $category = Category::where('name', 'Saving (Tabungan)')->first();
+            // $category = Category::where('name', 'Saving (Tabungan)')->first();
 
-            if (!$category) {
-                return redirect()->back()
-                    ->with('error', 'Kategori Tabungan belum ada. Silakan aktifkan terlebih dahulu di Setting-Tabungan.')
-                    ->withInput();
-            }
+            // if (!$category) {
+            //     return redirect()->back()
+            //         ->with('error', 'Kategori Tabungan belum ada. Silakan aktifkan terlebih dahulu di Setting-Tabungan.')
+            //         ->withInput();
+            // }
 
-            // 2. Cek apakah category 'Saving (Tabungan)' aktif
-            if (!$category->is_active) {
-                return redirect()->back()
-                    ->with('error', 'Kategori Tabungan tidak aktif. Silakan aktifkan terlebih dahulu di Setting-Tabungan.')
-                    ->withInput();
-            }
+            // // 2. Cek apakah category 'Saving (Tabungan)' aktif
+            // if (!$category->is_active) {
+            //     return redirect()->back()
+            //         ->with('error', 'Kategori Tabungan tidak aktif. Silakan aktifkan terlebih dahulu di Setting-Tabungan.')
+            //         ->withInput();
+            // }
 
-            // 3. Cek apakah category_id yang dikirim sesuai
-            if ($request->category_id != $category->id) {
-                return redirect()->back()
-                    ->with('error', 'Kategori tidak valid.')
-                    ->withInput();
-            }
+            // // 3. Cek apakah category_id yang dikirim sesuai
+            // if ($request->category_id != $category->id) {
+            //     return redirect()->back()
+            //         ->with('error', 'Kategori tidak valid.')
+            //         ->withInput();
+            // }
 
             // 4. Simpan sub category
-            $subCategory = SubCategory::create($request->all());
+            SubCategory::create($request->all());
 
             // 5. Simpan ke sub source
             $source = Source::where('name', 'Saving (Tabungan)')->first();

@@ -1,6 +1,16 @@
 <template>
   <AppLayout title="Kelola Kategori">
     <div class="p-4">
+
+         <!-- Tampilkan flash message jika ada -->
+    <div v-if="$page.props.flash.success" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+      {{ $page.props.flash.success }}
+    </div>
+
+    <div v-if="$page.props.flash.error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      {{ $page.props.flash.error }}
+    </div>
+
       <div class="container mx-auto p-2">
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
