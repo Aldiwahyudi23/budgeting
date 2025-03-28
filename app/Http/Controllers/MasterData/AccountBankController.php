@@ -238,6 +238,7 @@ class AccountBankController extends Controller
                 'date' => $expense->date,
                 'category' => $expense->category->name,
                 'description' => $expense->subCategory->name,
+                'detail' => $expense->description,
                 'amount' => $expense->amount,
                 'type' => 'expense',
             ]))
@@ -246,6 +247,7 @@ class AccountBankController extends Controller
                 'date' => $income->date,
                 'category' => $income->source->name,
                 'description' => $income->subSource->name,
+                'detail' => $income->description,
                 'amount' => $income->amount,
                 'type' => 'income',
             ]))

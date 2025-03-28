@@ -111,6 +111,7 @@ const nextPage = () => {
               <th class="p-2 text-left">Tanggal</th>
               <th class="p-2 text-left">Kategori</th>
               <th class="p-2 text-left">Keterangan</th>
+              <th class="p-2 text-left">Detail</th>
               <th class="p-2 text-left">Nominal</th>
             </tr>
           </thead>
@@ -122,6 +123,9 @@ const nextPage = () => {
               </td>
               <td class="p-2">
                   {{ transaction.description }}
+              </td>
+              <td class="p-2">
+                  {{ transaction.detail }}
               </td>
               <td class="p-2 font-bold" :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
                 {{ formatCurrency(transaction.amount) }}
