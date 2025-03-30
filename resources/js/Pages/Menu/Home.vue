@@ -15,13 +15,14 @@
           </svg>
         </div>
         <div class="ml-3">
-          <h2 class="text-base font-semibold">Saldo Bersih</h2>
-          <p class="text-xl font-bold text-purple-600">{{ formatCurrency(totalBalance) }}</p>
-          <p class="text-xs text-gray-500">
-            <span class="block">Bank: {{ formatCurrency(totalBankBalance) }}</span>
-            <span class="block">Tunai: {{ formatCurrency(totalCashBalance) }}</span>
-          </p>
-        </div>
+  <h2 class="text-base font-semibold">Saldo Bersih</h2>
+  <p class="text-xl font-bold text-purple-600">{{ formatCurrency(totalBalance) }}</p>
+  <p class="text-xs text-gray-500">
+    <span v-if="settings.bank" class="block">Bank: {{ formatCurrency(totalBankBalance) }}</span>
+    <span v-if="settings.cash" class="block">Tunai: {{ formatCurrency(totalCashBalance) }}</span>
+  </p>
+</div>
+
       </div>
     </Link>
 
@@ -247,11 +248,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Chart from 'chart.js/auto';
 
 const chartCanvas = ref(null);
+const settings = ref(usePage().props.settings);
 let chartInstance = null;
 
 // Terima props dari controller
@@ -263,7 +265,7 @@ const props = defineProps({
   totalBankBalance: Number,
   totalCashBalance: Number,
   transactions: Array, // Tambahkan transaksi
-  latestTransactions: Array
+  latestTransactions: Array,
 });
 
 const formatCurrency = (value) => {

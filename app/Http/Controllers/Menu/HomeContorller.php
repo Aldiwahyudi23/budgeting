@@ -10,6 +10,7 @@ use App\Models\MasterData\AccountBank;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\Debit;
 use App\Models\MasterData\SubCategory;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +20,7 @@ class HomeContorller extends Controller
 {
     public function home()
     {
+        $settings = Setting::where('user_id', Auth::id())->first();
         // ====Jumlah tabungan --------------------------------------------------------
         // Ambil kategori tabungan berdasarkan user_id yang login
         $savingCategory = Category::where('user_id', Auth::id())
@@ -119,13 +121,20 @@ class HomeContorller extends Controller
         $latestDebit = Debit::where('user_id', Auth::id())->latest()->first();
         $totalCashBalance = $latestDebit ? $latestDebit->balance : 0;
 
+        // Hitung saldo bank dan saldo tunai berdasarkan setting
+        $totalBank = $settings->bank ? $totalBankBalance : 0;
+        $totalCash = $settings->cash ? $totalCashBalance : 0;
+
         // Hitung saldo bersih (total saldo bank + saldo tunai)
-        $totalBalance = $totalBankBalance + $totalCashBalance;
+        $totalBalance = $totalBank + $totalCash;
 
         // ==========--------------------------------------------------------
+
+
         return Inertia::render(
             'Menu/Home',
             [
+                'settings' => $settings,
                 'totalIncome' => $totalIncome,
                 'totalExpenses' => $totalExpenses,
                 'totalSavingAmount' => $totalSavingAmount,

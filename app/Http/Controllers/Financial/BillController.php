@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Financial;
 use App\Models\Financial\Bill;
 use App\Http\Controllers\Controller;
 use App\Models\Aktivitas\Expenses;
+use App\Models\Alokasi\AllocationEx;
 use App\Models\MasterData\AccountBank;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\SubCategory;
@@ -27,8 +28,18 @@ class BillController extends Controller
             ->where('is_active', true)
             ->get();
 
+        $totalActiveBills = Bill::with('subCategory', 'accountBank')
+            ->where('user_id', Auth::id())
+            ->whereHas('subCategory', function ($query) {
+                $query->where('is_active', true); // Hanya ambil jika subCategory is_active
+            })
+            ->sum('amount'); // Menjumlahkan semua 'amount' dari tagihan aktif
+
+
+
         return Inertia::render('Financial/Bill/Index', [
             'bills' => $bills,
+            'totalActiveBills' => $totalActiveBills,
             'accountBanks' => $accountBanks,
         ]);
     }
@@ -84,7 +95,7 @@ class BillController extends Controller
             ]);
 
             // Simpan data Bill
-            Bill::create([
+            $bill = Bill::create([
                 'user_id' => Auth::id(),
                 'date' => $request->date,
                 'amount' => $request->amount,
@@ -94,6 +105,50 @@ class BillController extends Controller
                 'auto' => $request->auto ?? false,
                 'account_id' => $request->account_id ?? Null,
             ]);
+
+            // Get the current year and month in 'Y-m' format
+            $currentDate = now();
+            $currentYearMonth = $currentDate->format('Y-m');
+            $currentYear = $currentDate->year;
+            $currentMonth = $currentDate->month;
+
+            // Get the subcategory and category of the bill
+            $subCategoryBill = SubCategory::find($bill->sub_category_id);
+            $categoryBill = Category::find($subCategoryBill->category_id); // Fixed: should be category_id
+
+            // Get the sum of all active bills for the user
+            $totalActiveBills = Bill::with('subCategory', 'accountBank')
+                ->where('user_id', Auth::id())
+                ->whereHas('subCategory', function ($query) {
+                    $query->where('is_active', true);
+                })
+                ->sum('amount');
+
+            // Process allocations from current month to December of the current year
+            for ($month = $currentMonth; $month <= 12; $month++) {
+                $date = sprintf('%d-%02d', $currentYear, $month);
+
+                // Check if allocation exists for this user, category, and month
+                $existingAllocation = AllocationEx::where('user_id', Auth::id())
+                    ->where('category_id', $categoryBill->id)
+                    ->where('date', $date)
+                    ->first();
+
+                if ($existingAllocation) {
+                    // Update existing allocation
+                    $existingAllocation->update([
+                        'amount' => $totalActiveBills
+                    ]);
+                } else {
+                    // Create new allocation
+                    AllocationEx::create([
+                        'user_id' => Auth::id(),
+                        'category_id' => $categoryBill->id,
+                        'amount' => $totalActiveBills,
+                        'date' => $date,
+                    ]);
+                }
+            }
 
             // Commit transaction jika semua proses berhasil
             DB::commit();
@@ -154,6 +209,52 @@ class BillController extends Controller
                 'auto' => $request->auto ?? false,
                 'account_id' => $request->account_id ?? Null,
             ]);
+
+            // update untuk allocation
+            // Get the current year and month in 'Y-m' format
+            $currentDate = now();
+            $currentYearMonth = $currentDate->format('Y-m');
+            $currentYear = $currentDate->year;
+            $currentMonth = $currentDate->month;
+
+            // Get the subcategory and category of the bill
+            $subCategoryBill = SubCategory::find($bill->sub_category_id);
+            $categoryBill = Category::find($subCategoryBill->category_id); // Fixed: should be category_id
+
+            // Get the sum of all active bills for the user
+            $totalActiveBills = Bill::with('subCategory', 'accountBank')
+                ->where('user_id', Auth::id())
+                ->whereHas('subCategory', function ($query) {
+                    $query->where('is_active', true);
+                })
+                ->sum('amount');
+
+            // Process allocations from current month to December of the current year
+            for ($month = $currentMonth; $month <= 12; $month++) {
+                $date = sprintf('%d-%02d', $currentYear, $month);
+
+                // Check if allocation exists for this user, category, and month
+                $existingAllocation = AllocationEx::where('user_id', Auth::id())
+                    ->where('category_id', $categoryBill->id)
+                    ->where('date', $date)
+                    ->first();
+
+                if ($existingAllocation) {
+                    // Update existing allocation
+                    $existingAllocation->update([
+                        'amount' => $totalActiveBills
+                    ]);
+                } else {
+                    // Create new allocation
+                    AllocationEx::create([
+                        'user_id' => Auth::id(),
+                        'category_id' => $categoryBill->id,
+                        'amount' => $totalActiveBills,
+                        'date' => $date,
+                    ]);
+                }
+            }
+
 
             // Commit transaction jika semua proses berhasil
             DB::commit();

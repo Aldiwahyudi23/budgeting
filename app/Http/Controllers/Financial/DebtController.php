@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Financial;
 use App\Models\Financial\Debt;
 use App\Http\Controllers\Controller;
 use App\Models\Aktivitas\Expenses;
+use App\Models\Alokasi\AllocationEx;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\SubCategory;
 use Illuminate\Http\Request;
@@ -114,10 +115,58 @@ class DebtController extends Controller
                 'sub_category_id' => $subCategory->id,
                 'type' => $request->type,
                 'due_date' => $request->due_date,
-                'tenor_months' => $request->tenor_months ?? $request->due_date,
+                'tenor_months' => $request->tenor_months ?? 1, // default 1 bulan jika tidak diisi
                 'last_payment_month' => $request->last_payment_month,
                 'reminder' => $request->reminder ?? false,
             ]);
+
+            // Get category dari subcategory debt
+            $categoryDebt = Category::find($subCategory->category_id);
+
+            // Tentukan jumlah bulan berdasarkan type
+            $monthsToProcess = ($debt->type === 'personal') ? 12 : $debt->tenor_months;
+
+
+            // Proses allocation untuk setiap bulan sesuai tenor
+            $currentDate = now();
+            $currentYear = $currentDate->year;
+            $currentMonth = $currentDate->month;
+
+            for ($i = 0; $i < $monthsToProcess; $i++) {
+                // Hitung bulan dan tahun untuk allocation
+                $targetMonth = $currentMonth + $i;
+                $targetYear = $currentYear;
+
+                // Jika melebihi Desember, adjust tahun dan bulan
+                if ($targetMonth > 12) {
+                    $targetMonth -= 12;
+                    $targetYear += 1;
+                }
+
+                $date = sprintf('%d-%02d', $targetYear, $targetMonth);
+
+                // Cek apakah allocation sudah ada
+                $existingAllocation = AllocationEx::where('user_id', $user->id)
+                    ->where('category_id', $categoryDebt->id)
+                    ->where('date', $date)
+                    ->first();
+
+                if ($existingAllocation) {
+                    // Jika ada, tambahkan amount yang sudah ada dengan amount baru (FULL amount)
+                    $existingAllocation->update([
+                        'amount' => $existingAllocation->amount + $debt->amount
+                    ]);
+                } else {
+                    // Jika tidak ada, buat baru dengan FULL amount
+                    AllocationEx::create([
+                        'user_id' => $user->id,
+                        'category_id' => $categoryDebt->id,
+                        'amount' => $debt->amount,
+                        'date' => $date,
+                    ]);
+                }
+            }
+
 
             // Commit transaction jika semua proses berhasil
             DB::commit();
@@ -223,6 +272,54 @@ class DebtController extends Controller
                 'tenor_months' => $request->tenor_months,
                 'reminder' => $request->reminder,
             ]);
+
+            // Get category dari subcategory debt
+            $subCategory = SubCategory::find($debt->sub_category_id);
+            $categoryDebt = Category::find($subCategory->category_id);
+
+            // Tentukan jumlah bulan berdasarkan type
+            $monthsToProcess = ($debt->type === 'personal') ? 12 : $debt->tenor_months;
+
+
+            // Proses allocation untuk setiap bulan sesuai tenor
+            $currentDate = now();
+            $currentYear = $currentDate->year;
+            $currentMonth = $currentDate->month;
+
+            for ($i = 0; $i < $monthsToProcess; $i++) {
+                // Hitung bulan dan tahun untuk allocation
+                $targetMonth = $currentMonth + $i;
+                $targetYear = $currentYear;
+
+                // Jika melebihi Desember, adjust tahun dan bulan
+                if ($targetMonth > 12) {
+                    $targetMonth -= 12;
+                    $targetYear += 1;
+                }
+
+                $date = sprintf('%d-%02d', $targetYear, $targetMonth);
+
+                // Cek apakah allocation sudah ada
+                $existingAllocation = AllocationEx::where('user_id', Auth::id())
+                    ->where('category_id', $categoryDebt->id)
+                    ->where('date', $date)
+                    ->first();
+
+                if ($existingAllocation) {
+                    // Jika ada, tambahkan amount yang sudah ada dengan amount baru (FULL amount)
+                    $existingAllocation->update([
+                        'amount' => $existingAllocation->amount + $debt->amount
+                    ]);
+                } else {
+                    // Jika tidak ada, buat baru dengan FULL amount
+                    AllocationEx::create([
+                        'user_id' => Auth::id(),
+                        'category_id' => $categoryDebt->id,
+                        'amount' => $debt->amount,
+                        'date' => $date,
+                    ]);
+                }
+            }
 
             // Commit transaction jika semua proses berhasil
             DB::commit();

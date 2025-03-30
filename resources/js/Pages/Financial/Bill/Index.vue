@@ -3,16 +3,23 @@
     <div class="p-4">
   <div class="container mx-auto p-2">
     <!-- Header & Tombol Tambah -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg shadow-md mb-2">
-      <div>
-        <h1 class="text-xl font-semibold text-gray-800">Kelola Tagihan Bulanan</h1>
-        <p class="text-sm text-gray-600 mt-1">
-          Halaman ini digunakan untuk mengelola dan menambahkan data tagihan bulanan seperti 
-          listrik, internet, dan tagihan rutin lainnya.
-        </p>
-      </div>
-      <PrimaryButton @click="openModal('create')" class="mt-4 sm:mt-0">Tambah Bill (Tagihan)</PrimaryButton>
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg shadow-md mb-2">
+  <div>
+    <h1 class="text-xl font-semibold text-gray-800">Kelola Tagihan Bulanan</h1>
+    <p class="text-sm text-gray-600 mt-1">
+      Halaman ini digunakan untuk mengelola dan menambahkan data tagihan bulanan seperti 
+      listrik, internet, dan tagihan rutin lainnya.
+    </p>
+  </div>
+  
+  <div class="flex flex-col sm:flex-row items-center gap-4 mt-4 sm:mt-0">
+    <div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-semibold shadow">
+      💰 Total Tagihan Aktif: {{ formatCurrency(totalActiveBills) }}
     </div>
+    <PrimaryButton @click="openModal('create')">Tambah Bill (Tagihan)</PrimaryButton>
+  </div>
+</div>
+
 
     <!-- Daftar Bill -->
     <div v-if="bills.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -200,6 +207,7 @@ import InputError from '@/Components/InputError.vue';
 const props = defineProps({
   bills: Array,
   accountBanks: Array,
+  totalActiveBills:Number,
 });
 
 // State untuk modal

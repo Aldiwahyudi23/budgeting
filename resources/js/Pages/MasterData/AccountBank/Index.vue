@@ -22,7 +22,7 @@
 
       <!-- Bagian Header: Tombol Tambah & Pencarian -->
       <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-4 md:space-y-0">
-        <PrimaryButton @click="openModal('create')">Tambah Rekening Bank</PrimaryButton>
+        <PrimaryButton v-if="settings.bank" @click="openModal('create')">Tambah Rekening Bank</PrimaryButton>
         <div class="relative">
           <TextInput 
             v-model="searchQuery" 
@@ -67,9 +67,9 @@
                 </td>
               <td class="px-2 py-2 flex justify-end gap-2 sm:justify-start">
                 <SecondaryButton v-if="settings.btn_edit" @click="openModal('edit', item)">Edit</SecondaryButton>
-                <SecondaryButton class="bg-yellow-400 hover:bg-yellow-500" @click="openTopUpModal(item)"> {{ item.type === 'bank' ? 'Deposit' : 'Top Up' }}</SecondaryButton>
+                <SecondaryButton v-if="settings.bank" class="bg-yellow-400 hover:bg-yellow-500" @click="openTopUpModal(item)"> {{ item.type === 'bank' ? 'Deposit' : 'Top Up' }}</SecondaryButton>
                 <PrimaryButton class="bg-blue-600 hover:bg-blue-700" @click="goToMutation(item.id)">Mutasi</PrimaryButton>
-                <PrimaryButton class="bg-green-600 hover:bg-green-700" @click="openWithdrawModal(item)">Tarik Tunai</PrimaryButton>
+                <PrimaryButton v-if="settings.cash"  class="bg-green-600 hover:bg-green-700" @click="openWithdrawModal(item)">Tarik Tunai</PrimaryButton>
                 <PrimaryButton v-if="settings.btn_delete" class="bg-red-600 hover:bg-red-700" @click="confirmDelete(item.id)">Hapus</PrimaryButton>
               </td>
               </tr>
@@ -96,7 +96,7 @@
             <Link :href="route('debits.index')" class="text-xs text-gray-500 hover:text-purple-600">Klik untuk melihat detail mutasi</Link>
           </div>
         </div>
-        <PrimaryButton class="bg-green-600 hover:bg-green-700" @click="openDepositModal">Setor Tunai</PrimaryButton>
+        <PrimaryButton  v-if="settings.bank" class="bg-green-600 hover:bg-green-700" @click="openDepositModal">Setor Tunai</PrimaryButton>
       </div>
     </div>
 

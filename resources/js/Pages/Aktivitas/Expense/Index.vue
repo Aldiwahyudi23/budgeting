@@ -206,11 +206,11 @@
                 <span class="text-red-500 text-sm">*</span>
               </InputLabel>
               <div class="flex space-x-4 mt-2">
-                <label class="flex items-center">
+                <label class="flex items-center" v-if="settings.bank" >
                   <input type="radio" v-model="form.payment" value="Transfer" class="mr-2" @change="form.account_id = ''" />
                   <span>Transfer</span>
                 </label>
-                <label class="flex items-center" v-if="!isSavingCategory">
+                <label class="flex items-center"  v-if="!isSavingCategory  || settings.cash ">
                   <input type="radio" v-model="form.payment" value="Tunai" class="mr-2" @change="form.account_id = null" />
                   <span>Tunai</span>
                 </label>
@@ -238,10 +238,11 @@
               </select>
               <InputError :message="form.errors.account_id" />
             </div>
+            <span v-if="!settings.bank && !settings.cash"  class="text-red-500">Untuk melanjutkan Transaksi Harap Pilih salah satu Pembayaran di Setting</span>
 
             <div class="flex justify-end mt-4">
               <SecondaryButton type="button" @click="closeModal">Batal</SecondaryButton>
-              <PrimaryButton class="ml-3" type="submit">{{ isEditMode ? 'Update' : 'Simpan' }}</PrimaryButton>
+              <PrimaryButton  :disabled="!settings.bank && !settings.cash" class="ml-3" type="submit">{{ isEditMode ? 'Update' : 'Simpan' }}</PrimaryButton>
             </div>
           </form>
         </template>

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Auth\Job;
 use App\Http\Controllers\Controller;
+use App\Models\Alokasi\AllocationEx;
+use App\Models\Alokasi\AllocationIn;
 use App\Models\MasterData\Source;
 use App\Models\MasterData\SubCategory;
 use App\Models\MasterData\SubSource;
@@ -92,6 +94,38 @@ class JobController extends Controller
                     'name' => $request->company_name,
                     'is_active' => true,
                 ]);
+
+
+                // Get the current year and month in 'Y-m' format
+                $currentDate = now();
+                $currentYear = $currentDate->year;
+                $currentMonth = $currentDate->month;
+
+                // Process allocations from current month to December of the current year
+                for ($month = $currentMonth; $month <= 12; $month++) {
+                    $date = sprintf('%d-%02d', $currentYear, $month);
+
+                    // Check if allocation exists for this user, category, and month
+                    $existingAllocation = AllocationIn::where('user_id', Auth::id())
+                        ->where('source_id', $source->id)
+                        ->where('date', $date)
+                        ->first();
+
+                    if ($existingAllocation) {
+                        // Update existing allocation
+                        $existingAllocation->update([
+                            'amount' => $existingAllocation->amount + $request->salary
+                        ]);
+                    } else {
+                        // Create new allocation
+                        AllocationIn::create([
+                            'user_id' => Auth::id(),
+                            'source_id' => $source->id,
+                            'amount' => $request->salary,
+                            'date' => $date,
+                        ]);
+                    }
+                }
             });
             return back()->with('success', 'Job, Source, dan Sub Source berhasil disimpan!');
         } catch (Exception $e) {
@@ -148,6 +182,45 @@ class JobController extends Controller
         ]);
 
         $job->update($request->all());
+
+        $source = Source::firstOrCreate(
+            ['name' => 'Salary (Gajih)', 'user_id' => Auth::id()], // Cari berdasarkan name dan user_id
+            ['is_active' => true] // Jika tidak ada, buat baru dengan is_active = true
+        );
+
+        // Get the current year and month in 'Y-m' format
+        $currentDate = now();
+        $currentYear = $currentDate->year;
+        $currentMonth = $currentDate->month;
+
+        // Process allocations from current month to December of the current year
+        for ($month = $currentMonth; $month <= 12; $month++) {
+            $date = sprintf('%d-%02d', $currentYear, $month);
+
+            // Check if allocation exists for this user, category, and month
+            $existingAllocation = AllocationIn::where('user_id', Auth::id())
+                ->where('source_id', $source->id)
+                ->where('date', $date)
+                ->first();
+
+            $bpjs =  $request->salary * (4 / 100);
+            $amount =  $request->salary - $bpjs;
+
+            if ($existingAllocation) {
+                // Update existing allocation
+                $existingAllocation->update([
+                    'amount' => $amount
+                ]);
+            } else {
+                // Create new allocation
+                AllocationIn::create([
+                    'user_id' => Auth::id(),
+                    'source_id' => $source->id,
+                    'amount' => $amount,
+                    'date' => $date,
+                ]);
+            }
+        }
 
         return back();
     }
