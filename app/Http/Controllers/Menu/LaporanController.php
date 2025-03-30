@@ -128,7 +128,7 @@ class LaporanController extends Controller
             // Aktual diambil dari expenses yang sudah difilter
             $aktual = $category->expenses ? $category->expenses->sum('amount') : 0;
             // Hitung selisih
-            $selisih = $aktual - $alokasi;
+            $selisih =  $alokasi - $aktual;
 
             // -------------------Untuk perbandingan alocasi in------------------------------------------
 

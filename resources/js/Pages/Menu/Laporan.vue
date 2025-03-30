@@ -99,35 +99,45 @@
 
       <!-- Tabel Perbandingan Pengeluaran dan Pemasukan -->
       <div class="flex flex-col md:flex-row gap-4 mb-6">
-        <!-- Tabel Laporan Pengeluaran -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden w-full md:w-1/2">
-          <div class="bg-gray-700 text-white text-lg font-bold px-4 py-3">Pengeluaran</div>
-          <table class="min-w-full responsive-table">
-            <thead class="bg-gray-600 text-white text-sm uppercase tracking-wider">
-              <tr>
-                <th class="px-4 py-3 text-left">No</th>
-                <th class="px-4 py-3 text-left">Kategori</th>
-                <th class="px-4 py-3 text-left">Rencana</th>
-                <th class="px-4 py-3 text-left">Aktual</th>
-                <th class="px-4 py-3 text-left">Selisih</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-300 text-gray-700">
-              <tr v-for="(item, index) in reportData.report" :key="index" class="hover:bg-gray-100">
-                <td class="px-4 py-3">{{ index + 1 }}</td>
-                <td class="px-4 py-3">{{ item.name || '-' }}</td>
-                <td class="px-4 py-3">Rp {{ formatCurrency(item.alokasi) }}</td>
-                <td class="px-4 py-3">Rp {{ formatCurrency(item.aktual) }}</td>
-                <td class="px-4 py-3 font-semibold" :class="getSelisihClass(item.selisih)">
-                  Rp {{ formatCurrency(item.selisih) }}
-                </td>
-              </tr>
-              <tr v-if="reportData.report.length === 0">
-                <td colspan="5" class="px-4 py-3 text-center text-gray-500">Tidak ada data laporan.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <!-- Tabel Laporan Pengeluaran -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden w-full md:w-1/2">
+      <div class="bg-gray-700 text-white text-lg font-bold px-4 py-3">Pengeluaran</div>
+      <table class="min-w-full responsive-table">
+        <thead class="bg-gray-600 text-white text-sm uppercase tracking-wider">
+          <tr>
+            <th class="px-4 py-3 text-left">No</th>
+            <th class="px-4 py-3 text-left">Kategori</th>
+            <th class="px-4 py-3 text-left">Rencana</th>
+            <th class="px-4 py-3 text-left">Aktual</th>
+            <th class="px-4 py-3 text-left">Selisih</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-300 text-gray-700">
+           <tr v-for="(item, index) in reportData.report" :key="index" class="hover:bg-gray-100">
+            <td class="px-4 py-3">{{ index + 1 }}</td>
+            <td class="px-4 py-3">{{ item.name || '-' }}</td>
+            <td class="px-4 py-3">Rp {{ formatCurrency(item.alokasi) }}</td>
+            <td class="px-4 py-3">Rp {{ formatCurrency(item.aktual) }}</td>
+            <td class="px-4 py-3 font-semibold" :class="getSelisihClass(item.selisih)">
+              Rp {{ formatCurrency(item.selisih) }}
+            </td>
+          </tr>
+          <tr v-if="report.length === 0">
+            <td colspan="5" class="px-4 py-3 text-center text-gray-500">Tidak ada data laporan.</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="border-t border-gray-300">
+            <td colspan="2" class="px-4 py-2 text-right text-sm font-medium">Total Keseluruhan:</td>
+            <td class="px-4 py-2 text-sm">Rp {{ formatCurrency(totalAlokasi) }}</td>
+            <td class="px-4 py-2 text-sm">Rp {{ formatCurrency(totalAktual) }}</td>
+            <td class="px-4 py-2 text-sm font-semibold" :class="getSelisihClass(totalSelisih)">
+              Rp {{ formatCurrency(totalSelisih) }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+      </div>
 
         <!-- Tabel Laporan Pemasukan -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden w-full md:w-1/2">
@@ -156,6 +166,16 @@
                 <td colspan="5" class="px-4 py-3 text-center text-gray-500">Tidak ada data laporan.</td>
               </tr>
             </tbody>
+             <tfoot>
+          <tr class="border-t border-gray-300">
+            <td colspan="2" class="px-4 py-2 text-right text-sm font-medium">Total Keseluruhan:</td>
+            <td class="px-4 py-2 text-sm">Rp {{ formatCurrency(totalAlokasiIn) }}</td>
+            <td class="px-4 py-2 text-sm">Rp {{ formatCurrency(totalAktualIn) }}</td>
+            <td class="px-4 py-2 text-sm font-semibold" :class="getSelisihClass(totalSelisihIn)">
+              Rp {{ formatCurrency(totalSelisihIn) }}
+            </td>
+          </tr>
+        </tfoot>
           </table>
         </div>
       </div>
@@ -303,6 +323,38 @@ const getSelisihClass = (selisih) => {
   return number < 0 ? 'text-red-500' : 'text-green-500';
 };
 
+// Hitung total
+const totalAlokasi = computed(() => {
+  return reportData.value.report.reduce((sum, item) => sum + (Number(item.alokasi) || 0), 0);
+});
+
+const excludedCategories = computed(() => ['Saving (Tabungan)']);
+
+const totalAktual = computed(() => {
+  return reportData.value.report.reduce((sum, item) => {
+    const isExcluded = excludedCategories.value.some(cat => 
+      item.category_name?.toLowerCase().includes(cat.toLowerCase())
+    );
+    return isExcluded ? sum : sum + (Number(item.aktual) || 0);
+  }, 0);
+});
+
+const totalSelisih = computed(() => {
+  return  totalAlokasi.value - totalAktual.value;
+});
+// Hitung total
+const totalAlokasiIn = computed(() => {
+  return reportData.value.reportIn.reduce((sum, item) => sum + (Number(item.alokasi) || 0), 0);
+});
+
+const totalAktualIn = computed(() => {
+  return reportData.value.reportIn.reduce((sum, item) => sum + (Number(item.aktual) || 0), 0);
+});
+
+const totalSelisihIn = computed(() => {
+  return  totalAktual.value - totalAlokasi.value ;
+});
+
 // Format tanggal
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('id-ID');
@@ -368,6 +420,8 @@ const renderChart = () => {
 onMounted(() => {
   fetchReport();
 });
+
+
 </script>
 
 <style>

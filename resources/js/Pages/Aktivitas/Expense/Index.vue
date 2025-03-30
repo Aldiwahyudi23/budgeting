@@ -210,7 +210,7 @@
                   <input type="radio" v-model="form.payment" value="Transfer" class="mr-2" @change="form.account_id = ''" />
                   <span>Transfer</span>
                 </label>
-                <label class="flex items-center"  v-if="!isSavingCategory  || settings.cash ">
+                <label class="flex items-center"  v-if="!isSavingCategory  && settings.cash ">
                   <input type="radio" v-model="form.payment" value="Tunai" class="mr-2" @change="form.account_id = null" />
                   <span>Tunai</span>
                 </label>
