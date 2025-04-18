@@ -25,7 +25,7 @@ const submit = () => {
             }
         });
     } else {
-        form.post(route('sandi-botton.update'), {
+        form.post(route('sandi-botton.simpan'), {
             preserveScroll: true,
             onSuccess: () => form.reset(),
         });

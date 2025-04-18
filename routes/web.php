@@ -107,6 +107,9 @@ Route::middleware([
     Route::put('/sandi-botton', [SettingController::class, 'updateSandiBotton'])
         ->middleware(['auth'])
         ->name('sandi-botton.update');
+    Route::post('/sandi-botton', [SettingController::class, 'updateSandiBotton'])
+        ->middleware(['auth'])
+        ->name('sandi-botton.simpan');
 
     Route::get('/home', [HomeContorller::class, 'home'])->name('home');
     Route::get('/finance-summary', [HomeContorller::class, 'getFinanceSummary']);
