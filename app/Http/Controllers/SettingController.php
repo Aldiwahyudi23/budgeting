@@ -10,6 +10,7 @@ use App\Models\MasterData\AccountBank;
 use App\Models\MasterData\Category;
 use App\Models\MasterData\Source;
 use App\Models\MasterData\SubCategory;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +46,7 @@ class SettingController extends Controller
 
         // Ambil ID user yang login
         $userId = Auth::id();
+        $user = User::find($userId);
         // Cek apakah user sudah memiliki job
         $job = Job::where('user_id', $userId)->first();
 
@@ -53,6 +55,8 @@ class SettingController extends Controller
             'accounts' => $accounts,
             'job' => $job,
             'userId' => $userId,
+            'user' => $user,
+
         ]);
     }
 
@@ -254,5 +258,42 @@ class SettingController extends Controller
     public function destroy(Setting $setting)
     {
         //
+    }
+
+    public function sandiBotton()
+    {
+        return inertia('Setting/SandiBotton', [
+            'hasPassword' => !empty(Auth::user()->sandi_botton)
+        ]);
+    }
+
+    public function updateSandiBotton(Request $request)
+    {
+        $user = $request->user();
+
+        $rules = [
+            'new_password' => ['required', 'string', 'min:4', 'max:20']
+        ];
+
+        if ($user->sandi_botton) {
+            $rules['current_password'] = ['required', 'string'];
+        }
+
+        $request->validate($rules);
+
+        if ($user->sandi_botton) {
+            if ($request->current_password !== $user->sandi_botton) {
+                return back()->withErrors([
+                    'current_password' => 'Sandi saat ini tidak sesuai'
+                ]);
+            }
+        }
+
+        $user->update([
+            'sandi_botton' => $request->new_password
+        ]);
+
+        return redirect()->route('sandi-botton')
+            ->with('success', 'Sandi botton berhasil diperbarui');
     }
 }

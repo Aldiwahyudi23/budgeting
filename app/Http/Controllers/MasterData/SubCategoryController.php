@@ -76,42 +76,47 @@ class SubCategoryController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Cek apakah category 'Saving (Tabungan)' ada
-            // $category = Category::where('name', 'Saving (Tabungan)')->first();
 
-            // if (!$category) {
-            //     return redirect()->back()
-            //         ->with('error', 'Kategori Tabungan belum ada. Silakan aktifkan terlebih dahulu di Setting-Tabungan.')
-            //         ->withInput();
-            // }
-
-            // // 2. Cek apakah category 'Saving (Tabungan)' aktif
-            // if (!$category->is_active) {
-            //     return redirect()->back()
-            //         ->with('error', 'Kategori Tabungan tidak aktif. Silakan aktifkan terlebih dahulu di Setting-Tabungan.')
-            //         ->withInput();
-            // }
-
-            // // 3. Cek apakah category_id yang dikirim sesuai
-            // if ($request->category_id != $category->id) {
-            //     return redirect()->back()
-            //         ->with('error', 'Kategori tidak valid.')
-            //         ->withInput();
-            // }
 
             // 4. Simpan sub category
             SubCategory::create($request->all());
 
-            // 5. Simpan ke sub source
-            $source = Source::where('name', 'Saving (Tabungan)')->first();
+            // 2. Cek apakah category name adalah 'Saving (Tabungan)'
+            $category = Category::find($request['category_id']);
+            // 1. Cek apakah category 'Saving (Tabungan)' ada
 
-            if ($source) {
-                SubSource::create([
-                    'name' => $request->name,
-                    'source_id' => $source->id,
-                    'description' => $request->description,
-                    'is_active' => $request->is_active ?? false,
-                ]);
+            if (!$category) {
+                return redirect()->back()
+                    ->with('error', 'Kategori Tabungan belum ada. Silakan aktifkan terlebih dahulu di Setting-Tabungan.')
+                    ->withInput();
+            }
+
+            // 2. Cek apakah category 'Saving (Tabungan)' aktif
+            if (!$category->is_active) {
+                return redirect()->back()
+                    ->with('error', 'Kategori Tabungan tidak aktif. Silakan aktifkan terlebih dahulu di Setting-Tabungan.')
+                    ->withInput();
+            }
+
+            // 3. Cek apakah category_id yang dikirim sesuai
+            if ($request->category_id != $category->id) {
+                return redirect()->back()
+                    ->with('error', 'Kategori tidak valid.')
+                    ->withInput();
+            }
+
+            if ($category && $category->name === 'Saving (Tabungan)') {
+                // 5. Simpan ke sub source
+                $source = Source::where('name', 'Saving (Tabungan)')->first();
+
+                if ($source) {
+                    SubSource::create([
+                        'name' => $request->name,
+                        'source_id' => $source->id,
+                        'description' => $request->description,
+                        'is_active' => $request->is_active ?? false,
+                    ]);
+                }
             }
 
             DB::commit();

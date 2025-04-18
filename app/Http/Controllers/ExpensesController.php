@@ -462,7 +462,6 @@ class ExpensesController extends Controller
                 }
 
                 $lastSaving = Saving::where('user_id', Auth::id())
-                    ->where('category_id', $request->category_id)
                     ->where('sub_category_id', $request->sub_kategori_id)
                     ->latest()
                     ->first();

@@ -8,6 +8,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import NavLink from '@/Components/NavLink.vue';
 
 const props = defineProps({
     user: Object,
@@ -190,6 +191,10 @@ const clearPhotoFileInput = () => {
                 />
                 <InputError :message="form.errors.numberPhone" class="mt-2 text-sm text-red-600" />
             </div>
+
+            <NavLink :href="route('sandi-botton')" :active="route().current('sandi-botton')">
+                Kelola Sandi Botton
+            </NavLink>
         </template>
 
         <template #actions>

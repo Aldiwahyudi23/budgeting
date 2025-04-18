@@ -14,43 +14,51 @@
 
       <h4 class="text-2xl font-bold mb-4">Pengaturan</h4>
 
-      <!-- BAGIAN TABEL -->
-      <div class="mb-6 p-4 bg-white rounded-lg shadow-md">
-        <div @click="toggleSection('table')" class="flex justify-between items-center cursor-pointer">
-            <h2 class="text-lg font-bold">Tabel</h2>
-            <span class="text-gray-500">{{ isTableOpen ? '▲' : '▼' }}</span>
-        </div>
-          <span class="text-gray-500">Edit dan Hapus hanya jika perlu saja </span>
-        <div v-if="isTableOpen">
+<!-- BAGIAN TABEL -->
+<div class="mb-6 p-4 bg-white rounded-lg shadow-md">
+    <div @click="toggleSection('table')" class="flex justify-between items-center cursor-pointer">
+        <h2 class="text-lg font-bold">Tabel</h2>
+        <span class="text-gray-500">{{ isTableOpen ? '▲' : '▼' }}</span>
+    </div>
+    <span class="text-gray-500">Edit dan Hapus hanya jika perlu saja </span>
+    <div v-if="isTableOpen">
         <!-- Switch untuk Tombol Edit -->
         <div class="mt-2 mb-6 p-4 bg-blue-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
-          <label class="block text-gray-700 font-bold mb-2">Untuk memunculkan Tombol Edit disemua Tabel</label>
-          <div class="flex items-center">
-            <input
-              type="checkbox"
-              :checked="settings.btn_edit"
-              @change="updateSetting('btn_edit', $event.target.checked)"
-              class="form-checkbox h-5 w-5 text-blue-600"
-            />
-            <span class="ml-2 text-gray-700 text-sm">{{ settings.btn_edit ? 'Aktif' : 'Tidak Aktif' }}</span>
-          </div>
+            <label class="block text-gray-700 font-bold mb-2">Untuk memunculkan Tombol Edit disemua Tabel</label>
+            <div class="flex items-center">
+                <input
+                    type="checkbox"
+                    :checked="settings.btn_edit"
+                    @click="verifyBeforeUpdate('btn_edit', !settings.btn_edit)"
+                    :disabled="!hasPhoneNumber"
+                    class="form-checkbox h-5 w-5 text-blue-600"
+                />
+                <span class="ml-2 text-gray-700 text-sm">{{ settings.btn_edit ? 'Aktif' : 'Tidak Aktif' }}</span>
+            </div>
+            <p v-if="!hasPhoneNumber" class="mt-2 text-sm text-red-600">
+                Untuk mengaktifkan fitur ini, silakan tambahkan nomor WhatsApp terlebih dahulu.
+            </p>
         </div>
 
-          <!-- Switch untuk Tombol Hapus -->
-          <div class="mb-6 p-4 bg-blue-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
+        <!-- Switch untuk Tombol Hapus -->
+        <div class="mb-6 p-4 bg-blue-100 p-4 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
             <label class="block text-gray-700 font-bold mb-2">Untuk memunculkan Tombol Hapus disemua Tabel</label>
             <div class="flex items-center">
-              <input
-                type="checkbox"
-                :checked="settings.btn_delete"
-                @change="updateSetting('btn_delete', $event.target.checked)"
-                class="form-checkbox h-5 w-5 text-blue-600"
-              />
-              <span class="ml-2 text-gray-700 text-sm">{{ settings.btn_delete ? 'Aktif' : 'Tidak Aktif' }}</span>
+                <input
+                    type="checkbox"
+                    :checked="settings.btn_delete"
+                    @click="verifyBeforeUpdate('btn_delete', !settings.btn_delete)"
+                    :disabled="!hasPhoneNumber"
+                    class="form-checkbox h-5 w-5 text-blue-600"
+                />
+                <span class="ml-2 text-gray-700 text-sm">{{ settings.btn_delete ? 'Aktif' : 'Tidak Aktif' }}</span>
             </div>
-          </div>
+            <p v-if="!hasPhoneNumber" class="mt-2 text-sm text-red-600">
+                Untuk mengaktifkan fitur ini, silakan tambahkan nomor WhatsApp terlebih dahulu.
+            </p>
         </div>
-      </div>
+    </div>
+</div>
 
       <!-- BAGIAN TABUNGAN -->
       <div class="mb-6 p-4 bg-white rounded-lg shadow-md">
@@ -348,6 +356,12 @@ import FormSection from '@/Components/FormSection.vue';
 const settings = ref(usePage().props.settings);
 const accounts = ref(usePage().props.accounts);
 const selectedAccount = ref(settings.value.account_id);
+const user = ref(usePage().props.auth.user);
+
+// Computed property untuk mengecek apakah user memiliki nomor telepon
+const hasPhoneNumber = computed(() => {
+    return user.value.numberPhone && user.value.numberPhone.trim() !== '';
+});
 
 // State untuk mengontrol tampilan
 const isTableOpen = ref(false);
@@ -383,15 +397,70 @@ const toggleSection = (section) => {
   }
 };
 
+// Fungsi untuk verifikasi sebelum update
+const verifyBeforeUpdate = async (key, value) => {
+    const { value: password } = await Swal.fire({
+        title: 'Verifikasi',
+        text: 'Masukkan sandi Tombol untuk melanjutkan:',
+        input: 'text',
+        inputAttributes: {
+            autocapitalize: 'off',
+            autocorrect: 'off'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Verifikasi',
+        cancelButtonText: 'Batal',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'Harap masukkan sandi!';
+            }
+        }
+    });
+
+    if (password) {
+        if (password === user.value.sandi_botton) {
+            updateSetting(key, value);
+        } else {
+            Swal.fire({
+                title: 'Gagal!',
+                text: 'Sandi tidak sesuai',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            // Reset checkbox state
+            settings.value[key] = !value;
+        }
+    } else {
+        // Reset checkbox state jika user membatalkan
+        settings.value[key] = !value;
+    }
+};
+
 // Fungsi untuk mengupdate setting
 const updateSetting = (key, value) => {
   router.post(route('settings.update', { key }), {
     value,
   }, {
     preserveScroll: true,
-    onSuccess: () => {
-      settings.value[key] = value;
-    },
+     onSuccess: () => {
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Pengaturan berhasil diperbarui.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+            settings.value[key] = value;
+        },
+        onError: () => {
+            Swal.fire({
+                title: 'Gagal!',
+                text: 'Terjadi kesalahan saat memperbarui pengaturan.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            // Rollback the change if there's an error
+            settings.value[key] = !value;
+        }
   });
 };
 

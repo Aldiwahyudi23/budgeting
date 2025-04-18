@@ -100,6 +100,13 @@ Route::middleware([
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings/{key}', [SettingController::class, 'update'])->name('settings.update');
     Route::post('/setting/account-bank/saving/{key}', [SettingController::class, 'update_accountBank'])->name('setting_Account.update');
+    Route::get('/sandi-botton', [SettingController::class, 'sandiBotton'])
+        ->middleware(['auth'])
+        ->name('sandi-botton');
+
+    Route::put('/sandi-botton', [SettingController::class, 'updateSandiBotton'])
+        ->middleware(['auth'])
+        ->name('sandi-botton.update');
 
     Route::get('/home', [HomeContorller::class, 'home'])->name('home');
     Route::get('/finance-summary', [HomeContorller::class, 'getFinanceSummary']);
